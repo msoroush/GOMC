@@ -94,7 +94,6 @@ void CallBoxInterGPU(VariablesCUDA *vars,
 
   // Run the kernel...
   threadsPerBlock = 256;
-  printf("atomNumber: %d\n", atomNumber);
   blocksPerGrid = (int)(atomNumber / threadsPerBlock) + 1;
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
       vars->gpu_cellVector,
@@ -228,6 +227,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int box)
 {
   int currentParticle = blockIdx.x * blockDim.x + threadIdx.x;
+  if(currentParticle == 0) printf("gpu_count: %d\n", gpu_count[0]);
   if(currentParticle >= gpu_count[0])
     return;
   double distSq;
