@@ -763,7 +763,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             int box)
 {
   int currentParticle = blockIdx.x * blockDim.x + threadIdx.x;
-  if(currentParticle >= gpu_count[0])
+  if(currentParticle >= atomNumber)
     return;
   double distSq;
   double qi_qj_fact;
@@ -786,7 +786,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
 
     // Loop over particle inside neighboring cells
     int endIndex = neighborCell != numberOfCells - 1 ?
-      gpu_cellStartIndex[neighborCell+1] : gpu_count[0];
+      gpu_cellStartIndex[neighborCell+1] : atomNumber;
     for(int neighborParticleIndex = gpu_cellStartIndex[neighborCell];
         neighborParticleIndex < endIndex;
         neighborParticleIndex++) {
