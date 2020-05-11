@@ -1081,11 +1081,11 @@ void CalculateEnergy::CalculateTorque(vector<uint>& moleculeIndex,
 
     molTorque.Reset();
 
-#ifdef _OPENMP
+/*#ifdef _OPENMP
     #pragma omp parallel for default(shared) private(m, p, length, start, \
 distFromCOM, tempTorque) reduction(+: torquex[:torqueCount], \
                                        torquey[:torqueCount], torquez[:torqueCount])
-#endif
+#endif*/
     for(m = 0; m < moleculeIndex.size(); m++) {
       length = mols.GetKind(moleculeIndex[m]).NumAtoms();
       start = mols.MolStart(moleculeIndex[m]);
