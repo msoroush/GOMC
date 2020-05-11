@@ -245,6 +245,10 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
   // currentParticle 30
   while(gpu_cellStartIndex[currentCell] < currentParticle) currentCell++;
 
+  if(currentParticle == 2000) {
+    printf("2000 cell number: %d, x: %lf, y: %lf, z: %lf\n", currentCell, gpu_x[2000], gpu_y[2000], gpu_z[2000]);
+  }
+
   // Loop over neighboring cells
   for(int nCellIndex = currentCell * NUMBER_OF_NEIGHBOR_CELL;
       nCellIndex < ((currentCell+1) * NUMBER_OF_NEIGHBOR_CELL);
