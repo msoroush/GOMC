@@ -189,6 +189,8 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   std::vector<std::vector<int> > neighborList;
   cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex);
   neighborList = cellList.GetNeighborsList(box);
+  printf("cellVector size: %d, cellStartIndex size: %d\n", cellVector.size(), cellStartIndex.size());
+  printf("NeighbostList size: %d\n", neighborList.size());
 
 #ifdef GOMC_CUDA
   uint currentIndex = 0;
