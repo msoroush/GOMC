@@ -236,6 +236,7 @@ void CellList::GetCellListNeighbor(uint box, int coordinateSize,
 {
   cellVector.resize(coordinateSize);
   cellStartIndex.resize(head[box].size());
+  mapParticleToCell.resize(coordinateSize);
   int vector_index = 0;
   for(int cell = 0; cell < head[box].size(); cell++) {
     cellStartIndex[cell] = vector_index;
