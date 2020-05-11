@@ -263,6 +263,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
       if(currentParticle != neighborParticle) {
         if(currentParticle == 2000) {
           printf("%d -> %d\n", currentParticle, neighborParticle);
+          printf("nCell: %d, x: %lf, y: %lf, z: %lf\n", neighborCell, gpu_x[neighborParticle], gpu_y[neighborParticle], gpu_z[neighborParticle]);)
         }
 
         // Check if they are within rcut
