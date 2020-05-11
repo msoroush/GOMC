@@ -137,8 +137,6 @@ SystemPotential CalculateEnergy::SystemTotal()
     pot.boxEnergy[b].correction = p.energy_extra();
     pot.boxEnergy[b].self  = p.energy_self();
 
-    printf("correction: %lf, self: %lf\n", pot.boxEnergy[b].correction, pot.boxEnergy[b].self);
-
     //Calculate Virial
     pot.boxVirial[b] = VirialCalc(b);
   }
