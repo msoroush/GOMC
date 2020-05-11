@@ -231,7 +231,7 @@ CellList::Pairs CellList::EnumeratePairs(int box) const
 
 void CellList::GetCellListNeighbor(uint box, int coordinateSize,
                                    vector<int> &cellVector,
-                                   vector<int> &cellStartIndex)
+                                   vector<int> &cellStartIndex) const
 {
   cellVector.resize(coordinateSize);
   cellStartIndex.resize(head[box].size());
@@ -245,4 +245,9 @@ void CellList::GetCellListNeighbor(uint box, int coordinateSize,
       particleIndex = list[particleIndex];
     }
   }
+}
+
+std::vector<std::vector<int> > CellList::GetNeighborsList(uint box) const
+{
+  return neighbors[box];
 }
