@@ -20,7 +20,7 @@ using namespace cub;
 void CallBoxInterForceGPU(VariablesCUDA *vars,
                           vector<int> cellVector,
                           vector<int> cellStartIndex,
-                          std::vector<std::vector<int>> neighborList,
+                          std::vector<std::vector<int> > neighborList,
                           XYZArray const &currentCoords,
                           XYZArray const &currentCOM,
                           BoxDimensions const &boxAxes,
@@ -48,7 +48,7 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
 {
   int atomNumber = currentCoords.Count();
   int molNumber = currentCOM.Count();
-  int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBORS;
+  int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
   int numberOfCells = neighborList.size();
   int *gpu_particleKind;
   int *gpu_particleMol;
@@ -243,7 +243,7 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
 void CallBoxForceGPU(VariablesCUDA *vars,
                      vector<int> cellVector,
                      vector<int> cellStartIndex,
-                     std::vector<std::vector<int>> neighborList,
+                     std::vector<std::vector<int> > neighborList,
                      XYZArray const &coords,
                      BoxDimensions const &boxAxes,
                      bool electrostatic,
@@ -269,7 +269,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      uint const box)
 {
   int atomNumber = coords.Count();
-  int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBORS;
+  int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
   int numberOfCells = neighborList.size();
   int *gpu_particleKind, *gpu_particleMol;
   int *gpu_neighborList, *gpu_cellStartIndex;
@@ -628,18 +628,18 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
   int currentCell = 0;
   // 0 10 20 30 40
   // currentParticle 30
-  while(cellStartIndex[currentCell] < currentParticle) currentCell++;
+  while(gpu_cellStartIndex[currentCell] < currentParticle) currentCell++;
 
   // Loop over neighboring cells
-  for(int nCellIndex = currentCell * NUMBER_OF_NEIGHBOR_CELL];
+  for(int nCellIndex = currentCell * NUMBER_OF_NEIGHBOR_CELL;
       nCellIndex < ((currentCell+1) * NUMBER_OF_NEIGHBOR_CELL);
       nCellIndex++) {
-    int neighborCell = neighborlist1D[nCellIndex];
+    int neighborCell = gpu_neighborList[nCellIndex];
 
     // Loop over particle inside neighboring cells
     int endIndex = neighborCell != numberOfCells - 1 ?
-      cellStartIndex[neighborCell+1] : gpu_count[0];
-    for(int neighborParticle = cellStartIndex[neighborCell];
+      gpu_cellStartIndex[neighborCell+1] : gpu_count[0];
+    for(int neighborParticle = gpu_cellStartIndex[neighborCell];
         neighborParticle < endIndex;
         neighborParticle++) {
 
@@ -777,18 +777,18 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
   int currentCell = 0;
   // 0 10 20 30 40
   // currentParticle 30
-  while(cellStartIndex[currentCell] < currentParticle) currentCell++;
+  while(gpu_cellStartIndex[currentCell] < currentParticle) currentCell++;
 
   // Loop over neighboring cells
-  for(int nCellIndex = currentCell * NUMBER_OF_NEIGHBOR_CELL];
+  for(int nCellIndex = currentCell * NUMBER_OF_NEIGHBOR_CELL;
       nCellIndex < ((currentCell+1) * NUMBER_OF_NEIGHBOR_CELL);
       nCellIndex++) {
-    int neighborCell = neighborlist1D[nCellIndex];
+    int neighborCell = gpu_neighborList[nCellIndex];
 
     // Loop over particle inside neighboring cells
     int endIndex = neighborCell != numberOfCells - 1 ?
-      cellStartIndex[neighborCell+1] : gpu_count[0];
-    for(int neighborParticle = cellStartIndex[neighborCell];
+      gpu_cellStartIndex[neighborCell+1] : gpu_count[0];
+    for(int neighborParticle = gpu_cellStartIndex[neighborCell];
         neighborParticle < endIndex;
         neighborParticle++) {
 

@@ -18,7 +18,7 @@ using namespace std;
 void CallBoxInterGPU(VariablesCUDA *vars,
                      vector<int> cellVector,
                      vector<int> cellStartIndex,
-                     std::vector<std::vector<int>> neighborList,
+                     std::vector<std::vector<int> > neighborList,
                      XYZArray const &coords,
                      BoxDimensions const &boxAxes,
                      bool electrostatic,
