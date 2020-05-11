@@ -645,7 +645,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
       int neighborParticle = gpu_cellVector[neighborParticleIndex];
 
       // Check if their not the same particle
-      if(currentParticle != neighborParticle) {
+      if(currentParticle != neighborParticle && currentParticle < neighborParticle) {
 
         // Check if they are within rcut
         if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],
@@ -793,7 +793,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
       int neighborParticle = gpu_cellVector[neighborParticleIndex];
 
       // Check if their not the same particle
-      if(currentParticle != neighborParticle) {
+      if(currentParticle != neighborParticle && currentParticle < neighborParticle) {
 
         // Check if they are within rcut
         if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],

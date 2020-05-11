@@ -182,10 +182,6 @@ void CellList::RebuildNeighbors(int b)
       }
     }
   }
-
-  for(int i=0; i<neighbors[b][273].size(); i++) {
-    cout << neighbors[b][273][i] << "\n";
-  }
 }
 
 void CellList::GridAll(BoxDimensions& dims, const XYZArray& pos,
