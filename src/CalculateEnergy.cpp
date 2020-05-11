@@ -173,7 +173,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   double distSq, qi_qj_fact;
   int i, pairSize;
   XYZ virComponents, forceLJ, forceReal;
-  std::vector<uint> pair1, pair2;
+  /*std::vector<uint> pair1, pair2;
   CellList::Pairs pair = cellList.EnumeratePairs(box);
 
   //store atom pair index
@@ -184,7 +184,11 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
     }
     pair.Next();
   }
-  pairSize = pair1.size();
+  pairSize = pair1.size();*/
+  std::vector<int> cellVector, cellStartIndex;
+  std::vector<std::vector<int>> neighborList;
+  cellList.GetCellListNeighbor(box, coords.Count(), cellVector, cellStartIndex);
+  neighborList = cellList.GetNeighborsList();
 
 #ifdef GOMC_CUDA
   uint currentIndex = 0;
@@ -202,26 +206,13 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                            newAxes.cellBasis_Inv[box].z);
   }
 
-  while(currentIndex < pairSize) {
-    uint max = currentIndex + MAX_PAIR_SIZE;
-    max = (max < pairSize ? max : pairSize);
-
-    std::vector<uint>::const_iterator first1 = pair1.begin() + currentIndex;
-    std::vector<uint>::const_iterator last1 = pair1.begin() + max;
-    std::vector<uint>::const_iterator first2 = pair2.begin() + currentIndex;
-    std::vector<uint>::const_iterator last2 = pair2.begin() + max;
-    std::vector<uint> subPair1(first1, last1);
-    std::vector<uint> subPair2(first2, last2);
-
-    CallBoxInterGPU(forcefield.particles->getCUDAVars(), subPair1, subPair2,
-                    coords, boxAxes, electrostatic, particleCharge,
-                    particleKind, particleMol, REn, LJEn, forcefield.sc_coul,
-                    forcefield.sc_sigma_6, forcefield.sc_alpha,
-                    forcefield.sc_power, box);
-    tempREn += REn;
-    tempLJEn += LJEn;
-    currentIndex += MAX_PAIR_SIZE;
-  }
+  CallBoxInterGPU(forcefield.particles->getCUDAVars(), cellVector, cellStartIndex,
+                  neighborList, coords, boxAxes, electrostatic, particleCharge,
+                  particleKind, particleMol, REn, LJEn, forcefield.sc_coul,
+                  forcefield.sc_sigma_6, forcefield.sc_alpha,
+                  forcefield.sc_power, box);
+  tempREn = REn;
+  tempLJEn = LJEn;
 
 #else
 #ifdef _OPENMP
@@ -290,14 +281,18 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   ResetForce(atomForce, molForce, box);
 
   //store atom pair index
-  while (!pair.Done()) {
+  /*while (!pair.Done()) {
     if(!SameMolecule(pair.First(), pair.Second())) {
       pair1.push_back(pair.First());
       pair2.push_back(pair.Second());
     }
     pair.Next();
   }
-  uint pairSize = pair1.size();
+  uint pairSize = pair1.size();*/
+  std::vector<int> cellVector, cellStartIndex;
+  std::vector<std::vector<int>> neighborList;
+  cellList.GetCellListNeighbor(box, coords.Count(), cellVector, cellStartIndex);
+  neighborList = cellList.GetNeighborsList();
 
 #ifdef GOMC_CUDA
   uint currentIndex = 0;
@@ -315,34 +310,15 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                            newAxes.cellBasis_Inv[box].z);
   }
 
-  while(currentIndex < pairSize) {
-    uint max = currentIndex + MAX_PAIR_SIZE;
-    max = (max < pairSize ? max : pairSize);
-
-    std::vector<uint>::const_iterator first1 = pair1.begin() + currentIndex;
-    std::vector<uint>::const_iterator last1 = pair1.begin() + max;
-    std::vector<uint>::const_iterator first2 = pair2.begin() + currentIndex;
-    std::vector<uint>::const_iterator last2 = pair2.begin() + max;
-    std::vector<uint> subPair1(first1, last1);
-    std::vector<uint> subPair2(first2, last2);
-
-    // Reset forces on GPU for the first iteration
-    bool reset_force = currentIndex == 0;
-
-    // Copy back the result if it is the last iteration
-    bool copy_back = max == pairSize;
-
-    CallBoxForceGPU(forcefield.particles->getCUDAVars(), subPair1, subPair2,
-                    coords, boxAxes, electrostatic, particleCharge,
+  CallBoxForceGPU(forcefield.particles->getCUDAVars(), cellVector, cellStartIndex,
+                    neighborList, coords, boxAxes, electrostatic, particleCharge,
                     particleKind, particleMol, REn, LJEn,
                     aForcex, aForcey, aForcez, mForcex, mForcey, mForcez,
                     atomCount, molCount, reset_force, copy_back, forcefield.sc_coul,
                     forcefield.sc_sigma_6, forcefield.sc_alpha,
                     forcefield.sc_power, box);
-    tempREn += REn;
-    tempLJEn += LJEn;
-    currentIndex += MAX_PAIR_SIZE;
-  }
+  tempREn = REn;
+  tempLJEn = LJEn;
 
 #else
 #ifdef _OPENMP
@@ -417,7 +393,7 @@ Virial CalculateEnergy::VirialCalc(const uint box)
   double distSq, pVF, pRF, qi_qj;
   int i;
   XYZ virC, comC;
-  std::vector<uint> pair1, pair2;
+  /*std::vector<uint> pair1, pair2;
   CellList::Pairs pair = cellList.EnumeratePairs(box);
   //store atom pair index
   while (!pair.Done()) {
@@ -428,7 +404,12 @@ Virial CalculateEnergy::VirialCalc(const uint box)
     pair.Next();
   }
 
-  uint pairSize = pair1.size();
+  uint pairSize = pair1.size();*/
+
+  std::vector<int> cellVector, cellStartIndex;
+  std::vector<std::vector<int>> neighborList;
+  cellList.GetCellListNeighbor(box, coords.Count(), cellVector, cellStartIndex);
+  neighborList = cellList.GetNeighborsList();
 
 #ifdef GOMC_CUDA
   //update unitcell in GPU
@@ -444,43 +425,31 @@ Virial CalculateEnergy::VirialCalc(const uint box)
                            newAxes.cellBasis_Inv[box].z);
   }
 
-  uint currentIndex = 0;
   double vT11t = 0.0, vT12t = 0.0, vT13t = 0.0;
   double vT22t = 0.0, vT23t = 0.0, vT33t = 0.0;
   double rT11t = 0.0, rT12t = 0.0, rT13t = 0.0;
   double rT22t = 0.0, rT23t = 0.0, rT33t = 0.0;
-  while(currentIndex < pairSize) {
-    uint max = currentIndex + MAX_PAIR_SIZE;
-    max = (max < pairSize ? max : pairSize);
-
-    std::vector<uint>::const_iterator first1 = pair1.begin() + currentIndex;
-    std::vector<uint>::const_iterator last1 = pair1.begin() + max;
-    std::vector<uint>::const_iterator first2 = pair2.begin() + currentIndex;
-    std::vector<uint>::const_iterator last2 = pair2.begin() + max;
-    std::vector<uint> subPair1(first1, last1);
-    std::vector<uint> subPair2(first2, last2);
-    CallBoxInterForceGPU(forcefield.particles->getCUDAVars(), subPair1,
-                         subPair2, currentCoords, currentCOM, currentAxes,
-                         electrostatic, particleCharge, particleKind,
-                         particleMol, rT11t, rT12t, rT13t, rT22t, rT23t, rT33t,
-                         vT11t, vT12t, vT13t, vT22t, vT23t, vT33t,
-                         forcefield.sc_coul,
-                         forcefield.sc_sigma_6, forcefield.sc_alpha,
-                         forcefield.sc_power, box);
-    rT11 += rT11t;
-    rT12 += rT12t;
-    rT13 += rT13t;
-    rT22 += rT22t;
-    rT23 += rT23t;
-    rT33 += rT33t;
-    vT11 += vT11t;
-    vT12 += vT12t;
-    vT13 += vT13t;
-    vT22 += vT22t;
-    vT23 += vT23t;
-    vT33 += vT33t;
-    currentIndex += MAX_PAIR_SIZE;
-  }
+  CallBoxInterForceGPU(forcefield.particles->getCUDAVars(), cellVector,
+                      cellStartIndex, neighborList, currentCoords, currentCOM,
+                      currentAxes,
+                      electrostatic, particleCharge, particleKind,
+                      particleMol, rT11t, rT12t, rT13t, rT22t, rT23t, rT33t,
+                      vT11t, vT12t, vT13t, vT22t, vT23t, vT33t,
+                      forcefield.sc_coul,
+                      forcefield.sc_sigma_6, forcefield.sc_alpha,
+                      forcefield.sc_power, box);
+  rT11 = rT11t;
+  rT12 = rT12t;
+  rT13 = rT13t;
+  rT22 = rT22t;
+  rT23 = rT23t;
+  rT33 = rT33t;
+  vT11 = vT11t;
+  vT12 = vT12t;
+  vT13 = vT13t;
+  vT22 = vT22t;
+  vT23 = vT23t;
+  vT33 = vT33t;
 #else
 #ifdef _OPENMP
   #pragma omp parallel for default(shared) private(i, distSq, pVF, pRF, qi_qj, \

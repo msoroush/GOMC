@@ -30,6 +30,10 @@ public:
   void GridAll(BoxDimensions& dims, const XYZArray& pos, const MoleculeLookup& lookup);
   void GridBox(BoxDimensions& dims, const XYZArray& pos, const MoleculeLookup& lookup,
                const uint b);
+  void GetCellListNeighbor(uint box, int coordinateSize,
+                           vector<int> &cellVector,
+                           vector<int> &cellStartIndex);
+  std::vector<std::vector<int>> GetNeighborsList() { return neighbors; }
 
   // Index of cell containing position
   int PositionToCell(const XYZ& posRef, int box) const;

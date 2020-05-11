@@ -112,6 +112,8 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   cudaMalloc(&vars->gpu_mForcex, maxMolNumber * sizeof(double));
   cudaMalloc(&vars->gpu_mForcey, maxMolNumber * sizeof(double));
   cudaMalloc(&vars->gpu_mForcez, maxMolNumber * sizeof(double));
+
+  cudaMalloc(&vars->gpu_cellVector, atomNumber * sizeof(int));
   checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
@@ -316,6 +318,7 @@ void DestroyCUDAVars(VariablesCUDA *vars)
   cudaFree(vars->gpu_mForcex);
   cudaFree(vars->gpu_mForcey);
   cudaFree(vars->gpu_mForcez);
+  cudaFree(vars->gpu_cellVector);
   cudaFree(vars->gpu_rT11);
   cudaFree(vars->gpu_rT12);
   cudaFree(vars->gpu_rT13);

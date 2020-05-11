@@ -105,5 +105,6 @@ public:
   double *gpu_aForcex, *gpu_aForcey, *gpu_aForcez;
   double *gpu_mForcex, *gpu_mForcey, *gpu_mForcez;
   double *gpu_rMin, *gpu_expConst, *gpu_rMaxSq;
+  double *gpu_cellVector;
 };
 #endif

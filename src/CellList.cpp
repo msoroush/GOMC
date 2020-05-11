@@ -228,3 +228,21 @@ CellList::Pairs CellList::EnumeratePairs(int box) const
 {
   return CellList::Pairs(*this, box);
 }
+
+void CellList::GetCellListNeighbor(uint box, int coordinateSize,
+                                   vector<int> &cellVector,
+                                   vector<int> &cellStartIndex)
+{
+  cellVector.resize(coordinateSize);
+  cellStartIndex.resize(head[box].size());
+  int vector_index = 0;
+  for(int cell = 0; cell < head[box].size(); cell++) {
+    cellStartIndex[cell] = vector_index;
+    int particleIndex = head[box][cell];
+    while(particleIndex != END_CELL) {
+      cellVector[vector_index] = particleIndex;
+      vector_index++;
+      particleIndex = list[particleIndex];
+    }
+  }
+}
