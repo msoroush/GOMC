@@ -633,9 +633,10 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
     // Loop over particle inside neighboring cells
     int endIndex = neighborCell != numberOfCells - 1 ?
       gpu_cellStartIndex[neighborCell+1] : gpu_count[0];
-    for(int neighborParticle = gpu_cellStartIndex[neighborCell];
-        neighborParticle < endIndex;
-        neighborParticle++) {
+    for(int neighborParticleIndex = gpu_cellStartIndex[neighborCell];
+        neighborParticleIndex < endIndex;
+        neighborParticleIndex++) {
+      int neighborParticle = gpu_cellVector[neighborParticleIndex];
 
       // Check if their not the same particle
       if(currentParticle != neighborParticle) {
@@ -782,9 +783,10 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
     // Loop over particle inside neighboring cells
     int endIndex = neighborCell != numberOfCells - 1 ?
       gpu_cellStartIndex[neighborCell+1] : gpu_count[0];
-    for(int neighborParticle = gpu_cellStartIndex[neighborCell];
-        neighborParticle < endIndex;
-        neighborParticle++) {
+    for(int neighborParticleIndex = gpu_cellStartIndex[neighborCell];
+        neighborParticleIndex < endIndex;
+        neighborParticleIndex++) {
+      int neighborParticle = gpu_cellVector[neighborParticleIndex];
 
       // Check if their not the same particle
       if(currentParticle != neighborParticle) {

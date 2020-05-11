@@ -245,24 +245,19 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
   // currentParticle 30
   while(gpu_cellStartIndex[currentCell] < currentParticle) currentCell++;
 
-  if(currentParticle == 2000) {
-    printf("currentCell: %d\n", currentCell);
-  }
   // Loop over neighboring cells
   for(int nCellIndex = currentCell * NUMBER_OF_NEIGHBOR_CELL;
       nCellIndex < ((currentCell+1) * NUMBER_OF_NEIGHBOR_CELL);
       nCellIndex++) {
     int neighborCell = gpu_neighborList[nCellIndex];
-    if(currentParticle == 2000) {
-      printf("neighborCell: %d\n", neighborCell);
-    }
 
     // Loop over particle inside neighboring cells
     int endIndex = neighborCell != numberOfCells - 1 ?
       gpu_cellStartIndex[neighborCell+1] : atomNumber;
-    for(int neighborParticle = gpu_cellStartIndex[neighborCell];
-        neighborParticle < endIndex;
-        neighborParticle++) {
+    for(int neighborParticleIndex = gpu_cellStartIndex[neighborCell];
+        neighborParticleIndex < endIndex;
+        neighborParticleIndex++) {
+      int neighborParticle = gpu_cellVector[neighborParticleIndex];
 
       // Check if their not the same particle
       if(currentParticle != neighborParticle) {
