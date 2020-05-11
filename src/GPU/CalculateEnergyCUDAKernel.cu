@@ -267,11 +267,11 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
       int neighborParticle = gpu_cellVector[neighborParticleIndex];
 
       // Check if their not the same particle
+      if(currentParticle == 2000 && currentParticle == neighborParticle) {
+        printf("%d -> %d\n", currentParticle, neighborParticle);
+        printf("nCell: %d, x: %lf, y: %lf, z: %lf\n", neighborCell, gpu_x[neighborParticle], gpu_y[neighborParticle], gpu_z[neighborParticle]);
+      }
       if(currentParticle != neighborParticle) {
-        if(currentParticle == 2000) {
-          printf("%d -> %d\n", currentParticle, neighborParticle);
-          printf("nCell: %d, x: %lf, y: %lf, z: %lf\n", neighborCell, gpu_x[neighborParticle], gpu_y[neighborParticle], gpu_z[neighborParticle]);
-        }
 
         // Check if they are within rcut
         if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],
