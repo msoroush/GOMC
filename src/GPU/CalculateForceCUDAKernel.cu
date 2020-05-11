@@ -622,7 +622,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
   int currentCell = 0;
   // 0 10 20 30 40
   // currentParticle 30
-  int eCell = cbrt(numberOfCells);
+  int eCell = cbrt((float)numberOfCells);
   int x = (int)(gpu_x[currentParticle] / gpu_cell_x[0]);
   int y = (int)(gpu_y[currentParticle] / gpu_cell_y[1]);
   int z = (int)(gpu_z[currentParticle] / gpu_cell_z[2]);
@@ -776,7 +776,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
   int currentCell = 0;
   // 0 10 20 30 40
   // currentParticle 30
-  int eCell = cbrt(numberOfCells);
+  int eCell = cbrt((float)numberOfCells);
   int x = (int)(gpu_x[currentParticle] / gpu_cell_x[0]);
   int y = (int)(gpu_y[currentParticle] / gpu_cell_y[1]);
   int z = (int)(gpu_z[currentParticle] / gpu_cell_z[2]);
