@@ -186,8 +186,8 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   }
   pairSize = pair1.size();*/
   std::vector<int> cellVector, cellStartIndex;
-  std::vector<std::vector<int>> neighborList;
-  cellList.GetCellListNeighbor(box, coords.Count(), cellVector, cellStartIndex);
+  std::vector<std::vector<int> > neighborList;
+  cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex);
   neighborList = cellList.GetNeighborsList(box);
 
 #ifdef GOMC_CUDA
@@ -290,8 +290,8 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   }
   uint pairSize = pair1.size();*/
   std::vector<int> cellVector, cellStartIndex;
-  std::vector<std::vector<int>> neighborList;
-  cellList.GetCellListNeighbor(box, coords.Count(), cellVector, cellStartIndex);
+  std::vector<std::vector<int> > neighborList;
+  cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex);
   neighborList = cellList.GetNeighborsList(box);
 
 #ifdef GOMC_CUDA
@@ -314,7 +314,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                     neighborList, coords, boxAxes, electrostatic, particleCharge,
                     particleKind, particleMol, REn, LJEn,
                     aForcex, aForcey, aForcez, mForcex, mForcey, mForcez,
-                    atomCount, molCount, reset_force, copy_back, forcefield.sc_coul,
+                    atomCount, molCount, forcefield.sc_coul,
                     forcefield.sc_sigma_6, forcefield.sc_alpha,
                     forcefield.sc_power, box);
   tempREn = REn;
@@ -407,8 +407,8 @@ Virial CalculateEnergy::VirialCalc(const uint box)
   uint pairSize = pair1.size();*/
 
   std::vector<int> cellVector, cellStartIndex;
-  std::vector<std::vector<int>> neighborList;
-  cellList.GetCellListNeighbor(box, coords.Count(), cellVector, cellStartIndex);
+  std::vector<std::vector<int> > neighborList;
+  cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex);
   neighborList = cellList.GetNeighborsList(box);
 
 #ifdef GOMC_CUDA
