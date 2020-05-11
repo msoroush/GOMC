@@ -94,6 +94,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
 
   // Run the kernel...
   threadsPerBlock = 256;
+  printf("atomNumber: %d\n", atomNumber);
   blocksPerGrid = (int)(atomNumber / threadsPerBlock) + 1;
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
       vars->gpu_cellVector,
