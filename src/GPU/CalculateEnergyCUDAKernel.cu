@@ -243,7 +243,12 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
   int currentCell = 0;
   // 0 10 20 30 40
   // currentParticle 30
-  while(gpu_cellStartIndex[currentCell] < currentParticle) currentCell++;
+  //while(gpu_cellStartIndex[currentCell] < currentParticle) currentCell++;
+  int eCell = cbrt(numberOfCells);
+  int x = (int)(gpu_x[currentParticle] / gpu_cell_x[0]);
+  int y = (int)(gpu_y[currentParticle] / gpu_cell_y[1]);
+  int z = (int)(gpu_z[currentParticle] / gpu_cell_z[2]);
+  currentCell = x * eCell * eCell + y * eCell + z;
 
   if(currentParticle == 2000) {
     printf("2000 cell number: %d, x: %lf, y: %lf, z: %lf\n", currentCell, gpu_x[2000], gpu_y[2000], gpu_z[2000]);
