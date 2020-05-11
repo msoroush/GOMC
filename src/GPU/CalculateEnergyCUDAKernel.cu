@@ -243,7 +243,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
   // currentParticle 30
   while(gpu_cellStartIndex[currentCell] < currentParticle) currentCell++;
 
-  if(currentParticle == 0) {
+  if(currentParticle == 2000) {
     printf("currentCell: %d\n", currentCell);
   }
   // Loop over neighboring cells
@@ -251,7 +251,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
       nCellIndex < ((currentCell+1) * NUMBER_OF_NEIGHBOR_CELL);
       nCellIndex++) {
     int neighborCell = gpu_neighborList[nCellIndex];
-    if(currentParticle == 0) {
+    if(currentParticle == 2000) {
       printf("neighborCell: %d\n", neighborCell);
     }
 
@@ -273,6 +273,9 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
           yAxes / 2.0, zAxes / 2.0, cutoff, gpu_nonOrth[0], gpu_cell_x,
           gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
           gpu_Invcell_z)) {
+          if(currentParticle == 2000) {
+            printf("%d -> %d\n", currentParticle, neighborParticle);
+          }
           if(electrostatic) {
               qi_qj_fact = gpu_particleCharge[currentParticle] *
                            gpu_particleCharge[neighborParticle] * qqFact;
