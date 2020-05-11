@@ -261,6 +261,9 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
 
       // Check if their not the same particle
       if(currentParticle != neighborParticle) {
+        if(currentParticle == 2000) {
+          printf("%d -> %d\n", currentParticle, neighborParticle);
+        }
 
         // Check if they are within rcut
         if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],
@@ -270,9 +273,6 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
           yAxes / 2.0, zAxes / 2.0, cutoff, gpu_nonOrth[0], gpu_cell_x,
           gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
           gpu_Invcell_z)) {
-          if(currentParticle == 2000) {
-            printf("%d -> %d\n", currentParticle, neighborParticle);
-          }
           if(electrostatic) {
               qi_qj_fact = gpu_particleCharge[currentParticle] *
                            gpu_particleCharge[neighborParticle] * qqFact;
