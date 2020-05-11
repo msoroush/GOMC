@@ -112,6 +112,7 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
       vars->gpu_cellVector,
       gpu_neighborList,
       numberOfCells,
+      atomNumber,
       vars->gpu_x,
       vars->gpu_y,
       vars->gpu_z,
@@ -332,6 +333,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
       vars->gpu_cellVector,
       gpu_neighborList,
       numberOfCells,
+      atomNumber,
       vars->gpu_x,
       vars->gpu_y,
       vars->gpu_z,
@@ -545,6 +547,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  int *gpu_cellVector,
                                  int *gpu_neighborList,
                                  int numberOfCells,
+                                 int atomNumber,
                                  double *gpu_x,
                                  double *gpu_y,
                                  double *gpu_z,
@@ -600,7 +603,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  int box)
 {
   int currentParticle = blockIdx.x * blockDim.x + threadIdx.x;
-  if(currentParticle >= gpu_count[0])
+  if(currentParticle >= atomNumber)
     return;
 
   double distSq;
@@ -703,6 +706,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             int *gpu_cellVector,
                             int *gpu_neighborList,
                             int numberOfCells,
+                            int atomNumber,
                             double *gpu_x,
                             double *gpu_y,
                             double *gpu_z,

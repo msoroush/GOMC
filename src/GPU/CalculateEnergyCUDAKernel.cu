@@ -99,6 +99,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
       vars->gpu_cellVector,
       gpu_neighborList,
       numberOfCells,
+      atomNumber,
       vars->gpu_x,
       vars->gpu_y,
       vars->gpu_z,
@@ -185,6 +186,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int *gpu_cellVector,
                             int *gpu_neighborList,
                             int numberOfCells,
+                            int atomNumber
                             double *gpu_x,
                             double *gpu_y,
                             double *gpu_z,
@@ -227,8 +229,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int box)
 {
   int currentParticle = blockIdx.x * blockDim.x + threadIdx.x;
-  if(currentParticle == 0) printf("gpu_count: %d\n", gpu_count[0]);
-  if(currentParticle >= gpu_count[0])
+  if(currentParticle >= atomNumber)
     return;
   double distSq;
   double qi_qj_fact;
@@ -258,7 +259,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
 
     // Loop over particle inside neighboring cells
     int endIndex = neighborCell != numberOfCells - 1 ?
-      gpu_cellStartIndex[neighborCell+1] : gpu_count[0];
+      gpu_cellStartIndex[neighborCell+1] : atomNumber;
     for(int neighborParticle = gpu_cellStartIndex[neighborCell];
         neighborParticle < endIndex;
         neighborParticle++) {
