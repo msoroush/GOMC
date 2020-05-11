@@ -183,8 +183,8 @@ void CellList::RebuildNeighbors(int b)
     }
   }
 
-  for(auto x : neighbors[b][273]) {
-    cout << x << "\n";
+  for(int i=0; i<neighbors[b][273].size(); i++) {
+    cout << neighbors[b][273][i] << "\n";
   }
 }
 
