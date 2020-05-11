@@ -186,7 +186,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int *gpu_cellVector,
                             int *gpu_neighborList,
                             int numberOfCells,
-                            int atomNumber
+                            int atomNumber,
                             double *gpu_x,
                             double *gpu_y,
                             double *gpu_z,
