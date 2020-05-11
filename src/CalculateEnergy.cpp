@@ -185,9 +185,9 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
     pair.Next();
   }
   pairSize = pair1.size();*/
-  std::vector<int> cellVector, cellStartIndex;
+  std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
   std::vector<std::vector<int> > neighborList;
-  cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex);
+  cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborsList(box);
   //printf("cellVector size: %d, cellStartIndex size: %d\n", cellVector.size(), cellStartIndex.size());
   //printf("NeighbostList size: %d\n", neighborList.size());
@@ -209,7 +209,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   }
 
   CallBoxInterGPU(forcefield.particles->getCUDAVars(), cellVector, cellStartIndex,
-                  neighborList, coords, boxAxes, electrostatic, particleCharge,
+                  neighborList, mapParticleToCell, coords, boxAxes, electrostatic, particleCharge,
                   particleKind, particleMol, REn, LJEn, forcefield.sc_coul,
                   forcefield.sc_sigma_6, forcefield.sc_alpha,
                   forcefield.sc_power, box);
@@ -291,9 +291,9 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
     pair.Next();
   }
   uint pairSize = pair1.size();*/
-  std::vector<int> cellVector, cellStartIndex;
+  std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
   std::vector<std::vector<int> > neighborList;
-  cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex);
+  cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborsList(box);
 
 #ifdef GOMC_CUDA
@@ -313,7 +313,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   }
 
   CallBoxForceGPU(forcefield.particles->getCUDAVars(), cellVector, cellStartIndex,
-                    neighborList, coords, boxAxes, electrostatic, particleCharge,
+                    neighborList, mapParticleToCell, coords, boxAxes, electrostatic, particleCharge,
                     particleKind, particleMol, REn, LJEn,
                     aForcex, aForcey, aForcez, mForcex, mForcey, mForcez,
                     atomCount, molCount, forcefield.sc_coul,
@@ -408,9 +408,9 @@ Virial CalculateEnergy::VirialCalc(const uint box)
 
   uint pairSize = pair1.size();*/
 
-  std::vector<int> cellVector, cellStartIndex;
+  std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
   std::vector<std::vector<int> > neighborList;
-  cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex);
+  cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborsList(box);
 
 #ifdef GOMC_CUDA
@@ -432,7 +432,7 @@ Virial CalculateEnergy::VirialCalc(const uint box)
   double rT11t = 0.0, rT12t = 0.0, rT13t = 0.0;
   double rT22t = 0.0, rT23t = 0.0, rT33t = 0.0;
   CallBoxInterForceGPU(forcefield.particles->getCUDAVars(), cellVector,
-                      cellStartIndex, neighborList, currentCoords, currentCOM,
+                      cellStartIndex, neighborList, mapParticleToCell, currentCoords, currentCOM,
                       currentAxes,
                       electrostatic, particleCharge, particleKind,
                       particleMol, rT11t, rT12t, rT13t, rT22t, rT23t, rT33t,

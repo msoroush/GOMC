@@ -21,6 +21,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      vector<int> cellVector,
                      vector<int> cellStartIndex,
                      std::vector<std::vector<int> > neighborList,
+                     vector<int> mapParticleToCell,
                      XYZArray const &coords,
                      BoxDimensions const &boxAxes,
                      bool electrostatic,
@@ -54,6 +55,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
     }
   }
 
+  
   gpuErrchk(cudaMalloc((void**) &gpu_neighborList, neighborListCount * sizeof(int)));
   gpuErrchk(cudaMalloc((void**) &gpu_cellStartIndex,
                        cellStartIndex.size() * sizeof(int)));
@@ -67,6 +69,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   gpuErrchk(cudaMalloc((void**) &gpu_final_LJEn, sizeof(double)));
 
   // Copy necessary data to GPU
+  gpuErrchk(cudaMemcpy(vars->gpu_mapParticleToCell, &mapParticleToCell[0],
+                       atomNumber * sizeof(int), cudaMemcpyHostToDevice));
   gpuErrchk(cudaMemcpy(gpu_neighborList, &neighborlist1D[0],
                        neighborListCount * sizeof(int),
                        cudaMemcpyHostToDevice));
@@ -100,6 +104,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
       gpu_neighborList,
       numberOfCells,
       atomNumber,
+      vars->gpu_mapParticleToCell,
       vars->gpu_x,
       vars->gpu_y,
       vars->gpu_z,
@@ -187,6 +192,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int *gpu_neighborList,
                             int numberOfCells,
                             int atomNumber,
+                            int *gpu_mapParticleToCell,
                             double *gpu_x,
                             double *gpu_y,
                             double *gpu_z,
@@ -240,15 +246,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
   double cutoff = fmax(gpu_rCut[0], gpu_rCutCoulomb[box]);
 
   // find current cell
-  int currentCell = 0;
-  // 0 10 20 30 40
-  // currentParticle 30
-  //while(gpu_cellStartIndex[currentCell] < currentParticle) currentCell++;
-  int eCell = cbrt((float)numberOfCells);
-  int x = (int)(gpu_x[currentParticle] / gpu_cell_x[0]);
-  int y = (int)(gpu_y[currentParticle] / gpu_cell_y[1]);
-  int z = (int)(gpu_z[currentParticle] / gpu_cell_z[2]);
-  currentCell = x * eCell * eCell + y * eCell + z;
+  int currentCell = gpu_mapParticleToCell[currentParticle];
 
   if(currentParticle == 2000) {
     printf("2000 cell number: %d, x: %lf, y: %lf, z: %lf\n", currentCell, gpu_x[2000], gpu_y[2000], gpu_z[2000]);

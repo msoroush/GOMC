@@ -32,7 +32,8 @@ public:
                const uint b);
   void GetCellListNeighbor(uint box, int coordinateSize,
                            vector<int> &cellVector,
-                           vector<int> &cellStartIndex) const;
+                           vector<int> &cellStartIndex,
+                           vector<int> &mapParticleToCell) const;
   std::vector<std::vector<int> > GetNeighborsList(uint box) const;
 
   // Index of cell containing position

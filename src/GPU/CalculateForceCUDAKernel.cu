@@ -21,6 +21,7 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
                           vector<int> cellVector,
                           vector<int> cellStartIndex,
                           std::vector<std::vector<int> > neighborList,
+                          vector<int> mapParticleToCell,
                           XYZArray const &currentCoords,
                           XYZArray const &currentCOM,
                           BoxDimensions const &boxAxes,
@@ -74,6 +75,8 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   cudaMalloc((void**) &gpu_particleMol, particleMol.size() * sizeof(int));
   cudaMalloc((void**) &gpu_final_value, sizeof(double));
 
+  gpuErrchk(cudaMemcpy(vars->gpu_mapParticleToCell, &mapParticleToCell[0],
+                       atomNumber * sizeof(int), cudaMemcpyHostToDevice));
   gpuErrchk(cudaMemcpy(gpu_neighborList, &neighborlist1D[0],
       neighborListCount * sizeof(int),
       cudaMemcpyHostToDevice));
@@ -113,6 +116,7 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
       gpu_neighborList,
       numberOfCells,
       atomNumber,
+      vars->gpu_mapParticleToCell,
       vars->gpu_x,
       vars->gpu_y,
       vars->gpu_z,
@@ -240,6 +244,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      vector<int> cellVector,
                      vector<int> cellStartIndex,
                      std::vector<std::vector<int> > neighborList,
+                     vector<int> mapParticleToCell,
                      XYZArray const &coords,
                      BoxDimensions const &boxAxes,
                      bool electrostatic,
@@ -288,6 +293,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaMemset(vars->gpu_mForcey, 0, molCount * sizeof(double));
   cudaMemset(vars->gpu_mForcez, 0, molCount * sizeof(double));
 
+  gpuErrchk(cudaMemcpy(vars->gpu_mapParticleToCell, &mapParticleToCell[0],
+    atomNumber * sizeof(int), cudaMemcpyHostToDevice));
   gpuErrchk(cudaMalloc((void**) &gpu_neighborList, neighborListCount * sizeof(int)));
   gpuErrchk(cudaMalloc((void**) &gpu_cellStartIndex,
                        cellStartIndex.size() * sizeof(int)));
@@ -334,6 +341,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
       gpu_neighborList,
       numberOfCells,
       atomNumber,
+      vars->gpu_mapParticleToCell,
       vars->gpu_x,
       vars->gpu_y,
       vars->gpu_z,
@@ -548,6 +556,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  int *gpu_neighborList,
                                  int numberOfCells,
                                  int atomNumber,
+                                 int *gpu_mapParticleToCell,
                                  double *gpu_x,
                                  double *gpu_y,
                                  double *gpu_z,
@@ -619,14 +628,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
   double cutoff = fmax(gpu_rCut[0], gpu_rCutCoulomb[box]);
 
   // find current cell
-  int currentCell = 0;
-  // 0 10 20 30 40
-  // currentParticle 30
-  int eCell = cbrt((float)numberOfCells);
-  int x = (int)(gpu_x[currentParticle] / gpu_cell_x[0]);
-  int y = (int)(gpu_y[currentParticle] / gpu_cell_y[1]);
-  int z = (int)(gpu_z[currentParticle] / gpu_cell_z[2]);
-  currentCell = x * eCell * eCell + y * eCell + z;
+  int currentCell = gpu_mapParticleToCell[currentParticle];
 
   // Loop over neighboring cells
   for(int nCellIndex = currentCell * NUMBER_OF_NEIGHBOR_CELL;
@@ -712,6 +714,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             int *gpu_neighborList,
                             int numberOfCells,
                             int atomNumber,
+                            int *gpu_mapParticleToCell,
                             double *gpu_x,
                             double *gpu_y,
                             double *gpu_z,
@@ -773,14 +776,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
   double cutoff = fmax(gpu_rCut[0], gpu_rCutCoulomb[box]);
 
   // find current cell
-  int currentCell = 0;
-  // 0 10 20 30 40
-  // currentParticle 30
-  int eCell = cbrt((float)numberOfCells);
-  int x = (int)(gpu_x[currentParticle] / gpu_cell_x[0]);
-  int y = (int)(gpu_y[currentParticle] / gpu_cell_y[1]);
-  int z = (int)(gpu_z[currentParticle] / gpu_cell_z[2]);
-  currentCell = x * eCell * eCell + y * eCell + z;
+  int currentCell = gpu_mapParticleToCell[currentParticle];
 
   // Loop over neighboring cells
   for(int nCellIndex = currentCell * NUMBER_OF_NEIGHBOR_CELL;
