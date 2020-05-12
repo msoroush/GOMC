@@ -181,7 +181,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborsList(box);
   int numberOfCells = neighborList.size();
-  int atomNumber = coords.size();
+  int atomNumber = currentCoords.Count();
 
 #ifdef GOMC_CUDA
   uint currentIndex = 0;
@@ -297,7 +297,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborsList(box);
   int numberOfCells = neighborList.size();
-  int atomNumber = coords.size();
+  int atomNumber = currentCoords.Count();
 
 #ifdef GOMC_CUDA
   uint currentIndex = 0;
@@ -424,7 +424,7 @@ Virial CalculateEnergy::VirialCalc(const uint box)
   cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborsList(box);
   int numberOfCells = neighborList.size();
-  int atomNumber = coords.size();
+  int atomNumber = currentCoords.Count();
 
 #ifdef GOMC_CUDA
   //update unitcell in GPU
