@@ -796,8 +796,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
     int neighborParticleIndex = pairIndex / particlesInsideCurrentCell;
     int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
     
-    int currentParticle = current_cellVector[gpu_cellStartIndex[currCell] + currentParticleIndex];
-    int neighborParticle = current_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
+    int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + currentParticleIndex];
+    int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
 
     if(currentParticle < neighborParticle) {
       // Check if they are within rcut
@@ -881,7 +881,6 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
           -1.0 * (forceRealy + forceLJy));
         atomicAdd(&gpu_mForcez[gpu_particleMol[neighborParticle]],
           -1.0 * (forceRealz + forceLJz));
-        }
       }
     }
   }
