@@ -30,6 +30,9 @@ class Setup;
 class StaticVals;
 class MoveBase;
 
+#include "Random123/philox.h"
+typedef r123::Philox4x32 RNG;
+
 
 class System
 {
@@ -104,6 +107,10 @@ public:
   Ewald *calcEwald;
   CellList cellList;
   PRNG prng;
+  // Random Number Generator vars
+  RNG::ctr_type c;
+  RNG::ukey_type uk;
+  RNG randomGenerator;
 
   CheckpointSetup checkpointSet;
 

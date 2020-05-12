@@ -44,12 +44,16 @@ private:
   vector<uint> moveType, moleculeIndex;
   const MoleculeLookup& molLookup;
 
+  // Random number generator, reference to object created in System
+  RNG &randomGenerator;
+  RNG::ukey_type &userKey;
+
   long double GetCoeff();
   void CalculateTrialDistRot();
   void RotateForceBiased(uint molIndex);
   void TranslateForceBiased(uint molIndex);
   void SetMolInBox(uint box);
-  XYZ CalcRandomTransform(XYZ const &lb, double const max);
+  XYZ CalcRandomTransform(XYZ const &lb, double const max, int molIndex);
   double CalculateWRatio(XYZ const &lb_new, XYZ const &lb_old, XYZ const &k,
                          double max);
 };
@@ -58,7 +62,7 @@ inline MultiParticle::MultiParticle(System &sys, StaticVals const &statV) :
   MoveBase(sys, statV),
   newMolsPos(sys.boxDimRef, newCOMs, sys.molLookupRef, sys.prng, statV.mol),
   newCOMs(sys.boxDimRef, newMolsPos, sys.molLookupRef, statV.mol),
-  molLookup(sys.molLookup)
+  molLookup(sys.molLookup), randomGenerator(sys.randomGenerator), userKey(sys.uk)
 {
   molTorqueNew.Init(sys.com.Count());
   molTorqueRef.Init(sys.com.Count());
@@ -334,24 +338,35 @@ inline void MultiParticle::Accept(const uint rejectState, const uint step)
   moveSetRef.Update(mv::MULTIPARTICLE, result, step, bPick);
 }
 
-inline XYZ MultiParticle::CalcRandomTransform(XYZ const &lb, double const max)
+inline XYZ MultiParticle::CalcRandomTransform(XYZ const &lb, double const max, int molIndex)
 {
   XYZ lbmax = lb * max;
   XYZ num;
+  
+  RNG::ctr_type c = {{}};
+  c[0] = molIndex * 3;// index of random number
+  RNG::ctr_type r = randomGenerator(c, userKey);
+  double randomNumber = (double) r[0] / INT_MAX;
   if(abs(lbmax.x) > MIN_FORCE && abs(lbmax.x) < MAX_FORCE) {
-    num.x = log(exp(-1.0 * lbmax.x) + 2 * prng() * sinh(lbmax.x)) / lb.x;
+    num.x = log(exp(-1.0 * lbmax.x) + 2 * randomNumber * sinh(lbmax.x)) / lb.x;
   } else {
     num.x = prng.Sym(max);
   }
 
+  c[0] = molIndex * 3 + 1;// index of random number
+  RNG::ctr_type r = randomGenerator(c, userKey);
+  double randomNumber = (double) r[0] / INT_MAX;
   if(abs(lbmax.y) > MIN_FORCE && abs(lbmax.y) < MAX_FORCE) {
-    num.y = log(exp(-1.0 * lbmax.y) + 2 * prng() * sinh(lbmax.y)) / lb.y;
+    num.y = log(exp(-1.0 * lbmax.y) + 2 * randomNumber * sinh(lbmax.y)) / lb.y;
   } else {
     num.y = prng.Sym(max);
   }
 
+  c[0] = molIndex * 3 + 2;// index of random number
+  RNG::ctr_type r = randomGenerator(c, userKey);
+  double randomNumber = (double) r[0] / INT_MAX;
   if(abs(lbmax.z) > MIN_FORCE && abs(lbmax.z) < MAX_FORCE) {
-    num.z = log(exp(-1.0 * lbmax.z) + 2 * prng() * sinh(lbmax.z)) / lb.z;
+    num.z = log(exp(-1.0 * lbmax.z) + 2 * randomNumber * sinh(lbmax.z)) / lb.z;
   } else {
     num.z = prng.Sym(max);
   }
@@ -389,11 +404,11 @@ inline void MultiParticle::CalculateTrialDistRot()
 
     if(moveType[molIndex]) { // rotate
       lbt = molTorqueRef.Get(molIndex) * lambda * BETA;
-      r_k.Set(molIndex, CalcRandomTransform(lbt, r_max));
+      r_k.Set(molIndex, CalcRandomTransform(lbt, r_max, molIndex));
     } else { // displace
       lbf = (molForceRef.Get(molIndex) + molForceRecRef.Get(molIndex)) *
             lambda * BETA;
-      t_k.Set(molIndex, CalcRandomTransform(lbf, t_max));
+      t_k.Set(molIndex, CalcRandomTransform(lbf, t_max, molIndex));
     }
   }
 }
