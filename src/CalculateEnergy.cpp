@@ -217,9 +217,7 @@ reduction(+:tempREn, tempLJEn)
   for(currParticle = 0; currParticle < atomNumber; currParticle++) {
     currCell = mapParticleToCell[currParticle];
 
-    for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
-        nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
-        nCellIndex++) {
+    for(nCellIndex = 0; nCellIndex < NUMBER_OF_NEIGHBOR_CELL; nCellIndex++) {
       neighborCell = neighborList[currCell][nCellIndex];
 
       endIndex = neighborCell != numberOfCells - 1 ?
@@ -337,9 +335,7 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
   for(currParticle = 0; currParticle < atomNumber; currParticle++) {
     currCell = mapParticleToCell[currParticle];
 
-    for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
-        nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
-        nCellIndex++) {
+    for(nCellIndex = 0; nCellIndex < NUMBER_OF_NEIGHBOR_CELL; nCellIndex++) {
       neighborCell = neighborList[currCell][nCellIndex];
 
       endIndex = neighborCell != numberOfCells - 1 ?
@@ -477,9 +473,7 @@ virC, comC) reduction(+:vT11, vT12, vT13, vT22, \
   for(currParticle = 0; currParticle < atomNumber; currParticle++) {
     currCell = mapParticleToCell[currParticle];
 
-    for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
-        nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
-        nCellIndex++) {
+    for(nCellIndex = 0; nCellIndex < NUMBER_OF_NEIGHBOR_CELL; nCellIndex++) {
       neighborCell = neighborList[currCell][nCellIndex];
 
       endIndex = neighborCell != numberOfCells - 1 ?
