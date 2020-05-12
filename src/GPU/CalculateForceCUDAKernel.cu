@@ -280,7 +280,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
 
   // Run the kernel...
   threadsPerBlock = 256;
-  blocksPerGrid = (int)(atomNumber / threadsPerBlock) + 1;
+  blocksPerGrid = (int)(numberOfCells * NUMBER_OF_NEIGHBOR_CELL);
 
   // Convert neighbor list to 1D array
   std::vector<int> neighborlist1D(neighborListCount);
@@ -778,13 +778,13 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
   int nCellIndex = blockIdx.x;
   int neighborCell = gpu_neighborList[nCellIndex];
 
-  // calculate number of particles inside currCell
+  // calculate number of particles inside neighbor Cell
   int particlesInsideCurrentCell, particlesInsideNeighboringCells;
   int endIndex = neighborCell != numberOfCells - 1 ?
   gpu_cellStartIndex[neighborCell+1] : atomNumber;
   particlesInsideNeighboringCells = endIndex - gpu_cellStartIndex[neighborCell];
 
-  // Calculate number of particles inside neighboring cell
+  // Calculate number of particles inside current Cell
   endIndex = currentCell != numberOfCells - 1 ?
   gpu_cellStartIndex[currentCell+1] : atomNumber;
   particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
