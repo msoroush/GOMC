@@ -29,6 +29,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "ConstantDefinitionsCUDAKernel.cuh"
 #endif
 
+#define NUMBER_OF_NEIGHBOR_CELL 27
+
 //
 //    CalculateEnergy.cpp
 //    Energy Calculation functions for Monte Carlo simulation
@@ -173,24 +175,13 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   double distSq, qi_qj_fact;
   int i, pairSize;
   XYZ virComponents, forceLJ, forceReal;
-  /*std::vector<uint> pair1, pair2;
-  CellList::Pairs pair = cellList.EnumeratePairs(box);
-
-  //store atom pair index
-  while (!pair.Done()) {
-    if(!SameMolecule(pair.First(), pair.Second())) {
-      pair1.push_back(pair.First());
-      pair2.push_back(pair.Second());
-    }
-    pair.Next();
-  }
-  pairSize = pair1.size();*/
+  
   std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
   std::vector<std::vector<int> > neighborList;
   cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborsList(box);
-  //printf("cellVector size: %d, cellStartIndex size: %d\n", cellVector.size(), cellStartIndex.size());
-  //printf("NeighbostList size: %d\n", neighborList.size());
+  int numberOfCells = neighborList.size();
+  int atomNumber = coords.size();
 
 #ifdef GOMC_CUDA
   uint currentIndex = 0;
@@ -218,20 +209,40 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
 
 #else
 #ifdef _OPENMP
-  #pragma omp parallel for default(shared) private(i, distSq, qi_qj_fact, \
+  #pragma omp parallel for default(shared) private(currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle, distSq, qi_qj_fact, \
   virComponents, forceReal, forceLJ) \
 reduction(+:tempREn, tempLJEn)
 #endif
-  for (i = 0; i < pair1.size(); i++) {
-    if(boxAxes.InRcut(distSq, virComponents, coords, pair1[i], pair2[i], box)) {
-      if (electrostatic) {
-        qi_qj_fact = particleCharge[pair1[i]] * particleCharge[pair2[i]] *
-                     num::qqFact;
-        tempREn += forcefield.particles->CalcCoulomb(distSq, particleKind[pair1[i]],
-                   particleKind[pair2[i]], qi_qj_fact, box);
+  for(int currParticle = 0; currParticle < atomNumber, currParticle++) {
+    int currCell = mapParticleToCell[currParticle];
+
+    for(int nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
+        nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
+        nCellIndex++) {
+      int neighborCell = neighborList[nCellIndex];
+
+      int endIndex = neighborCell != numberOfCells - 1 ?
+        cellStartIndex[neighborCell+1] : atomNumber;
+      for(int nParticleIndex = cellStartIndex[neighborCell];
+          nParticleIndex < endIndex; nParticleIndex++) {
+        int nParticle = cellVector[nParticleIndex];
+
+        if(currParticle != nParticle && currParticle < nParticle) {
+          if(boxAxes.InRcut(distSq, virComponents, coords, currParticle,
+                            nParticle, box)) {
+            if (electrostatic) {
+              qi_qj_fact = particleCharge[currParticle] *
+                           particleCharge[nParticle] *
+                           num::qqFact;
+              tempREn += forcefield.particles->CalcCoulomb(distSq,
+                particleKind[currParticle], particleKind[nParticle], qi_qj_fact,
+                box);
+            }
+            tempLJEn += forcefield.particles->CalcEn(distSq,
+              particleKind[currParticle], particleKind[nParticle]);
+          }
+        }
       }
-      tempLJEn += forcefield.particles->CalcEn(distSq, particleKind[pair1[i]],
-                  particleKind[pair2[i]]);
     }
   }
 #endif
@@ -266,7 +277,6 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   double distSq, qi_qj_fact;
   int i;
   XYZ virComponents, forceLJ, forceReal;
-  std::vector<uint> pair1, pair2;
   CellList::Pairs pair = cellList.EnumeratePairs(box);
 
   // make a pointer to atom force and mol force for openmp
@@ -281,20 +291,13 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 
   // Reset Force Arrays
   ResetForce(atomForce, molForce, box);
-
-  //store atom pair index
-  /*while (!pair.Done()) {
-    if(!SameMolecule(pair.First(), pair.Second())) {
-      pair1.push_back(pair.First());
-      pair2.push_back(pair.Second());
-    }
-    pair.Next();
-  }
-  uint pairSize = pair1.size();*/
+  
   std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
   std::vector<std::vector<int> > neighborList;
   cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborsList(box);
+  int numberOfCells = neighborList.size();
+  int atomNumber = coords.size();
 
 #ifdef GOMC_CUDA
   uint currentIndex = 0;
@@ -324,46 +327,66 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 
 #else
 #ifdef _OPENMP
-  #pragma omp parallel for default(shared) private(i, distSq, qi_qj_fact, \
+  #pragma omp parallel for default(shared) private(currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle, distSq, qi_qj_fact, \
   virComponents, forceReal, forceLJ) \
 reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
             aForcez[:atomCount], mForcex[:molCount], mForcey[:molCount], mForcez[:molCount])
 #endif
-  for (i = 0; i < pair1.size(); i++) {
-    if(boxAxes.InRcut(distSq, virComponents, coords, pair1[i], pair2[i], box)) {
+  for(int currParticle = 0; currParticle < atomNumber, currParticle++) {
+    int currCell = mapParticleToCell[currParticle];
 
-      if (electrostatic) {
-        qi_qj_fact = particleCharge[pair1[i]] * particleCharge[pair2[i]] *
-                     num::qqFact;
-        tempREn+= forcefield.particles->CalcCoulomb(distSq, 
-                                                    particleKind[pair1[i]],
-                                                    particleKind[pair2[i]],
-                                                    qi_qj_fact, box);
-      }
-      tempLJEn += forcefield.particles->CalcEn(distSq, particleKind[pair1[i]], particleKind[pair2[i]]);
+    for(int nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
+        nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
+        nCellIndex++) {
+      int neighborCell = neighborList[nCellIndex];
 
-      // Calculating the force
-      if(multiParticleEnabled) {
-        if(electrostatic) {
-          forceReal = virComponents *
-                      forcefield.particles->CalcCoulombVir(distSq, particleKind[pair1[i]],
-                          particleKind[pair2[i]], qi_qj_fact, box);
+      int endIndex = neighborCell != numberOfCells - 1 ?
+        cellStartIndex[neighborCell+1] : atomNumber;
+      for(int nParticleIndex = cellStartIndex[neighborCell];
+          nParticleIndex < endIndex; nParticleIndex++) {
+        int nParticle = cellVector[nParticleIndex];
+
+        if(currParticle != nParticle && currParticle < nParticle) {
+          if(boxAxes.InRcut(distSq, virComponents, coords, currParticle,
+            nParticle, box)) {
+
+            if (electrostatic) {
+              qi_qj_fact = particleCharge[currParticle] * particleCharge[nParticle] *
+                          num::qqFact;
+              tempREn+= forcefield.particles->CalcCoulomb(distSq, 
+                                                          particleKind[currParticle],
+                                                          particleKind[nParticle],
+                                                          qi_qj_fact, box);
+            }
+            tempLJEn += forcefield.particles->CalcEn(distSq,
+              particleKind[currParticle], particleKind[nParticle]);
+
+            // Calculating the force
+            if(multiParticleEnabled) {
+              if(electrostatic) {
+                forceReal = virComponents *
+                            forcefield.particles->CalcCoulombVir(distSq,
+                            particleKind[currParticle],
+                            particleKind[nParticle], qi_qj_fact, box);
+              }
+              forceLJ = virComponents *
+                        forcefield.particles->CalcVir(distSq, particleKind[currParticle],
+                                                      particleKind[nParticle]);
+              aForcex[currParticle] += forceLJ.x + forceReal.x;
+              aForcey[currParticle] += forceLJ.y + forceReal.y;
+              aForcez[currParticle] += forceLJ.z + forceReal.z;
+              aForcex[nParticle] += -(forceLJ.x + forceReal.x);
+              aForcey[nParticle] += -(forceLJ.y + forceReal.y);
+              aForcez[nParticle] += -(forceLJ.z + forceReal.z);
+              mForcex[particleMol[currParticle]] += (forceLJ.x + forceReal.x);
+              mForcey[particleMol[currParticle]] += (forceLJ.y + forceReal.y);
+              mForcez[particleMol[currParticle]] += (forceLJ.z + forceReal.z);
+              mForcex[particleMol[nParticle]] += -(forceLJ.x + forceReal.x);
+              mForcey[particleMol[nParticle]] += -(forceLJ.y + forceReal.y);
+              mForcez[particleMol[nParticle]] += -(forceLJ.z + forceReal.z);
+            }
+          }
         }
-        forceLJ = virComponents *
-                  forcefield.particles->CalcVir(distSq, particleKind[pair1[i]],
-                                                particleKind[pair2[i]]);
-        aForcex[pair1[i]] += forceLJ.x + forceReal.x;
-        aForcey[pair1[i]] += forceLJ.y + forceReal.y;
-        aForcez[pair1[i]] += forceLJ.z + forceReal.z;
-        aForcex[pair2[i]] += -(forceLJ.x + forceReal.x);
-        aForcey[pair2[i]] += -(forceLJ.y + forceReal.y);
-        aForcez[pair2[i]] += -(forceLJ.z + forceReal.z);
-        mForcex[particleMol[pair1[i]]] += (forceLJ.x + forceReal.x);
-        mForcey[particleMol[pair1[i]]] += (forceLJ.y + forceReal.y);
-        mForcez[particleMol[pair1[i]]] += (forceLJ.z + forceReal.z);
-        mForcex[particleMol[pair2[i]]] += -(forceLJ.x + forceReal.x);
-        mForcey[particleMol[pair2[i]]] += -(forceLJ.y + forceReal.y);
-        mForcez[particleMol[pair2[i]]] += -(forceLJ.z + forceReal.z);
       }
     }
   }
@@ -395,23 +418,13 @@ Virial CalculateEnergy::VirialCalc(const uint box)
   double distSq, pVF, pRF, qi_qj;
   int i;
   XYZ virC, comC;
-  /*std::vector<uint> pair1, pair2;
-  CellList::Pairs pair = cellList.EnumeratePairs(box);
-  //store atom pair index
-  while (!pair.Done()) {
-    if(!SameMolecule(pair.First(), pair.Second())) {
-      pair1.push_back(pair.First());
-      pair2.push_back(pair.Second());
-    }
-    pair.Next();
-  }
-
-  uint pairSize = pair1.size();*/
 
   std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
   std::vector<std::vector<int> > neighborList;
   cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector, cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborsList(box);
+  int numberOfCells = neighborList.size();
+  int atomNumber = coords.size();
 
 #ifdef GOMC_CUDA
   //update unitcell in GPU
@@ -454,51 +467,69 @@ Virial CalculateEnergy::VirialCalc(const uint box)
   vT33 = vT33t;
 #else
 #ifdef _OPENMP
-  #pragma omp parallel for default(shared) private(i, distSq, pVF, pRF, qi_qj, \
+  #pragma omp parallel for default(shared) private(currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle, distSq, pVF, pRF, qi_qj, \
 virC, comC) reduction(+:vT11, vT12, vT13, vT22, \
       vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT33)
 #endif
-  for (i = 0; i < pair1.size(); i++) {
-    if (currentAxes.InRcut(distSq, virC, currentCoords, pair1[i],
-                           pair2[i], box)) {
-      pVF = 0.0;
-      pRF = 0.0;
+  for(int currParticle = 0; currParticle < atomNumber, currParticle++) {
+    int currCell = mapParticleToCell[currParticle];
 
-      //calculate the distance between com of two molecules
-      comC = currentCOM.Difference(particleMol[pair1[i]],
-                                   particleMol[pair2[i]]);
-      //calculate the minimum image between com of two molecules
-      comC = currentAxes.MinImage(comC, box);
+    for(int nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
+        nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
+        nCellIndex++) {
+      int neighborCell = neighborList[nCellIndex];
 
-      if (electrostatic) {
-        qi_qj = particleCharge[pair1[i]] * particleCharge[pair2[i]];
+      int endIndex = neighborCell != numberOfCells - 1 ?
+        cellStartIndex[neighborCell+1] : atomNumber;
+      for(int nParticleIndex = cellStartIndex[neighborCell];
+          nParticleIndex < endIndex; nParticleIndex++) {
+        int nParticle = cellVector[nParticleIndex];
 
-        pRF = forcefield.particles->CalcCoulombVir(distSq, particleKind[pair1[i]],
-              particleKind[pair2[i]], qi_qj, box);
-        //calculate the top diagonal of pressure tensor
-        rT11 += pRF * (virC.x * comC.x);
-        //rT12 += pRF * (0.5 * (virC.x * comC.y + virC.y * comC.x));
-        //rT13 += pRF * (0.5 * (virC.x * comC.z + virC.z * comC.x));
+        if(currParticle != nParticle && currParticle < nParticle) {
+          if (currentAxes.InRcut(distSq, virC, currentCoords, currParticle,
+                                nParticle, box)) {
+            pVF = 0.0;
+            pRF = 0.0;
 
-        rT22 += pRF * (virC.y * comC.y);
-        //rT23 += pRF * (0.5 * (virC.y * comC.z + virC.z * comC.y));
+            //calculate the distance between com of two molecules
+            comC = currentCOM.Difference(particleMol[currParticle],
+                                        particleMol[nParticle]);
+            //calculate the minimum image between com of two molecules
+            comC = currentAxes.MinImage(comC, box);
 
-        rT33 += pRF * (virC.z * comC.z);
+            if (electrostatic) {
+              qi_qj = particleCharge[currParticle] * particleCharge[nParticle];
+
+              pRF = forcefield.particles->CalcCoulombVir(distSq, particleKind[currParticle],
+                    particleKind[nParticle], qi_qj, box);
+              //calculate the top diagonal of pressure tensor
+              rT11 += pRF * (virC.x * comC.x);
+              //rT12 += pRF * (0.5 * (virC.x * comC.y + virC.y * comC.x));
+              //rT13 += pRF * (0.5 * (virC.x * comC.z + virC.z * comC.x));
+
+              rT22 += pRF * (virC.y * comC.y);
+              //rT23 += pRF * (0.5 * (virC.y * comC.z + virC.z * comC.y));
+
+              rT33 += pRF * (virC.z * comC.z);
+            }
+
+            pVF = forcefield.particles->CalcVir(distSq, particleKind[currParticle],
+                                                particleKind[nParticle]);
+            //calculate the top diagonal of pressure tensor
+            vT11 += pVF * (virC.x * comC.x);
+            //vT12 += pVF * (0.5 * (virC.x * comC.y + virC.y * comC.x));
+            //vT13 += pVF * (0.5 * (virC.x * comC.z + virC.z * comC.x));
+
+            vT22 += pVF * (virC.y * comC.y);
+            //vT23 += pVF * (0.5 * (virC.y * comC.z + virC.z * comC.y));
+
+            vT33 += pVF * (virC.z * comC.z);
+          }
+        }
       }
-
-      pVF = forcefield.particles->CalcVir(distSq, particleKind[pair1[i]],
-                                          particleKind[pair2[i]]);
-      //calculate the top diagonal of pressure tensor
-      vT11 += pVF * (virC.x * comC.x);
-      //vT12 += pVF * (0.5 * (virC.x * comC.y + virC.y * comC.x));
-      //vT13 += pVF * (0.5 * (virC.x * comC.z + virC.z * comC.x));
-
-      vT22 += pVF * (virC.y * comC.y);
-      //vT23 += pVF * (0.5 * (virC.y * comC.z + virC.z * comC.y));
-
-      vT33 += pVF * (virC.z * comC.z);
     }
   }
+}
 #endif
 
   // set the all tensor values

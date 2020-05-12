@@ -274,25 +274,25 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
           gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
           gpu_Invcell_z)) {
           if(electrostatic) {
-              qi_qj_fact = gpu_particleCharge[currentParticle] *
-                           gpu_particleCharge[neighborParticle] * qqFact;
-              gpu_REn[currentParticle] += CalcCoulombGPU(distSq,
-                                                 gpu_particleKind[currentParticle],
-                                                 gpu_particleKind[neighborParticle],
-                                                 qi_qj_fact, gpu_rCutLow[0],
-                                                 gpu_ewald[0], gpu_VDW_Kind[0],
-                                                 gpu_alpha[box],
-                                                 gpu_rCutCoulomb[box],
-                                                 gpu_isMartini[0],
-                                                 gpu_diElectric_1[0],
-                                                 sc_coul,
-                                                 sc_sigma_6,
-                                                 sc_alpha,
-                                                 sc_power,
-                                                 gpu_sigmaSq,
-                                                 gpu_count[0]);
-            }
-            gpu_LJEn[currentParticle] += CalcEnGPU(distSq,
+            qi_qj_fact = gpu_particleCharge[currentParticle] *
+                          gpu_particleCharge[neighborParticle] * qqFact;
+            gpu_REn[currentParticle] += CalcCoulombGPU(distSq,
+                                                gpu_particleKind[currentParticle],
+                                                gpu_particleKind[neighborParticle],
+                                                qi_qj_fact, gpu_rCutLow[0],
+                                                gpu_ewald[0], gpu_VDW_Kind[0],
+                                                gpu_alpha[box],
+                                                gpu_rCutCoulomb[box],
+                                                gpu_isMartini[0],
+                                                gpu_diElectric_1[0],
+                                                sc_coul,
+                                                sc_sigma_6,
+                                                sc_alpha,
+                                                sc_power,
+                                                gpu_sigmaSq,
+                                                gpu_count[0]);
+          }
+          gpu_LJEn[currentParticle] += CalcEnGPU(distSq,
                                            gpu_particleKind[currentParticle],
                                            gpu_particleKind[neighborParticle],
                                            gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
