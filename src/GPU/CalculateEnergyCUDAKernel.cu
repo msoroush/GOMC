@@ -276,7 +276,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
           if(electrostatic) {
               qi_qj_fact = gpu_particleCharge[currentParticle] *
                            gpu_particleCharge[neighborParticle] * qqFact;
-              gpu_REn[currentParticle] = CalcCoulombGPU(distSq,
+              gpu_REn[currentParticle] += CalcCoulombGPU(distSq,
                                                  gpu_particleKind[currentParticle],
                                                  gpu_particleKind[neighborParticle],
                                                  qi_qj_fact, gpu_rCutLow[0],
@@ -292,7 +292,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                                  gpu_sigmaSq,
                                                  gpu_count[0]);
             }
-            gpu_LJEn[currentParticle] = CalcEnGPU(distSq,
+            gpu_LJEn[currentParticle] += CalcEnGPU(distSq,
                                            gpu_particleKind[currentParticle],
                                            gpu_particleKind[neighborParticle],
                                            gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
