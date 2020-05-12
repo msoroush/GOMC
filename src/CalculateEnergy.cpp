@@ -220,7 +220,7 @@ reduction(+:tempREn, tempLJEn)
     for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
         nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
         nCellIndex++) {
-      neighborCell = neighborList[nCellIndex];
+      neighborCell = neighborList[currCell][nCellIndex];
 
       endIndex = neighborCell != numberOfCells - 1 ?
         cellStartIndex[neighborCell+1] : atomNumber;
@@ -340,7 +340,7 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
     for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
         nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
         nCellIndex++) {
-      neighborCell = neighborList[nCellIndex];
+      neighborCell = neighborList[currCell][nCellIndex];
 
       endIndex = neighborCell != numberOfCells - 1 ?
         cellStartIndex[neighborCell+1] : atomNumber;
@@ -480,7 +480,7 @@ virC, comC) reduction(+:vT11, vT12, vT13, vT22, \
     for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
         nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
         nCellIndex++) {
-      neighborCell = neighborList[nCellIndex];
+      neighborCell = neighborList[currCell][nCellIndex];
 
       endIndex = neighborCell != numberOfCells - 1 ?
         cellStartIndex[neighborCell+1] : atomNumber;
