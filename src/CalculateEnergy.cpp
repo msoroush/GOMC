@@ -209,11 +209,11 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   tempLJEn = LJEn;
 
 #else
-#ifdef _OPENMP
+/*#ifdef _OPENMP
   #pragma omp parallel for default(shared) private(currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle, distSq, qi_qj_fact, \
   virComponents, forceReal, forceLJ) \
 reduction(+:tempREn, tempLJEn)
-#endif
+#endif*/
   for(currParticle = 0; currParticle < atomNumber, currParticle++) {
     currCell = mapParticleToCell[currParticle];
 
@@ -328,12 +328,12 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   tempLJEn = LJEn;
 
 #else
-#ifdef _OPENMP
+/*#ifdef _OPENMP
   #pragma omp parallel for default(shared) private(currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle, distSq, qi_qj_fact, \
   virComponents, forceReal, forceLJ) \
 reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
             aForcez[:atomCount], mForcex[:molCount], mForcey[:molCount], mForcez[:molCount])
-#endif
+#endif*/
   for(currParticle = 0; currParticle < atomNumber, currParticle++) {
     currCell = mapParticleToCell[currParticle];
 
