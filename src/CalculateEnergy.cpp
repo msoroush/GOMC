@@ -532,7 +532,6 @@ virC, comC) reduction(+:vT11, vT12, vT13, vT22, \
       }
     }
   }
-}
 #endif
 
   // set the all tensor values
