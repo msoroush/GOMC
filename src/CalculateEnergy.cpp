@@ -214,7 +214,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   virComponents, forceReal, forceLJ) \
 reduction(+:tempREn, tempLJEn)
 #endif*/
-  for(currParticle = 0; currParticle < atomNumber, currParticle++) {
+  for(currParticle = 0; currParticle < atomNumber; currParticle++) {
     currCell = mapParticleToCell[currParticle];
 
     for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
@@ -334,7 +334,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
             aForcez[:atomCount], mForcex[:molCount], mForcey[:molCount], mForcez[:molCount])
 #endif*/
-  for(currParticle = 0; currParticle < atomNumber, currParticle++) {
+  for(currParticle = 0; currParticle < atomNumber; currParticle++) {
     currCell = mapParticleToCell[currParticle];
 
     for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
@@ -474,7 +474,7 @@ Virial CalculateEnergy::VirialCalc(const uint box)
 virC, comC) reduction(+:vT11, vT12, vT13, vT22, \
       vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT33)
 #endif
-  for(currParticle = 0; currParticle < atomNumber, currParticle++) {
+  for(currParticle = 0; currParticle < atomNumber; currParticle++) {
     currCell = mapParticleToCell[currParticle];
 
     for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
