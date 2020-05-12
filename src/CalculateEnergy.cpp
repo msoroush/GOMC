@@ -182,6 +182,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   neighborList = cellList.GetNeighborsList(box);
   int numberOfCells = neighborList.size();
   int atomNumber = currentCoords.Count();
+  int currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
 
 #ifdef GOMC_CUDA
   uint currentIndex = 0;
@@ -213,19 +214,19 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   virComponents, forceReal, forceLJ) \
 reduction(+:tempREn, tempLJEn)
 #endif
-  for(int currParticle = 0; currParticle < atomNumber, currParticle++) {
-    int currCell = mapParticleToCell[currParticle];
+  for(currParticle = 0; currParticle < atomNumber, currParticle++) {
+    currCell = mapParticleToCell[currParticle];
 
-    for(int nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
+    for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
         nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
         nCellIndex++) {
-      int neighborCell = neighborList[nCellIndex];
+      neighborCell = neighborList[nCellIndex];
 
-      int endIndex = neighborCell != numberOfCells - 1 ?
+      endIndex = neighborCell != numberOfCells - 1 ?
         cellStartIndex[neighborCell+1] : atomNumber;
-      for(int nParticleIndex = cellStartIndex[neighborCell];
+      for(nParticleIndex = cellStartIndex[neighborCell];
           nParticleIndex < endIndex; nParticleIndex++) {
-        int nParticle = cellVector[nParticleIndex];
+        nParticle = cellVector[nParticleIndex];
 
         if(currParticle != nParticle && currParticle < nParticle) {
           if(boxAxes.InRcut(distSq, virComponents, coords, currParticle,
@@ -298,6 +299,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   neighborList = cellList.GetNeighborsList(box);
   int numberOfCells = neighborList.size();
   int atomNumber = currentCoords.Count();
+  int currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
 
 #ifdef GOMC_CUDA
   uint currentIndex = 0;
@@ -332,19 +334,19 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
             aForcez[:atomCount], mForcex[:molCount], mForcey[:molCount], mForcez[:molCount])
 #endif
-  for(int currParticle = 0; currParticle < atomNumber, currParticle++) {
-    int currCell = mapParticleToCell[currParticle];
+  for(currParticle = 0; currParticle < atomNumber, currParticle++) {
+    currCell = mapParticleToCell[currParticle];
 
-    for(int nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
+    for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
         nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
         nCellIndex++) {
-      int neighborCell = neighborList[nCellIndex];
+      neighborCell = neighborList[nCellIndex];
 
-      int endIndex = neighborCell != numberOfCells - 1 ?
+      endIndex = neighborCell != numberOfCells - 1 ?
         cellStartIndex[neighborCell+1] : atomNumber;
-      for(int nParticleIndex = cellStartIndex[neighborCell];
+      for(nParticleIndex = cellStartIndex[neighborCell];
           nParticleIndex < endIndex; nParticleIndex++) {
-        int nParticle = cellVector[nParticleIndex];
+        nParticle = cellVector[nParticleIndex];
 
         if(currParticle != nParticle && currParticle < nParticle) {
           if(boxAxes.InRcut(distSq, virComponents, coords, currParticle,
@@ -425,6 +427,7 @@ Virial CalculateEnergy::VirialCalc(const uint box)
   neighborList = cellList.GetNeighborsList(box);
   int numberOfCells = neighborList.size();
   int atomNumber = currentCoords.Count();
+  int currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
 
 #ifdef GOMC_CUDA
   //update unitcell in GPU
@@ -471,19 +474,19 @@ Virial CalculateEnergy::VirialCalc(const uint box)
 virC, comC) reduction(+:vT11, vT12, vT13, vT22, \
       vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT33)
 #endif
-  for(int currParticle = 0; currParticle < atomNumber, currParticle++) {
-    int currCell = mapParticleToCell[currParticle];
+  for(currParticle = 0; currParticle < atomNumber, currParticle++) {
+    currCell = mapParticleToCell[currParticle];
 
-    for(int nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
+    for(nCellIndex = currCell * NUMBER_OF_NEIGHBOR_CELL;
         nCellIndex < ((currCell+1) * NUMBER_OF_NEIGHBOR_CELL);
         nCellIndex++) {
-      int neighborCell = neighborList[nCellIndex];
+      neighborCell = neighborList[nCellIndex];
 
-      int endIndex = neighborCell != numberOfCells - 1 ?
+      endIndex = neighborCell != numberOfCells - 1 ?
         cellStartIndex[neighborCell+1] : atomNumber;
-      for(int nParticleIndex = cellStartIndex[neighborCell];
+      for(nParticleIndex = cellStartIndex[neighborCell];
           nParticleIndex < endIndex; nParticleIndex++) {
-        int nParticle = cellVector[nParticleIndex];
+        nParticle = cellVector[nParticleIndex];
 
         if(currParticle != nParticle && currParticle < nParticle) {
           if (currentAxes.InRcut(distSq, virC, currentCoords, currParticle,
