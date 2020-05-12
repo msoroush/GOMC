@@ -354,8 +354,8 @@ inline XYZ MultiParticle::CalcRandomTransform(XYZ const &lb, double const max, i
   }
 
   c[0] = molIndex * 3 + 1;// index of random number
-  RNG::ctr_type r = randomGenerator(c, userKey);
-  double randomNumber = (double) r[0] / INT_MAX;
+  r = randomGenerator(c, userKey);
+  randomNumber = (double) r[0] / INT_MAX;
   if(abs(lbmax.y) > MIN_FORCE && abs(lbmax.y) < MAX_FORCE) {
     num.y = log(exp(-1.0 * lbmax.y) + 2 * randomNumber * sinh(lbmax.y)) / lb.y;
   } else {
@@ -363,8 +363,8 @@ inline XYZ MultiParticle::CalcRandomTransform(XYZ const &lb, double const max, i
   }
 
   c[0] = molIndex * 3 + 2;// index of random number
-  RNG::ctr_type r = randomGenerator(c, userKey);
-  double randomNumber = (double) r[0] / INT_MAX;
+  r = randomGenerator(c, userKey);
+  randomNumber = (double) r[0] / INT_MAX;
   if(abs(lbmax.z) > MIN_FORCE && abs(lbmax.z) < MAX_FORCE) {
     num.z = log(exp(-1.0 * lbmax.z) + 2 * randomNumber * sinh(lbmax.z)) / lb.z;
   } else {

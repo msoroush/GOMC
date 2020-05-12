@@ -23,6 +23,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "MultiParticle.h"
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
+#include <stdio.h>
 
 System::System(StaticVals& statics) :
   statV(statics),
@@ -70,9 +71,9 @@ void System::Init(Setup const& set, ulong & startStep)
   if(seedValue != UINT_MAX) {
     uk[1] = seedValue;
   } else {
-    srand (time(NULL));
-    set.config.in.prng.seed = rand();
-    uk[1] = set.config.in.prng.seed;
+    //srand (time(NULL));
+    //set.config.in.prng.seed = rand();
+    uk[1] = rand();
   }
 #ifdef VARIABLE_VOLUME
   boxDimensions->Init(set.config.in.restart,
