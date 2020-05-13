@@ -229,13 +229,6 @@ CellList::Pairs CellList::EnumeratePairs(int box) const
   return CellList::Pairs(*this, box);
 }
 
-void printVector(vector<int> v) 
-{
-  for(int i=0; i<v.size(); i++) {
-    cout << v[i] << " \n"[i==v.size()-1];
-  }
-}
-
 void CellList::GetCellListNeighbor(uint box, int coordinateSize,
                                    vector<int> &cellVector,
                                    vector<int> &cellStartIndex,
@@ -255,8 +248,6 @@ void CellList::GetCellListNeighbor(uint box, int coordinateSize,
       particleIndex = list[particleIndex];
     }
     sort(cellVector.begin()+cellStartIndex[cell], cellVector.begin()+vector_index);
-    vector<int> temp(cellVector.begin()+cellStartIndex[cell], cellVector.begin()+vector_index);
-    printVector(temp);
   }
 }
 
