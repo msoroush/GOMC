@@ -200,9 +200,10 @@ inline uint MultiParticle::Transform()
     double t_max = moveSetRef.GetTMAX(bPick);
     CallTranslateParticlesGPU(cudaVars, moleculeIndex, moveType, t_max,
                               molForceRef.x, molForceRef.y, molForceRef.z,
-                              r123wrapper.GetStep(), r123wrapper.GetSeed(),
+                              r123wrapper.GetStep(), r123wrapper.GetSeedValue(),
                               particleMol, atomForceRecNew.Count(),
-                              molForceRecNew.Count(), boxAxes);
+                              molForceRecNew.Count(), boxDimRef.GetAxis(box).x,
+                              boxDimRef.GetAxis(box).y, boxDimRef.GetAxis(box).z);
   }
 #else
   // move particles according to force and torque and store them in the new pos
