@@ -304,7 +304,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      double sc_alpha,
                      uint sc_power,
                      uint const box,
-                     bool updated = false)
+                     bool updated)
 {
   int atomNumber = coords.Count();
   int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
