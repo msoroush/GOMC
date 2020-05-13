@@ -407,6 +407,9 @@ inline void MultiParticle::CalculateTrialDistRot()
       lbf = (molForceRef.Get(molIndex) + molForceRecRef.Get(molIndex)) *
             lambda * BETA;
       lbmax = lbf * t_max;
+      if(molIndex == 3000) {
+        cout << molForceRef.Get(molIndex).x << ", " << molForceRef.Get(molIndex).y << ", " << molForceRef.Get(molIndex).z << "\n";
+      }
 
       if(abs(lbmax.x) > MIN_FORCE && abs(lbmax.x) < MAX_FORCE) {
         num.x = log(exp(-1.0 * lbmax.x) + 2 * r123wrapper(m*3+0) * sinh(lbmax.x)) / lbf.x;
@@ -480,9 +483,9 @@ inline void MultiParticle::TranslateForceBiased(std::vector<uint> molIndeces)
   for(int i=0; i<molIndeces.size(); i++) {
     uint molIndex = molIndeces[i];
     XYZ shift = t_k.Get(molIndex);
-    if(molIndex == 3000) {
-      cout << shift.x << ", " << shift.y << ", " << shift.z << "\n";
-    }
+    // if(molIndex == 3000) {
+    //   cout << shift.x << ", " << shift.y << ", " << shift.z << "\n";
+    // }
 
     XYZ newcom = newCOMs.Get(molIndex);
     newcom += shift;
