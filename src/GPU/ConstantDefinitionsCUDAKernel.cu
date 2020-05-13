@@ -77,19 +77,6 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   cudaMalloc(&vars->gpu_comy, maxMolNumber * sizeof(double));
   cudaMalloc(&vars->gpu_comz, maxMolNumber * sizeof(double));
 
-  cudaMalloc(&vars->gpu_rT11, MAX_PAIR_SIZE * sizeof(double));
-  cudaMalloc(&vars->gpu_rT12, MAX_PAIR_SIZE * sizeof(double));
-  cudaMalloc(&vars->gpu_rT13, MAX_PAIR_SIZE * sizeof(double));
-  cudaMalloc(&vars->gpu_rT22, MAX_PAIR_SIZE * sizeof(double));
-  cudaMalloc(&vars->gpu_rT23, MAX_PAIR_SIZE * sizeof(double));
-  cudaMalloc(&vars->gpu_rT33, MAX_PAIR_SIZE * sizeof(double));
-  cudaMalloc(&vars->gpu_vT11, MAX_PAIR_SIZE * sizeof(double));
-  cudaMalloc(&vars->gpu_vT12, MAX_PAIR_SIZE * sizeof(double));
-  cudaMalloc(&vars->gpu_vT13, MAX_PAIR_SIZE * sizeof(double));
-  cudaMalloc(&vars->gpu_vT22, MAX_PAIR_SIZE * sizeof(double));
-  cudaMalloc(&vars->gpu_vT23, MAX_PAIR_SIZE * sizeof(double));
-  cudaMalloc(&vars->gpu_vT33, MAX_PAIR_SIZE * sizeof(double));
-
   cudaMalloc(&vars->gpu_nonOrth, sizeof(int));
   vars->gpu_cell_x = new double *[BOX_TOTAL];
   vars->gpu_cell_y = new double *[BOX_TOTAL];
