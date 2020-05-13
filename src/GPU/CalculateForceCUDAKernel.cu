@@ -504,6 +504,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaFree(gpu_final_LJEn);
   cudaFree(gpu_neighborList);
   cudaFree(gpu_cellStartIndex);
+  checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
 void CallVirialReciprocalGPU(VariablesCUDA *vars,
