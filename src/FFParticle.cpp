@@ -23,9 +23,9 @@ FFParticle::FFParticle(Forcefield &ff) : forcefield(ff), mass(NULL), nameFirst(N
 
 FFParticle::~FFParticle(void)
 {
-  delete[] mass;
-  delete[] nameFirst;
-  delete[] nameSec;
+  //delete[] mass;
+  //delete[] nameFirst;
+  //delete[] nameSec;
 
   delete[] sigmaSq;
   delete[] n;
