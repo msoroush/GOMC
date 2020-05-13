@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 
 #include "Random123/philox.h"
 typedef r123::Philox4x32 RNG;
