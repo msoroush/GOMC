@@ -21,9 +21,6 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "Translate.h"
 #include "VolumeTransfer.h"
 #include "MultiParticle.h"
-#include <stdlib.h>     /* srand, rand */
-#include <time.h>       /* time */
-#include <stdio.h>
 
 System::System(StaticVals& statics) :
   statV(statics),
@@ -66,15 +63,7 @@ System::~System()
 
 void System::Init(Setup const& set, ulong & startStep)
 {
-  //prng.Init(set.prng.prngMaker.prng);
-  int seedValue = set.config.in.prng.seed;
-  if(seedValue != UINT_MAX) {
-    uk[1] = seedValue;
-  } else {
-    //srand (time(NULL));
-    //set.config.in.prng.seed = rand();
-    uk[1] = rand();
-  }
+  prng.Init(set.prng.prngMaker.prng);
 #ifdef VARIABLE_VOLUME
   boxDimensions->Init(set.config.in.restart,
                       set.config.sys.volume, set.pdb.cryst,
@@ -165,7 +154,6 @@ void System::RecalculateTrajectory(Setup &set, uint frameNum)
 
 void System::ChooseAndRunMove(const uint step)
 {
-  uk[0] = step;
   double draw = 0;
   uint majKind = 0;
   PickMove(majKind, draw);
