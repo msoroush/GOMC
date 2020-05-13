@@ -61,7 +61,10 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
                                          int atomCount,
                                          double xAxes,
                                          double yAxes,
-                                         double zAxes);
+                                         double zAxes,
+                                         double *gpu_comx,
+                                         double *gpu_comy,
+                                         double *gpu_comz);
 
 __global__ void RotateParticlesKernel(unsigned int numberOfMolecules,
                                       double r_max,
