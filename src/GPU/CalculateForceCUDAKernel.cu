@@ -767,8 +767,8 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
       if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],
                   gpu_y[currentParticle], gpu_z[currentParticle],
                   gpu_x[neighborParticle], gpu_y[neighborParticle],
-                  gpu_z[neighborParticle], xAxes, yAxes, zAxes, xAxes / 2.0,
-                  yAxes / 2.0, zAxes / 2.0, cutoff, gpu_nonOrth[0],
+                  gpu_z[neighborParticle], xAxes, yAxes, zAxes, xAxes * 0.5,
+                  yAxes * 0.5, zAxes * 0.5, cutoff, gpu_nonOrth[0],
                   gpu_cell_x, gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
                   gpu_Invcell_z)) {
         diff_comx = gpu_comx[gpu_particleMol[currentParticle]] -
@@ -778,9 +778,9 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
         diff_comz = gpu_comz[gpu_particleMol[currentParticle]] -
                     gpu_comz[gpu_particleMol[neighborParticle]];
 
-        diff_comx = MinImageSignedGPU(diff_comx, xAxes, xAxes / 2.0);
-        diff_comy = MinImageSignedGPU(diff_comy, yAxes, yAxes / 2.0);
-        diff_comz = MinImageSignedGPU(diff_comz, zAxes, zAxes / 2.0);
+        diff_comx = MinImageSignedGPU(diff_comx, xAxes, xAxes * 0.5);
+        diff_comy = MinImageSignedGPU(diff_comy, yAxes, yAxes * 0.5);
+        diff_comz = MinImageSignedGPU(diff_comz, zAxes, zAxes * 0.5);
 
         if(electrostatic) {
           qi_qj = gpu_particleCharge[currentParticle] *
@@ -917,8 +917,8 @@ __global__ void BoxForceLJGPU(int *gpu_cellStartIndex,
       if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],
         gpu_y[currentParticle], gpu_z[currentParticle],
         gpu_x[neighborParticle], gpu_y[neighborParticle],
-        gpu_z[neighborParticle], xAxes, yAxes, zAxes, xAxes / 2.0,
-        yAxes / 2.0, zAxes / 2.0, cutoff, gpu_nonOrth[0], gpu_cell_x,
+        gpu_z[neighborParticle], xAxes, yAxes, zAxes, xAxes * 0.5,
+        yAxes * 0.5, zAxes * 0.5, cutoff, gpu_nonOrth[0], gpu_cell_x,
         gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
         gpu_Invcell_z)) {
         // gpu_LJEn[threadID] += CalcEnGPU(distSq,
@@ -1068,8 +1068,8 @@ __global__ void BoxForceRealGPU(int *gpu_cellStartIndex,
       if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],
       gpu_y[currentParticle], gpu_z[currentParticle],
       gpu_x[neighborParticle], gpu_y[neighborParticle],
-      gpu_z[neighborParticle], xAxes, yAxes, zAxes, xAxes / 2.0,
-      yAxes / 2.0, zAxes / 2.0, cutoff, gpu_nonOrth[0], gpu_cell_x,
+      gpu_z[neighborParticle], xAxes, yAxes, zAxes, xAxes * 0.5,
+      yAxes * 0.5, zAxes * 0.5, cutoff, gpu_nonOrth[0], gpu_cell_x,
       gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
       gpu_Invcell_z)) {
       qi_qj_fact = gpu_particleCharge[currentParticle] *
