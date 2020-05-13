@@ -16,7 +16,9 @@ public:
     c[0] = counter;
     RNG::key_type k = uk;
     RNG::ctr_type r = rng(c, k);
-    return (double)r[0] / UINT_MAX;
+    double r01 = r[0];
+    r01 /= UINT_MAX;
+    return r01;
   }
   unsigned int GetStep() { return uk[0]; }
   unsigned int GetSeedValue() { return uk[1]; }
