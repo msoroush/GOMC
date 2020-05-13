@@ -99,8 +99,6 @@ __device__ inline void ApplyRotation(double &x, double &y, double &z,
   double newy = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z;
   double newz = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z;
 
-  printf("%lf, %lf, %lf -> %lf, %lf, %lf\n", x, y, z, newx, newy, newz);
-
   x = newx;
   y = newy;
   z = newz;
@@ -305,9 +303,11 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
 
 
   // perform the shift on the coordinates
+  printf("old: %lf, %lf, %lf -> ", gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber]);
   gpu_x[atomNumber] += shiftx;
   gpu_y[atomNumber] += shifty;
   gpu_z[atomNumber] += shiftz;
+  printf("new: %lf, %lf, %lf\n", gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber]);
 
   // rewrapping
   WrapPBC(gpu_x[atomNumber], xAxes);
@@ -376,16 +376,10 @@ __global__ void RotateParticlesKernel(unsigned int numberOfMolecules,
     rotz = r_max * rr;
   }
 
-  // if(atomNumber == 100) {
-  //   printf("%d: %lf, %lf, %lf, %lf, %lf, %lf\n", atomNumber, rotx, roty, rotz, gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber]);
-  // }
   // perform the rot on the coordinates
   ApplyRotation(gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber],
                 gpu_comx[molIndex], gpu_comy[molIndex], gpu_comz[molIndex],
                 rotx, roty, rotz, xAxes, yAxes, zAxes);
-  // if(atomNumber == 100) {
-  //   printf("%d: %lf, %lf, %lf, %lf, %lf, %lf\n", atomNumber, rotx, roty, rotz, gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber]);
-  // }
 }
 
 #endif
