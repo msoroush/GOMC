@@ -837,6 +837,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
   int nCellIndex = blockIdx.x;
   int neighborCell = gpu_neighborList[nCellIndex];
 
+  if(currentCell > neighborCell) return;
+
   // calculate number of particles inside neighbor Cell
   int particlesInsideCurrentCell, particlesInsideNeighboringCells;
   int endIndex = neighborCell != numberOfCells - 1 ?
@@ -858,7 +860,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
     int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + currentParticleIndex];
     int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
 
-    if(currentParticle < neighborParticle) {
+    if(currentParticle != neighborParticle) {
       // Check if they are within rcut
       if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],
         gpu_y[currentParticle], gpu_z[currentParticle],
