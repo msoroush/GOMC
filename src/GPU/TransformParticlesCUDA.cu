@@ -1,5 +1,8 @@
 #include "TransformParticlesCUDA.cuh"
 #include "Random123/philox.h"
+#include <vector>
+
+using namespace std;
 #define MIN_FORCE 1E-12
 #define MAX_FORCE 30
 
