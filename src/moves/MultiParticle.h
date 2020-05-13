@@ -480,6 +480,9 @@ inline void MultiParticle::TranslateForceBiased(std::vector<uint> molIndeces)
   for(int i=0; i<molIndeces.size(); i++) {
     uint molIndex = molIndeces[i];
     XYZ shift = t_k.Get(molIndex);
+    if(molIndex == 3000) {
+      cout << shift.x << ", " << shift.y << ", " << shift.z << "\n";
+    }
 
     XYZ newcom = newCOMs.Get(molIndex);
     newcom += shift;
