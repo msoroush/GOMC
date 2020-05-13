@@ -5,7 +5,6 @@
 #define MAX_FORCE 30
 
 __device__ inline double randomGPU(unsigned int counter, unsigned int step, unsigned int seed) {
-  RNG rng;
   RNG::ctr_type c = {{}};
   RNG::ukey_type uk = {{}};
   uk[0] = step;
