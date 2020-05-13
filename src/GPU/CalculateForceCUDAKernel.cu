@@ -369,12 +369,6 @@ void CallBoxForceGPU(VariablesCUDA *vars,
              cudaMemcpyHostToDevice);
   cudaMemcpy(gpu_particleMol, &particleMol[0], particleMol.size() * sizeof(int),
              cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double),
-             cudaMemcpyHostToDevice);
 
   checkLastErrorCUDA(__FILE__, __LINE__);
   BoxForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,

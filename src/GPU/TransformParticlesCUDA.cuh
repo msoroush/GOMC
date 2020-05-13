@@ -24,7 +24,10 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                int molCount,
                                double xAxes,
                                double yAxes,
-                               double zAxes);
+                               double zAxes,
+                               double *coordRefx,
+                               double *coordRefy,
+                               double *coordRefz);
 
 void CallRotateParticlesGPU(VariablesCUDA *vars,
                             vector<uint> &moleculeIndex,

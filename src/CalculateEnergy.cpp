@@ -261,11 +261,11 @@ reduction(+:tempREn, tempLJEn)
 }
 
 SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
-    XYZArray const& coords,
-    XYZArray& atomForce,
-    XYZArray& molForce,
-    BoxDimensions const& boxAxes,
-    const uint box)
+                                          XYZArray const& coords,
+                                          XYZArray& atomForce,
+                                          XYZArray& molForce,
+                                          BoxDimensions const& boxAxes,
+                                          const uint box)
 {
   //Handles reservoir box case, returning zeroed structure if
   //interactions are off.

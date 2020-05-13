@@ -128,7 +128,10 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                int molCount,
                                double xAxes,
                                double yAxes,
-                               double zAxes)
+                               double zAxes,
+                               double *coordRefx,
+                               double *coordRefy,
+                               double *coordRefz)
 {
   int numberOfMolecules = moleculeIndex.size();
   int threadsPerBlock = 256;
@@ -145,6 +148,9 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
              cudaMemcpyHostToDevice);
   cudaMemcpy(gpu_particleMol, &particleMol[0], particleMol.size() * sizeof(int),
              cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_x, coordRefx, atomCount * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_y, coordRefy, atomCount * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_z, coordRefz, atomCount * sizeof(double), cudaMemcpyHostToDevice);
 
   TranslateParticlesKernel<<<blocksPerGrid, threadsPerBlock>>>(numberOfMolecules,
                                                                t_max,
