@@ -209,7 +209,10 @@ RotateParticlesKernel<<<blocksPerGrid, threadsPerBlock>>>(numberOfMolecules,
                                                           atomCount,
                                                           xAxes,
                                                           yAxes,
-                                                          zAxes);
+                                                          zAxes,
+                                                          vars->comx,
+                                                          vars->comy,
+                                                          vars->comz);
 }
 
 __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
