@@ -921,21 +921,30 @@ __global__ void BoxForceLJGPU(int *gpu_cellStartIndex,
         yAxes / 2.0, zAxes / 2.0, cutoff, gpu_nonOrth[0], gpu_cell_x,
         gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
         gpu_Invcell_z)) {
-        gpu_LJEn[threadID] += CalcEnGPU(distSq,
-                              gpu_particleKind[currentParticle],
-                              gpu_particleKind[neighborParticle],
-                              gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
-                              gpu_VDW_Kind[0], gpu_isMartini[0],
-                              gpu_rCut[0], gpu_rOn[0], gpu_count[0],
-                              sc_sigma_6, sc_alpha, sc_power, gpu_rMin,
-                              gpu_rMaxSq, gpu_expConst);
-        double pVF = CalcEnForceGPU(distSq, gpu_particleKind[currentParticle],
-                            gpu_particleKind[neighborParticle],
-                            gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
-                            gpu_rCut[0], gpu_rOn[0], gpu_isMartini[0],
-                            gpu_VDW_Kind[0], gpu_count[0], sc_sigma_6,
-                            sc_alpha, sc_power, gpu_rMin, gpu_rMaxSq,
-                            gpu_expConst);
+        // gpu_LJEn[threadID] += CalcEnGPU(distSq,
+        //                       gpu_particleKind[currentParticle],
+        //                       gpu_particleKind[neighborParticle],
+        //                       gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
+        //                       gpu_VDW_Kind[0], gpu_isMartini[0],
+        //                       gpu_rCut[0], gpu_rOn[0], gpu_count[0],
+        //                       sc_sigma_6, sc_alpha, sc_power, gpu_rMin,
+        //                       gpu_rMaxSq, gpu_expConst);
+        // double pVF = CalcEnForceGPU(distSq, gpu_particleKind[currentParticle],
+        //                     gpu_particleKind[neighborParticle],
+        //                     gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
+        //                     gpu_rCut[0], gpu_rOn[0], gpu_isMartini[0],
+        //                     gpu_VDW_Kind[0], gpu_count[0], sc_sigma_6,
+        //                     sc_alpha, sc_power, gpu_rMin, gpu_rMaxSq,
+        //                     gpu_expConst);
+        int index = FlatIndexGPU(gpu_particleKind[currentParticle], gpu_particleKind[neighborParticle], gpu_count[0]);
+        double rRat2 = gpu_sigmaSq[index] / distSq;
+        double rRat4 = rRat2 * rRat2;
+        double attract = rRat4 * rRat2;
+        double repulse = pow(rRat2, gpu_n[index] / 2.0);
+        gpu_LJEn[threadID] += gpu_epsilon_Cn[index] * (repulse - attract);
+        double pVF = gpu_epsilon_Cn[index] * 6.0 *
+          ((gpu_n[index] / 6.0) * repulse - attract) / distSq;
+
         forceLJx = virX * pVF;
         forceLJy = virY * pVF;
         forceLJz = virZ * pVF;
