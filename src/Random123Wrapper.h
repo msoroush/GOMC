@@ -16,8 +16,11 @@ public:
     c[0] = counter;
     RNG::key_type k = uk;
     RNG::ctr_type r = rng(c, k);
+    cout << "r[0]: " << r[0] << "\n";
     double r01 = r[0];
+    cout << "r01: " << r01 << "\n";
     r01 /= UINT_MAX;
+    cout << "return: " << r01 << "\n";
     return r01;
   }
   unsigned int GetStep() { return uk[0]; }

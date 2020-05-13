@@ -325,7 +325,6 @@ inline void MultiParticle::CalculateTrialDistRot()
       } else {
         num.x = prng.Sym(r_max);
       }
-      cout << r123wrapper(m*3+0) << "\n";
 
       if(abs(lbmax.y) > MIN_FORCE && abs(lbmax.y) < MAX_FORCE) {
         num.y = log(exp(-1.0 * lbmax.y) + 2 * r123wrapper(m*3+1) * sinh(lbmax.y)) / lbt.y;
