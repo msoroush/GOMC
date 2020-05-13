@@ -326,17 +326,21 @@ inline void MultiParticle::CalculateTrialDistRot()
         num.x = prng.Sym(r_max);
       }
 
+      cout << r123wrapper(m*3+0) << ", ";
+
       if(abs(lbmax.y) > MIN_FORCE && abs(lbmax.y) < MAX_FORCE) {
         num.y = log(exp(-1.0 * lbmax.y) + 2 * r123wrapper(m*3+1) * sinh(lbmax.y)) / lbt.y;
       } else {
         num.y = prng.Sym(r_max);
       }
+      cout << r123wrapper(m*3+1) << ", ";
 
       if(abs(lbmax.z) > MIN_FORCE && abs(lbmax.z) < MAX_FORCE) {
         num.z = log(exp(-1.0 * lbmax.z) + 2 * r123wrapper(m*3+2) * sinh(lbmax.z)) / lbt.z;
       } else {
         num.z = prng.Sym(r_max);
       }
+      cout << r123wrapper(m*3+2) << "\n";
 
       if(num.Length() >= boxDimRef.axis.Min(bPick)) {
         std::cout << "Trial Displacement exceed half of the box length in Multiparticle move." << endl;
