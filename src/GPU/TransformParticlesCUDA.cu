@@ -38,7 +38,7 @@ __device__ inline void ApplyRotation(double &x, double &y, double &z,
                                      double rotx, double roty, double rotz,
                                      double axx, double axy, double axz)
 {
-  double rotLen = rotx * roty * rotz;
+  double rotLen = sqrt(rotx * rotx + roty * roty + rotz * rotz);
   double axisx = rotx * (1.0 / rotLen);
   double axisy = roty * (1.0 / rotLen);
   double axisz = rotz * (1.0 / rotLen);
