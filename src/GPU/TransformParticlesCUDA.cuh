@@ -1,10 +1,11 @@
 #pragma once
+#ifdef GOMC_CUDA
 #include <vector>
 #include "Random123/philox.h"
+typedef r123::Philox4x32 RNG;
 
 using namespace std;
 
-#ifdef GOMC_CUDA
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include "VariablesCUDA.cuh"
