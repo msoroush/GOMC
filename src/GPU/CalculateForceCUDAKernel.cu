@@ -303,8 +303,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      double sc_sigma_6,
                      double sc_alpha,
                      uint sc_power,
-                     uint const box,
-                     bool updated)
+                     uint const box)
 {
   int atomNumber = coords.Count();
   int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
@@ -371,14 +370,12 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaMemcpy(gpu_particleMol, &particleMol[0], particleMol.size() * sizeof(int),
              cudaMemcpyHostToDevice);
   
-  if(!updated) {
-    cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double),
-               cudaMemcpyHostToDevice);
-    cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double),
-               cudaMemcpyHostToDevice);
-    cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double),
-               cudaMemcpyHostToDevice);
-  }
+  cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double),
+             cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double),
+             cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double),
+             cudaMemcpyHostToDevice);
 
   checkLastErrorCUDA(__FILE__, __LINE__);
   BoxForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
