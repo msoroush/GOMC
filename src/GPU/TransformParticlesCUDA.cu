@@ -106,21 +106,21 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
   if(abs(lbmaxx) > MIN_FORCE && abs(lbmaxx) < MAX_FORCE) {
     shiftx = log(exp(-1.0 * lbmaxx) + 2 * randomGPU(molIndex * 3, step, seed) * sinh(lbmaxx)) / lbfx;
   } else {
-    double rr = randomGPU(molIndex * 3) * 2.0 - 1.0;
+    double rr = randomGPU(molIndex * 3, step, seed) * 2.0 - 1.0;
     shiftx = t_max * rr;
   }
 
   if(abs(lbmaxy) > MIN_FORCE && abs(lbmaxy) < MAX_FORCE) {
     shifty = log(exp(-1.0 * lbmaxy) + 2 * randomGPU(molIndex * 3 + 1, step, seed) * sinh(lbmaxx)) / lbfy;
   } else {
-    double rr = randomGPU(molIndex * 3 + 1) * 2.0 - 1.0;
+    double rr = randomGPU(molIndex * 3 + 1, step, seed) * 2.0 - 1.0;
     shifty = t_max * rr;
   }
 
   if(abs(lbmaxz) > MIN_FORCE && abs(lbmaxz) < MAX_FORCE) {
     shiftz = log(exp(-1.0 * lbmaxz) + 2 * randomGPU(molIndex * 3 + 2, step, seed) * sinh(lbmaxz)) / lbfz;
   } else {
-    double rr = randomGPU(molIndex * 3 + 2) * 2.0 - 1.0;
+    double rr = randomGPU(molIndex * 3 + 2, step, seed) * 2.0 - 1.0;
     shiftz = t_max * rr;
   }
 
