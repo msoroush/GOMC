@@ -573,6 +573,7 @@ void CallVirialReciprocalGPU(VariablesCUDA *vars,
                                          constVal,
                                          imageSize,
                                          atomNumber);
+  cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
   // ReduceSum // Virial of Reciprocal
   void *d_temp_storage = NULL;
