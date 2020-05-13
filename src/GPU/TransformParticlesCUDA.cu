@@ -1,3 +1,4 @@
+#ifdef GOMC_CUDA
 #include "TransformParticlesCUDA.cuh"
 #include "Random123/philox.h"
 #include <vector>
@@ -5,6 +6,26 @@
 using namespace std;
 #define MIN_FORCE 1E-12
 #define MAX_FORCE 30
+
+__device__ inline double randomGPU(unsigned int counter, unsigned int step, unsigned int seed) {
+  RNG rng;
+  RNG::ctr_type c = {{}};
+  RNG::ukey_type uk = {{}};
+  uk[0] = step;
+  uk[1] = seed;
+  RNG::key_type k = uk;
+  c[0] = counter;
+  RNG::ctr_type r = philox4x32(c, k);
+  return (double)r[0] / UINT_MAX;
+}
+
+__device__ inline double WrapPBC(double &v, double ax) {
+  if(v >= ax)
+    v -= ax;
+  else if(v < 0)
+    v += ax;
+  return v;
+}
 
 void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                vector<uint> &moleculeIndex,
@@ -124,22 +145,4 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
   // TODO ======================= shift COM as well
 }
 
-__device__ double randomGPU(unsigned int counter, unsigned int step, unsigned int seed) {
-  RNG rng;
-  RNG::ctr_type c = {{}};
-  RNG::ukey_type uk = {{}};
-  uk[0] = step;
-  uk[1] = seed;
-  RNG::key_type k = uk;
-  c[0] = counter;
-  RNG::ctr_type r = philox4x32(c, k);
-  return (double)r[0] / UINT_MAX;
-}
-
-__device__ double WrapPBC(double &v, double ax) {
-  if(v >= ax)
-    v -= ax;
-  else if(v < 0)
-    v += ax;
-  return v;
-}
+#endif
