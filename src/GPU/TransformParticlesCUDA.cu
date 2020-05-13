@@ -24,7 +24,7 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
   int numberOfMolecules = moleculeIndex.size();
   int threadsPerBlock = 256;
   int blocksPerGrid = (int)(atomCount / threadsPerBlock) + 1;
-  double *gpu_mForcex, *gpu_mForcey, gpu_mForcez;
+  double *gpu_mForcex, *gpu_mForcey, *gpu_mForcez;
   int *gpu_particleMol;
 
   cudaMalloc((void**) &gpu_particleMol, particleMol.size() * sizeof(int)));
