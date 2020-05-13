@@ -35,11 +35,12 @@ __device__ inline void TransformUnSlantGPU(double &tx, double &ty, double &tz,
 
 __device__ inline double MinImageSignedGPU(double raw, double ax, double halfAx)
 {
-  if (raw > halfAx)
-    raw -= ax;
-  else if (raw < -halfAx)
-    raw += ax;
-  return raw;
+  // if (raw > halfAx)
+  //   raw -= ax;
+  // else if (raw < -halfAx)
+  //   raw += ax;
+  // return raw;
+  raw-=ax*round(raw/ax);
 }
 
 // Call by calculate energy whether it is in rCut
