@@ -306,7 +306,6 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
   gpu_x[atomNumber] += shiftx;
   gpu_y[atomNumber] += shifty;
   gpu_z[atomNumber] += shiftz;
-  printf("new: %lf, %lf, %lf\n", gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber]);
 
   // rewrapping
   WrapPBC(gpu_x[atomNumber], xAxes);
