@@ -16,6 +16,7 @@ public:
     c[0] = counter;
     RNG::key_type k = uk;
     RNG::ctr_type r = rng(c, k);
+    cout << "GetRandomNumber is returning : " << r[0] << "\n";
     return r[0];
   }
   unsigned int GetStep() { return uk[0]; }
