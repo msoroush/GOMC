@@ -40,7 +40,7 @@ __device__ inline double MinImageSignedGPU(double raw, double ax, double halfAx)
   // else if (raw < -halfAx)
   //   raw += ax;
   // return raw;
-  raw-=ax*round(raw/ax);
+  raw = min(abs(raw), ax - abs(raw));
   return raw;
 }
 
