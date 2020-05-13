@@ -12,13 +12,11 @@ public:
 
   void SetStep(unsigned int step) { uk[0] = step; }
   void SetRandomSeed(unsigned int seedValue) { uk[1] = seedValue; }
-  int GetRandomNumber(unsigned int counter) {
+  double GetRandomNumber(unsigned int counter) {
     c[0] = counter;
     RNG::key_type k = uk;
     RNG::ctr_type r = rng(c, k);
-    r[0] /= UINT_MAX;
-    cout << "GetRandomNumber is returning : " << r[0] << "\n";
-    return r[0];
+    return (double)r[0] / UINT_MAX;
   }
   unsigned int GetStep() { return uk[0]; }
   unsigned int GetSeedValue() { return uk[1]; }
