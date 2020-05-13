@@ -1,4 +1,8 @@
 #pragma once
+#include <vector>
+#include "Random123/philox.h"
+
+using namespace std;
 
 #ifdef GOMC_CUDA
 #include <cuda.h>
