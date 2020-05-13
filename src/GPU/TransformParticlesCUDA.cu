@@ -53,7 +53,7 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
   cudaMemcpy(vars->gpu_mForcez, mForcez, numberOfMolecules * sizeof(double),
              cudaMemcpyHostToDevice);
   cudaMemcpy(gpu_particleMol, &particleMol[0], particleMol.size() * sizeof(int),
-             cudaMemcpyHostToDevice));
+             cudaMemcpyHostToDevice);
 
   TranslateParticlesKernel<<<blocksPerGrid, threadsPerBlock>>>(numberOfMolecules,
                                                                t_max,
