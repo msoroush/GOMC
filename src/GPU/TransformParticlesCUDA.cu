@@ -85,7 +85,7 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
                                          unsigned int seed,
                                          double *gpu_x,
                                          double *gpu_y,
-                                         double *gpu_z
+                                         double *gpu_z,
                                          int *gpu_particleMol,
                                          int atomCount,
                                          double xAxes,
