@@ -80,7 +80,7 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
                                          double *molForcez,
                                          double *molForceRecx,
                                          double *molForceRecy,
-                                         double *molForceRecz
+                                         double *molForceRecz,
                                          unsigned int step,
                                          unsigned int seed,
                                          double *gpu_x,
