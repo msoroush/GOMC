@@ -44,7 +44,7 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
   double *gpu_mForcex, *gpu_mForcey, *gpu_mForcez;
   int *gpu_particleMol;
 
-  cudaMalloc((void**) &gpu_particleMol, particleMol.size() * sizeof(int)));
+  cudaMalloc((void**) &gpu_particleMol, particleMol.size() * sizeof(int));
 
   cudaMemcpy(vars->gpu_mForcex, mForcex, numberOfMolecules * sizeof(double),
              cudaMemcpyHostToDevice);
