@@ -86,6 +86,8 @@ inline MultiParticle::MultiParticle(System &sys, StaticVals const &statV) :
   for(uint b = 0; b < BOX_TOTAL; b++) {
     initMol[b] = false;
   }
+
+#ifdef GOMC_CUDA
   cudaVars = sys.statV.forcefield.particles->getCUDAVars();
 
   for(uint m = 0; m < mols.count; ++m) {
@@ -96,6 +98,7 @@ inline MultiParticle::MultiParticle(System &sys, StaticVals const &statV) :
       particleMol.push_back(m);
     }
   }
+#endif
 }
 
 inline void MultiParticle::PrintAcceptKind()
