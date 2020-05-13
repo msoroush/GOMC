@@ -153,13 +153,13 @@ inline uint MultiParticle::Prep(const double subDraw, const double movPerc)
   prng.PickBox(bPick, subDraw, movPerc);
 #endif
 
+  SetMolInBox(bPick);
   // In each step, we perform either:
   // 1- All displacement move.
   // 2- All rotation move.
   uint length = molRef.GetKind(moleculeIndex[0]).NumAtoms();
   if(length == 1) moveType = mp::MPALLDISPLACE;
   else moveType = prng.randIntExc(mp::MPTOTALTYPES);
-  SetMolInBox(bPick);
 
   if(moveSetRef.GetSingleMoveAccepted()) {
     //Calculate force for long range electrostatic using old position
