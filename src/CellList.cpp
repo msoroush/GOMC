@@ -156,7 +156,6 @@ void CellList::RebuildNeighbors(int b)
 {
   int* eCells = edgeCells[b];
   int nCells = eCells[0] * eCells[1] * eCells[2];
-  cout << "nCells: " << nCells << "\n";
   head[b].resize(nCells);
   neighbors[b].resize(nCells);
   for (int i = 0; i < nCells; ++i) {
