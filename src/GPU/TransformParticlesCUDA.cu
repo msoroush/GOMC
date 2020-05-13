@@ -66,7 +66,7 @@ __device__ inline void ApplyRotation(double &x, double &y, double &z,
   for(int i=0; i<3; i++) {
     tensor[i][0] *= axisx;
     tensor[i][1] *= axisy;
-    tensor[i][2] *= axixz;
+    tensor[i][2] *= axisz;
   }
 
   // build matrix
@@ -209,10 +209,7 @@ RotateParticlesKernel<<<blocksPerGrid, threadsPerBlock>>>(numberOfMolecules,
                                                           atomCount,
                                                           xAxes,
                                                           yAxes,
-                                                          zAxes,
-                                                          vars->gpu_comx,
-                                                          vars->gpu_comy,
-                                                          vars->gpu_comz);
+                                                          zAxes);
 }
 
 __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
