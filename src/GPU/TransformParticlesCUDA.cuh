@@ -43,7 +43,10 @@ void CallRotateParticlesGPU(VariablesCUDA *vars,
                             int molCount,
                             double xAxes,
                             double yAxes,
-                            double zAxes);
+                            double zAxes,
+                            double *coordRefx,
+                            double *coordRefy,
+                            double *coordRefz);
 
 __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
                                          double t_max,

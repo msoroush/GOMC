@@ -183,42 +183,44 @@ void CallRotateParticlesGPU(VariablesCUDA *vars,
                             int molCount,
                             double xAxes,
                             double yAxes,
-                            double zAxes)
+                            double zAxes,
+                            double *coordRefx,
+                            double *coordRefy,
+                            double *coordRefz)
 {
-int numberOfMolecules = moleculeIndex.size();
-int threadsPerBlock = 256;
-int blocksPerGrid = (int)(atomCount / threadsPerBlock) + 1;
-int *gpu_particleMol;
+  int numberOfMolecules = moleculeIndex.size();
+  int threadsPerBlock = 256;
+  int blocksPerGrid = (int)(atomCount / threadsPerBlock) + 1;
+  int *gpu_particleMol;
 
-cudaMalloc((void**) &gpu_particleMol, particleMol.size() * sizeof(int));
+  cudaMalloc((void**) &gpu_particleMol, particleMol.size() * sizeof(int));
 
-cudaMemcpy(vars->gpu_mTorquex, mTorquex, molCount * sizeof(double),
-cudaMemcpyHostToDevice);
-cudaMemcpy(vars->gpu_mTorquey, mTorquey, molCount * sizeof(double),
-cudaMemcpyHostToDevice);
-cudaMemcpy(vars->gpu_mTorquez, mTorquez, molCount * sizeof(double),
-cudaMemcpyHostToDevice);
-cudaMemcpy(gpu_particleMol, &particleMol[0], particleMol.size() * sizeof(int),
-cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_mTorquex, mTorquex, molCount * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_mTorquey, mTorquey, molCount * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_mTorquez, mTorquez, molCount * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_particleMol, &particleMol[0], particleMol.size() * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_x, coordRefx, atomCount * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_y, coordRefy, atomCount * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_z, coordRefz, atomCount * sizeof(double), cudaMemcpyHostToDevice);
 
-RotateParticlesKernel<<<blocksPerGrid, threadsPerBlock>>>(numberOfMolecules,
-                                                          r_max,
-                                                          vars->gpu_mTorquex,
-                                                          vars->gpu_mTorquey,
-                                                          vars->gpu_mTorquez,
-                                                          step,
-                                                          seed,
-                                                          vars->gpu_x,
-                                                          vars->gpu_y,
-                                                          vars->gpu_z,
-                                                          gpu_particleMol,
-                                                          atomCount,
-                                                          xAxes,
-                                                          yAxes,
-                                                          zAxes,
-                                                          vars->gpu_comx,
-                                                          vars->gpu_comy,
-                                                          vars->gpu_comz);
+  RotateParticlesKernel<<<blocksPerGrid, threadsPerBlock>>>(numberOfMolecules,
+                                                            r_max,
+                                                            vars->gpu_mTorquex,
+                                                            vars->gpu_mTorquey,
+                                                            vars->gpu_mTorquez,
+                                                            step,
+                                                            seed,
+                                                            vars->gpu_x,
+                                                            vars->gpu_y,
+                                                            vars->gpu_z,
+                                                            gpu_particleMol,
+                                                            atomCount,
+                                                            xAxes,
+                                                            yAxes,
+                                                            zAxes,
+                                                            vars->gpu_comx,
+                                                            vars->gpu_comy,
+                                                            vars->gpu_comz);
 }
 
 __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
