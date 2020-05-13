@@ -281,9 +281,9 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
   double lbmaxy = lbfy * t_max;
   double lbmaxz = lbfz * t_max;
 
-  if(molIndex == 3000 && updateCOM) {
-    printf("%lf, %lf, %lf\n", molForcex[molIndex], molForcey[molIndex], molForcez[molIndex]);
-  }
+  // if(molIndex == 3000 && updateCOM) {
+  //   printf("%lf, %lf, %lf\n", molForcex[molIndex], molForcey[molIndex], molForcez[molIndex]);
+  // }
 
   double shiftx, shifty, shiftz;
 
@@ -308,9 +308,9 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
     shiftz = t_max * rr;
   }
 
-  // if(molIndex == 3000 && updateCOM) {
-  //   printf("%lf, %lf, %lf\n", shiftx, shifty, shiftz);
-  // }
+  if(molIndex == 3000 && updateCOM) {
+    printf("%lf, %lf, %lf\n", shiftx, shifty, shiftz);
+  }
 
 
   // perform the shift on the coordinates
