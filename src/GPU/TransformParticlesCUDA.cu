@@ -308,9 +308,9 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
     shiftz = t_max * rr;
   }
 
-  if(molIndex == 3000 && updateCOM) {
-    printf("%lf, %lf, %lf\n", shiftx, shifty, shiftz);
-  }
+  // if(molIndex == 3000 && updateCOM) {
+  //   printf("%lf, %lf, %lf\n", shiftx, shifty, shiftz);
+  // }
 
 
   // perform the shift on the coordinates
@@ -327,6 +327,10 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
     gpu_comx[molIndex] += shiftx;
     gpu_comy[molIndex] += shifty;
     gpu_comz[molIndex] += shiftz;
+  }
+
+  if(molIndex == 3000) {
+    printf("%lf, %lf, %lf\n", gpu_x[molIndex], gpu_y[molIndex], gpu_z[molIndex]);
   }
 }
 

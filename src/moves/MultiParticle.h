@@ -483,9 +483,9 @@ inline void MultiParticle::TranslateForceBiased(std::vector<uint> molIndeces)
   for(int i=0; i<molIndeces.size(); i++) {
     uint molIndex = molIndeces[i];
     XYZ shift = t_k.Get(molIndex);
-    if(molIndex == 3000) {
-      cout << shift.x << ", " << shift.y << ", " << shift.z << "\n";
-    }
+    // if(molIndex == 3000) {
+    //   cout << shift.x << ", " << shift.y << ", " << shift.z << "\n";
+    // }
 
     XYZ newcom = newCOMs.Get(molIndex);
     newcom += shift;
@@ -503,6 +503,9 @@ inline void MultiParticle::TranslateForceBiased(std::vector<uint> molIndeces)
     boxDimRef.WrapPBC(temp, bPick);
     //set the new coordinate
     temp.CopyRange(newMolsPos, 0, start, len);
+    if(molIndex == 3000) {
+      printf("%lf, %lf, %lf\n", newMolsPos[molIndex], newMolsPos[molIndex], newMolsPos[molIndex]);
+    }
   }
 }
 
