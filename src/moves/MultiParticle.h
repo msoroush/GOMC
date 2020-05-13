@@ -202,7 +202,7 @@ inline uint MultiParticle::Transform()
                            particleMol, atomForceRecNew.Count(),
                            molForceRecNew.Count(), boxDimRef.GetAxis(bPick).x,
                            boxDimRef.GetAxis(bPick).y, boxDimRef.GetAxis(bPick).z,
-                           coordCurrRef.x, coordCurrRef.y, coordCurrRef.z);
+                           newMolsPos, newCOMs);
   } else {
     double t_max = moveSetRef.GetTMAX(bPick);
     CallTranslateParticlesGPU(cudaVars, moleculeIndex, moveType, t_max,
@@ -210,8 +210,8 @@ inline uint MultiParticle::Transform()
                               r123wrapper.GetStep(), r123wrapper.GetSeedValue(),
                               particleMol, atomForceRecNew.Count(),
                               molForceRecNew.Count(), boxDimRef.GetAxis(bPick).x,
-                              boxDimRef.GetAxis(bPick).y, boxDimRef.GetAxis(bPick).z,
-                              coordCurrRef.x, coordCurrRef.y, coordCurrRef.z);
+                              boxDimRef.GetAxis(bPick).y, boxDimRef.GetAxis(bPick).z,,
+                              newMolsPos, newCOMs);
   }
 #else
   // move particles according to force and torque and store them in the new pos
@@ -240,7 +240,7 @@ inline void MultiParticle::CalcEn()
   sysPotNew = sysPotRef;
   //calculate short range energy and force
   sysPotNew = calcEnRef.BoxForce(sysPotNew, newMolsPos, atomForceNew,
-                                 molForceNew, boxDimRef, bPick);
+                                 molForceNew, boxDimRef, bPick, true);
   //calculate long range of new electrostatic energy
   //sysPotNew.boxEnergy[bPick].recip = calcEwald->BoxReciprocal(bPick);
   //Calculate long range of new electrostatic force

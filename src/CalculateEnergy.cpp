@@ -265,7 +265,8 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                                           XYZArray& atomForce,
                                           XYZArray& molForce,
                                           BoxDimensions const& boxAxes,
-                                          const uint box)
+                                          const uint box,
+                                          bool updated = false)
 {
   //Handles reservoir box case, returning zeroed structure if
   //interactions are off.
@@ -321,7 +322,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                     aForcex, aForcey, aForcez, mForcex, mForcey, mForcez,
                     atomCount, molCount, forcefield.sc_coul,
                     forcefield.sc_sigma_6, forcefield.sc_alpha,
-                    forcefield.sc_power, box);
+                    forcefield.sc_power, box, updated);
   tempREn = REn;
   tempLJEn = LJEn;
 

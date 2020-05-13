@@ -9,6 +9,7 @@ using namespace std;
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include "VariablesCUDA.cuh"
+#include "XYZArray.h"
 
 void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                vector<uint> &moleculeIndex,
@@ -25,9 +26,8 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                double xAxes,
                                double yAxes,
                                double zAxes,
-                               double *coordRefx,
-                               double *coordRefy,
-                               double *coordRefz);
+                               XYZArray &newMolPos,
+                               XYZArray &newCOMs);
 
 void CallRotateParticlesGPU(VariablesCUDA *vars,
                             vector<uint> &moleculeIndex,
@@ -44,9 +44,8 @@ void CallRotateParticlesGPU(VariablesCUDA *vars,
                             double xAxes,
                             double yAxes,
                             double zAxes,
-                            double *coordRefx,
-                            double *coordRefy,
-                            double *coordRefz);
+                            XYZArray &newMolPos,
+                            XYZArray &newCOMs);
 
 __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
                                          double t_max,
