@@ -770,9 +770,9 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
       double dy = gpu_y[currentParticle] - gpu_y[neighborParticle];
       double dz = gpu_z[currentParticle] - gpu_z[neighborParticle];
 
-      tx = min(abs(tx), xAxes - abs(tx));
-        ty = min(abs(ty), yAxes - abs(ty));
-        tz = min(abs(tz), zAxes - abs(tz));
+      tx = min(abs(dx), xAxes - abs(dx));
+      ty = min(abs(dy), yAxes - abs(dy));
+      tz = min(abs(dz), zAxes - abs(dz));
 
       distSq = dx * dx + dy * dy + dz * dz;
 
@@ -926,9 +926,9 @@ __global__ void BoxForceLJGPU(int *gpu_cellStartIndex,
       double dy = gpu_y[currentParticle] - gpu_y[neighborParticle];
       double dz = gpu_z[currentParticle] - gpu_z[neighborParticle];
 
-      tx = min(abs(tx), xAxes - abs(tx));
-        ty = min(abs(ty), yAxes - abs(ty));
-        tz = min(abs(tz), zAxes - abs(tz));
+      tx = min(abs(dx), xAxes - abs(dx));
+      ty = min(abs(dy), yAxes - abs(dy));
+      tz = min(abs(dz), zAxes - abs(dz));
 
       distSq = dx * dx + dy * dy + dz * dz;
       
@@ -1083,9 +1083,9 @@ __global__ void BoxForceRealGPU(int *gpu_cellStartIndex,
       double dy = gpu_y[currentParticle] - gpu_y[neighborParticle];
       double dz = gpu_z[currentParticle] - gpu_z[neighborParticle];
 
-      tx = min(abs(tx), xAxes - abs(tx));
-      ty = min(abs(ty), yAxes - abs(ty));
-      tz = min(abs(tz), zAxes - abs(tz));
+      tx = min(abs(dx), xAxes - abs(dx));
+      ty = min(abs(dy), yAxes - abs(dy));
+      tz = min(abs(dz), zAxes - abs(dz));
 
       distSq = dx * dx + dy * dy + dz * dz;
       
