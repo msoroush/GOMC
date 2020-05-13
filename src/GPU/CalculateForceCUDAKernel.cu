@@ -770,19 +770,9 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
       double dy = gpu_y[currentParticle] - gpu_y[neighborParticle];
       double dz = gpu_z[currentParticle] - gpu_z[neighborParticle];
 
-      if(gpu_nonOrth[0]) {
-        TransformUnSlantGPU(tx, ty, tz, dx, dy, dz, gpu_Invcell_x, gpu_Invcell_y,
-                            gpu_Invcell_z);
-        tx = min(abs(tx), xAxes - abs(tx));
+      tx = min(abs(tx), xAxes - abs(tx));
         ty = min(abs(ty), yAxes - abs(ty));
         tz = min(abs(tz), zAxes - abs(tz));
-        TransformSlantGPU(dx, dy, dz, tx, ty, tz, gpu_cell_x, gpu_cell_y,
-                          gpu_cell_z);
-      } else {
-        tx = min(abs(tx), xAxes - abs(tx));
-        ty = min(abs(ty), yAxes - abs(ty));
-        tz = min(abs(tz), zAxes - abs(tz));
-      }
 
       distSq = dx * dx + dy * dy + dz * dz;
 
@@ -936,19 +926,9 @@ __global__ void BoxForceLJGPU(int *gpu_cellStartIndex,
       double dy = gpu_y[currentParticle] - gpu_y[neighborParticle];
       double dz = gpu_z[currentParticle] - gpu_z[neighborParticle];
 
-      if(gpu_nonOrth[0]) {
-        TransformUnSlantGPU(tx, ty, tz, dx, dy, dz, gpu_Invcell_x, gpu_Invcell_y,
-                            gpu_Invcell_z);
-        tx = min(abs(tx), xAxes - abs(tx));
+      tx = min(abs(tx), xAxes - abs(tx));
         ty = min(abs(ty), yAxes - abs(ty));
         tz = min(abs(tz), zAxes - abs(tz));
-        TransformSlantGPU(dx, dy, dz, tx, ty, tz, gpu_cell_x, gpu_cell_y,
-                          gpu_cell_z);
-      } else {
-        tx = min(abs(tx), xAxes - abs(tx));
-        ty = min(abs(ty), yAxes - abs(ty));
-        tz = min(abs(tz), zAxes - abs(tz));
-      }
 
       distSq = dx * dx + dy * dy + dz * dz;
       
@@ -1103,19 +1083,9 @@ __global__ void BoxForceRealGPU(int *gpu_cellStartIndex,
       double dy = gpu_y[currentParticle] - gpu_y[neighborParticle];
       double dz = gpu_z[currentParticle] - gpu_z[neighborParticle];
 
-      if(gpu_nonOrth[0]) {
-        TransformUnSlantGPU(tx, ty, tz, dx, dy, dz, gpu_Invcell_x, gpu_Invcell_y,
-                            gpu_Invcell_z);
-        tx = min(abs(tx), xAxes - abs(tx));
-        ty = min(abs(ty), yAxes - abs(ty));
-        tz = min(abs(tz), zAxes - abs(tz));
-        TransformSlantGPU(dx, dy, dz, tx, ty, tz, gpu_cell_x, gpu_cell_y,
-                          gpu_cell_z);
-      } else {
-        tx = min(abs(tx), xAxes - abs(tx));
-        ty = min(abs(ty), yAxes - abs(ty));
-        tz = min(abs(tz), zAxes - abs(tz));
-      }
+      tx = min(abs(tx), xAxes - abs(tx));
+      ty = min(abs(ty), yAxes - abs(ty));
+      tz = min(abs(tz), zAxes - abs(tz));
 
       distSq = dx * dx + dy * dy + dz * dz;
       
