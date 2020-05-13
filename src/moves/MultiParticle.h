@@ -324,11 +324,11 @@ inline void MultiParticle::Accept(const uint rejectState, const uint step)
 {
   // Here we compare the values of reference and trial and decide whether to
   // accept or reject the move
-  long double MPCoeff = GetCoeff();
+  long double MPCoeff = 1.3050e+04;//GetCoeff();
   double uBoltz = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()));
   long double accept = MPCoeff * uBoltz;
-  cout << "MPCoeff: " << MPCoeff << ", sysPotNew: " << sysPotNew.Total()
-       << ", sysPotRef: " << sysPotRef.Total() << ", accept: " << accept <<endl;
+  // cout << "MPCoeff: " << MPCoeff << ", sysPotNew: " << sysPotNew.Total()
+  //      << ", sysPotRef: " << sysPotRef.Total() << ", accept: " << accept <<endl;
   bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
   if(result) {
     sysPotRef = sysPotNew;
