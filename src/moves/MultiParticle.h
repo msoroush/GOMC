@@ -195,7 +195,7 @@ inline uint MultiParticle::Transform()
 #ifdef GOMC_CUDA
   // This kernel will calculate translation/rotation amout + shifting/rotating
   if(moveType == mp::MPALLROTATE) {
-
+    RotateForceBiased(moleculeIndex);
   } else {
     double t_max = moveSetRef.GetTMAX(bPick);
     CallTranslateParticlesGPU(cudaVars, moleculeIndex, moveType, t_max,
