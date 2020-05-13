@@ -64,15 +64,21 @@ __device__ inline bool InRcutGPU(double &distSq, double gpu_x1, double gpu_y1,
   if(gpu_nonOrth) {
     TransformUnSlantGPU(tx, ty, tz, dx, dy, dz, gpu_Invcell_x, gpu_Invcell_y,
                         gpu_Invcell_z);
-    tx = MinImageSignedGPU(tx, xAxes, xHalfAxes);
-    ty = MinImageSignedGPU(ty, yAxes, yHalfAxes);
-    tz = MinImageSignedGPU(tz, zAxes, zHalfAxes);
+    // tx = MinImageSignedGPU(tx, xAxes, xHalfAxes);
+    // ty = MinImageSignedGPU(ty, yAxes, yHalfAxes);
+    // tz = MinImageSignedGPU(tz, zAxes, zHalfAxes);
+    tx = min(abs(tx), xAxes - abs(tx));
+    ty = min(abs(ty), yAxes - abs(ty));
+    tz = min(abs(tz), zAxes - abs(tz));
     TransformSlantGPU(dx, dy, dz, tx, ty, tz, gpu_cell_x, gpu_cell_y,
                       gpu_cell_z);
   } else {
-    dx = MinImageSignedGPU(dx, xAxes, xHalfAxes);
-    dy = MinImageSignedGPU(dy, yAxes, yHalfAxes);
-    dz = MinImageSignedGPU(dz, zAxes, zHalfAxes);
+    // dx = MinImageSignedGPU(dx, xAxes, xHalfAxes);
+    // dy = MinImageSignedGPU(dy, yAxes, yHalfAxes);
+    // dz = MinImageSignedGPU(dz, zAxes, zHalfAxes);
+    tx = min(abs(tx), xAxes - abs(tx));
+    ty = min(abs(ty), yAxes - abs(ty));
+    tz = min(abs(tz), zAxes - abs(tz));
   }
 
   distSq = dx * dx + dy * dy + dz * dz;
