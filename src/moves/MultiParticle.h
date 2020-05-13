@@ -503,9 +503,9 @@ inline void MultiParticle::TranslateForceBiased(std::vector<uint> molIndeces)
     boxDimRef.WrapPBC(temp, bPick);
     //set the new coordinate
     temp.CopyRange(newMolsPos, 0, start, len);
-    if(molIndex == 3000) {
-      printf("%lf, %lf, %lf\n", newMolsPos[molIndex].x, newMolsPos[molIndex].y, newMolsPos[molIndex].z);
-    }
+    // if(molIndex == 3000) {
+    //   printf("%lf, %lf, %lf\n", newMolsPos[molIndex].x, newMolsPos[molIndex].y, newMolsPos[molIndex].z);
+    // }
   }
 }
 

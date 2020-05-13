@@ -329,9 +329,9 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
     gpu_comz[molIndex] += shiftz;
   }
 
-  if(molIndex == 3000) {
-    printf("%lf, %lf, %lf\n", gpu_x[molIndex], gpu_y[molIndex], gpu_z[molIndex]);
-  }
+  // if(molIndex == 3000) {
+  //   printf("%lf, %lf, %lf\n", gpu_x[molIndex], gpu_y[molIndex], gpu_z[molIndex]);
+  // }
 }
 
 __global__ void RotateParticlesKernel(unsigned int numberOfMolecules,
