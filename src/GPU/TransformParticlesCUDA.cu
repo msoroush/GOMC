@@ -175,6 +175,7 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                                                vars->gpu_comy,
                                                                vars->gpu_comz,
                                                                lambdaBETA);
+  checkLastErrorCUDA(__FILE__, __LINE__);
   
   cudaMemcpy(newMolPos.x, vars->gpu_x, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.y, vars->gpu_y, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
@@ -240,6 +241,7 @@ void CallRotateParticlesGPU(VariablesCUDA *vars,
                                                             vars->gpu_comx,
                                                             vars->gpu_comy,
                                                             vars->gpu_comz);
+  checkLastErrorCUDA(__FILE__, __LINE__);
   
   cudaMemcpy(newMolPos.x, vars->gpu_x, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.y, vars->gpu_y, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
