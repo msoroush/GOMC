@@ -296,7 +296,7 @@ void DestroyCUDAVars(VariablesCUDA *vars)
   cudaFree(vars->gpu_ewald);
   cudaFree(vars->gpu_diElectric_1);
   for(int i=0; i<NUMBER_OF_STREAMS; i++) {
-    cudaStreamDestroy(&vars->streams[i]);
+    cudaStreamDestroy(vars->streams[i]);
   }
   cudaFree(vars->gpu_x);
   cudaFree(vars->gpu_y);
