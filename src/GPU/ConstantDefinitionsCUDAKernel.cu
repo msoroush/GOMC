@@ -314,18 +314,6 @@ void DestroyCUDAVars(VariablesCUDA *vars)
   cudaFree(vars->gpu_mTorquez);
   cudaFree(vars->gpu_cellVector);
   cudaFree(vars->gpu_mapParticleToCell);
-  cudaFree(vars->gpu_rT11);
-  cudaFree(vars->gpu_rT12);
-  cudaFree(vars->gpu_rT13);
-  cudaFree(vars->gpu_rT22);
-  cudaFree(vars->gpu_rT23);
-  cudaFree(vars->gpu_rT33);
-  cudaFree(vars->gpu_vT11);
-  cudaFree(vars->gpu_vT12);
-  cudaFree(vars->gpu_vT13);
-  cudaFree(vars->gpu_vT22);
-  cudaFree(vars->gpu_vT23);
-  cudaFree(vars->gpu_vT33);
   cudaFree(vars->gpu_nonOrth);
   for(uint b = 0; b < BOX_TOTAL; b++) {
     cudaFree(vars->gpu_cell_x[b]);
