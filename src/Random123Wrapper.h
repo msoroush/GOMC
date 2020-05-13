@@ -16,6 +16,7 @@ public:
     c[0] = counter;
     RNG::key_type k = uk;
     RNG::ctr_type r = rng(c, k);
+    r[0] /= UINT_MAX;
     cout << "GetRandomNumber is returning : " << r[0] << "\n";
     return r[0];
   }
