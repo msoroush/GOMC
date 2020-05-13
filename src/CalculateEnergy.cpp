@@ -124,7 +124,7 @@ SystemPotential CalculateEnergy::SystemTotal()
     pot.boxEnergy[b].correction = correction;
 
     //Calculate Virial
-    pot.boxVirial[b] = VirialCalc(b);
+    //pot.boxVirial[b] = VirialCalc(b);
   }
 
   pot.Total();
