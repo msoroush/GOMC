@@ -100,7 +100,7 @@ __device__ inline void ApplyRotation(double &x, double &y, double &z,
   double newy = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z;
   double newz = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z;
 
-  printf("%lf, %lf, %lf -> %lf, %lf, %lf\n", x, y, z, newx, newy, newz);
+  // printf("%lf, %lf, %lf -> %lf, %lf, %lf\n", x, y, z, newx, newy, newz);
 
   x = newx;
   y = newy;
