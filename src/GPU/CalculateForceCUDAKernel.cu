@@ -878,10 +878,7 @@ __global__ void BoxForceLJGPU(int *gpu_cellStartIndex,
                             int box)
 {
   double distSq;
-  double qi_qj_fact;
-  double qqFact = 167000.0;
   double virX = 0.0, virY = 0.0, virZ = 0.0;
-  double forceRealx = 0.0, forceRealy = 0.0, forceRealz = 0.0;
   double forceLJx = 0.0, forceLJy = 0.0, forceLJz = 0.0;
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   gpu_REn[threadID] = 0.0;
@@ -892,7 +889,7 @@ __global__ void BoxForceLJGPU(int *gpu_cellStartIndex,
   int nCellIndex = blockIdx.x;
   int neighborCell = gpu_neighborList[nCellIndex];
 
-  if(currentCell < neighborCell) return;
+  if(currentCell > neighborCell) return;
 
   // calculate number of particles inside neighbor Cell
   int particlesInsideCurrentCell, particlesInsideNeighboringCells;
@@ -1025,7 +1022,6 @@ __global__ void BoxForceRealGPU(int *gpu_cellStartIndex,
   double qqFact = 167000.0;
   double virX = 0.0, virY = 0.0, virZ = 0.0;
   double forceRealx = 0.0, forceRealy = 0.0, forceRealz = 0.0;
-  double forceLJx = 0.0, forceLJy = 0.0, forceLJz = 0.0;
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   gpu_REn[threadID] = 0.0;
   gpu_LJEn[threadID] = 0.0;
@@ -1035,7 +1031,7 @@ __global__ void BoxForceRealGPU(int *gpu_cellStartIndex,
   int nCellIndex = blockIdx.x;
   int neighborCell = gpu_neighborList[nCellIndex];
 
-  if(currentCell < neighborCell) return;
+  if(currentCell > neighborCell) return;
 
   // calculate number of particles inside neighbor Cell
   int particlesInsideCurrentCell, particlesInsideNeighboringCells;
