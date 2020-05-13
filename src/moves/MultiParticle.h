@@ -50,6 +50,7 @@ private:
   uint moveType;
   const MoleculeLookup& molLookup;
   Random123Wrapper &r123wrapper;
+  const Molecules& mols;
 #ifdef GOMC_CUDA
   VariablesCUDA *cudaVars;
   std::vector<int> particleMol;
@@ -68,7 +69,7 @@ inline MultiParticle::MultiParticle(System &sys, StaticVals const &statV) :
   MoveBase(sys, statV),
   newMolsPos(sys.boxDimRef, newCOMs, sys.molLookupRef, sys.prng, statV.mol),
   newCOMs(sys.boxDimRef, newMolsPos, sys.molLookupRef, statV.mol),
-  molLookup(sys.molLookup), r123wrapper(sys.r123wrapper)
+  molLookup(sys.molLookup), r123wrapper(sys.r123wrapper), mols(statV.mol)
 {
   molTorqueNew.Init(sys.com.Count());
   molTorqueRef.Init(sys.com.Count());
