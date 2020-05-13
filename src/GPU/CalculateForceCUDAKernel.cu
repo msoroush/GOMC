@@ -390,7 +390,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
              cudaMemcpyHostToDevice);
 
   checkLastErrorCUDA(__FILE__, __LINE__);
-  BoxForceLJGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
+  BoxForceLJGPU <<< blocksPerGrid, threadsPerBlock, 0, vars->streams[0]>>>(gpu_cellStartIndex,
                                                     vars->gpu_cellVector,
                                                     gpu_neighborList,
                                                     numberOfCells,
@@ -442,7 +442,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                                                     vars->gpu_rMaxSq,
                                                     vars->gpu_expConst,
                                                     box);
-BoxForceRealGPU <<< blocksPerGrid, threadsPerBlock, 0, vars->streams[0]>>>(gpu_cellStartIndex,
+BoxForceRealGPU <<< blocksPerGrid, threadsPerBlock, 0, vars->streams[1]>>>(gpu_cellStartIndex,
                                                       vars->gpu_cellVector,
                                                       gpu_neighborList,
                                                       numberOfCells,
