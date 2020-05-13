@@ -12,6 +12,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <cuda_runtime.h>
 #include "EnsemblePreprocessor.h"
 
+#define NUMBER_OF_STREAMS 2
+
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true)
 {
@@ -107,5 +109,6 @@ public:
   double *gpu_mTorquex, *gpu_mTorquey, *gpu_mTorquez;
   double *gpu_rMin, *gpu_expConst, *gpu_rMaxSq;
   int *gpu_cellVector, *gpu_mapParticleToCell;
+  cudaStream_t streams[NUMBER_OF_STREAMS];
 };
 #endif

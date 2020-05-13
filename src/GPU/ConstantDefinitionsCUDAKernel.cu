@@ -61,6 +61,10 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
 void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
                          uint maxAtomsInMol, uint maxMolNumber)
 {
+  for(int i=0; i<NUMBER_OF_STREAMS; i++) {
+    cudaStreamCreate(&vars->streams[i]);
+  }
+
   cudaMalloc(&vars->gpu_x, atomNumber * sizeof(double));
   cudaMalloc(&vars->gpu_y, atomNumber * sizeof(double));
   cudaMalloc(&vars->gpu_z, atomNumber * sizeof(double));
@@ -291,6 +295,9 @@ void DestroyCUDAVars(VariablesCUDA *vars)
   cudaFree(vars->gpu_alpha);
   cudaFree(vars->gpu_ewald);
   cudaFree(vars->gpu_diElectric_1);
+  for(int i=0; i<NUMBER_OF_STREAMS; i++) {
+    cudaStreamDestroy(&vars->streams[i]);
+  }
   cudaFree(vars->gpu_x);
   cudaFree(vars->gpu_y);
   cudaFree(vars->gpu_z);
