@@ -169,9 +169,6 @@ inline uint MultiParticle::Transform()
   uint m;
 
   // move particles according to force and torque and store them in the new pos
-#ifdef _OPENMP
-  #pragma omp parallel for default(shared) private(m)
-#endif
   if(moveType == mp::MPALLROTATE) {
     // rotate
     RotateForceBiased(moleculeIndex);
