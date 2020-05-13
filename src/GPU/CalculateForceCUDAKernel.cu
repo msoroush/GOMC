@@ -764,13 +764,29 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
 
     if(currentParticle < neighborParticle) {
       // Check if they are within rcut
-      if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],
-                  gpu_y[currentParticle], gpu_z[currentParticle],
-                  gpu_x[neighborParticle], gpu_y[neighborParticle],
-                  gpu_z[neighborParticle], xAxes, yAxes, zAxes, xAxes * 0.5,
-                  yAxes * 0.5, zAxes * 0.5, cutoff, gpu_nonOrth[0],
-                  gpu_cell_x, gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
-                  gpu_Invcell_z)) {
+      distSq = 0;
+      double tx, ty, tz;
+      double dx = gpu_x[currentParticle] - gpu_x[neighborParticle];
+      double dy = gpu_y[currentParticle] - gpu_y[neighborParticle];
+      double dz = gpu_z[currentParticle] - gpu_z[neighborParticle];
+
+      if(gpu_nonOrth[0]) {
+        TransformUnSlantGPU(tx, ty, tz, dx, dy, dz, gpu_Invcell_x, gpu_Invcell_y,
+                            gpu_Invcell_z);
+        tx = min(abs(tx), xAxes - abs(tx));
+        ty = min(abs(ty), yAxes - abs(ty));
+        tz = min(abs(tz), zAxes - abs(tz));
+        TransformSlantGPU(dx, dy, dz, tx, ty, tz, gpu_cell_x, gpu_cell_y,
+                          gpu_cell_z);
+      } else {
+        tx = min(abs(tx), xAxes - abs(tx));
+        ty = min(abs(ty), yAxes - abs(ty));
+        tz = min(abs(tz), zAxes - abs(tz));
+      }
+
+      distSq = dx * dx + dy * dy + dz * dz;
+
+      if((cutoff * cutoff) > distSq) {
         diff_comx = gpu_comx[gpu_particleMol[currentParticle]] -
                     gpu_comx[gpu_particleMol[neighborParticle]];
         diff_comy = gpu_comy[gpu_particleMol[currentParticle]] -
@@ -914,13 +930,29 @@ __global__ void BoxForceLJGPU(int *gpu_cellStartIndex,
 
     if(currentParticle != neighborParticle) {
       // Check if they are within rcut
-      if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],
-        gpu_y[currentParticle], gpu_z[currentParticle],
-        gpu_x[neighborParticle], gpu_y[neighborParticle],
-        gpu_z[neighborParticle], xAxes, yAxes, zAxes, xAxes * 0.5,
-        yAxes * 0.5, zAxes * 0.5, cutoff, gpu_nonOrth[0], gpu_cell_x,
-        gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
-        gpu_Invcell_z)) {
+      distSq = 0;
+      double tx, ty, tz;
+      double dx = gpu_x[currentParticle] - gpu_x[neighborParticle];
+      double dy = gpu_y[currentParticle] - gpu_y[neighborParticle];
+      double dz = gpu_z[currentParticle] - gpu_z[neighborParticle];
+
+      if(gpu_nonOrth[0]) {
+        TransformUnSlantGPU(tx, ty, tz, dx, dy, dz, gpu_Invcell_x, gpu_Invcell_y,
+                            gpu_Invcell_z);
+        tx = min(abs(tx), xAxes - abs(tx));
+        ty = min(abs(ty), yAxes - abs(ty));
+        tz = min(abs(tz), zAxes - abs(tz));
+        TransformSlantGPU(dx, dy, dz, tx, ty, tz, gpu_cell_x, gpu_cell_y,
+                          gpu_cell_z);
+      } else {
+        tx = min(abs(tx), xAxes - abs(tx));
+        ty = min(abs(ty), yAxes - abs(ty));
+        tz = min(abs(tz), zAxes - abs(tz));
+      }
+
+      distSq = dx * dx + dy * dy + dz * dz;
+      
+      if((cutoff * cutoff) > distSq) {
         // gpu_LJEn[threadID] += CalcEnGPU(distSq,
         //                       gpu_particleKind[currentParticle],
         //                       gpu_particleKind[neighborParticle],
@@ -1065,13 +1097,29 @@ __global__ void BoxForceRealGPU(int *gpu_cellStartIndex,
 
     if(currentParticle != neighborParticle) {
       // Check if they are within rcut
-      if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],
-      gpu_y[currentParticle], gpu_z[currentParticle],
-      gpu_x[neighborParticle], gpu_y[neighborParticle],
-      gpu_z[neighborParticle], xAxes, yAxes, zAxes, xAxes * 0.5,
-      yAxes * 0.5, zAxes * 0.5, cutoff, gpu_nonOrth[0], gpu_cell_x,
-      gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
-      gpu_Invcell_z)) {
+      distSq = 0;
+      double tx, ty, tz;
+      double dx = gpu_x[currentParticle] - gpu_x[neighborParticle];
+      double dy = gpu_y[currentParticle] - gpu_y[neighborParticle];
+      double dz = gpu_z[currentParticle] - gpu_z[neighborParticle];
+
+      if(gpu_nonOrth[0]) {
+        TransformUnSlantGPU(tx, ty, tz, dx, dy, dz, gpu_Invcell_x, gpu_Invcell_y,
+                            gpu_Invcell_z);
+        tx = min(abs(tx), xAxes - abs(tx));
+        ty = min(abs(ty), yAxes - abs(ty));
+        tz = min(abs(tz), zAxes - abs(tz));
+        TransformSlantGPU(dx, dy, dz, tx, ty, tz, gpu_cell_x, gpu_cell_y,
+                          gpu_cell_z);
+      } else {
+        tx = min(abs(tx), xAxes - abs(tx));
+        ty = min(abs(ty), yAxes - abs(ty));
+        tz = min(abs(tz), zAxes - abs(tz));
+      }
+
+      distSq = dx * dx + dy * dy + dz * dz;
+      
+      if((cutoff * cutoff) > distSq) {
       qi_qj_fact = gpu_particleCharge[currentParticle] *
       gpu_particleCharge[neighborParticle] * qqFact;
       gpu_REn[threadID] += CalcCoulombGPU(distSq,
