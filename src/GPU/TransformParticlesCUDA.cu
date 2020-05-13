@@ -99,6 +99,8 @@ __device__ inline void ApplyRotation(double &x, double &y, double &z,
   double newy = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z;
   double newz = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z;
 
+  printf("%lf, %lf, %lf -> %lf, %lf, %lf\n", x, y, z, newx, newy, newz);
+
   x = newx;
   y = newy;
   z = newz;
@@ -217,7 +219,7 @@ void CallRotateParticlesGPU(VariablesCUDA *vars,
   cudaMemcpy(vars->gpu_comx, newCOMs.x, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_comy, newCOMs.y, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_comz, newCOMs.z, molCount * sizeof(double), cudaMemcpyHostToDevice);
-  cout << "old position for atom 100: " << newMolPos.x[100] << ", " << newMolPos.y[100] << ", " << newMolPos.z[100] << "\n";
+  // cout << "old position for atom 100: " << newMolPos.x[100] << ", " << newMolPos.y[100] << ", " << newMolPos.z[100] << "\n";
 
   RotateParticlesKernel<<<blocksPerGrid, threadsPerBlock>>>(numberOfMolecules,
                                                             r_max,
@@ -241,7 +243,7 @@ void CallRotateParticlesGPU(VariablesCUDA *vars,
   cudaMemcpy(newMolPos.x, vars->gpu_x, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.y, vars->gpu_y, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.z, vars->gpu_z, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cout << "new position for atom 100: " << newMolPos.x[100] << ", " << newMolPos.y[100] << ", " << newMolPos.z[100] << "\n";
+  // cout << "new position for atom 100: " << newMolPos.x[100] << ", " << newMolPos.y[100] << ", " << newMolPos.z[100] << "\n";
   cudaFree(gpu_particleMol);
 }
 
@@ -374,16 +376,16 @@ __global__ void RotateParticlesKernel(unsigned int numberOfMolecules,
     rotz = r_max * rr;
   }
 
-  if(atomNumber == 100) {
-    printf("%d: %lf, %lf, %lf, %lf, %lf, %lf\n", atomNumber, rotx, roty, rotz, gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber]);
-  }
+  // if(atomNumber == 100) {
+  //   printf("%d: %lf, %lf, %lf, %lf, %lf, %lf\n", atomNumber, rotx, roty, rotz, gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber]);
+  // }
   // perform the rot on the coordinates
   ApplyRotation(gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber],
                 gpu_comx[molIndex], gpu_comy[molIndex], gpu_comz[molIndex],
                 rotx, roty, rotz, xAxes, yAxes, zAxes);
-  if(atomNumber == 100) {
-    printf("%d: %lf, %lf, %lf, %lf, %lf, %lf\n", atomNumber, rotx, roty, rotz, gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber]);
-  }
+  // if(atomNumber == 100) {
+  //   printf("%d: %lf, %lf, %lf, %lf, %lf, %lf\n", atomNumber, rotx, roty, rotz, gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber]);
+  // }
 }
 
 #endif
