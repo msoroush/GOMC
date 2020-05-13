@@ -41,6 +41,7 @@ __device__ inline double MinImageSignedGPU(double raw, double ax, double halfAx)
   //   raw += ax;
   // return raw;
   raw-=ax*round(raw/ax);
+  return raw;
 }
 
 // Call by calculate energy whether it is in rCut
