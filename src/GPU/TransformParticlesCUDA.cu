@@ -286,9 +286,6 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
     double rr = randomGPU(molIndex * 3, step, seed) * 2.0 - 1.0;
     shiftx = t_max * rr;
   }
-  if(molIndex * 3 == 3000) {
-    printf("rand 3000: %lf\n", randomGPU(molIndex * 3, step, seed));
-  }
 
   if(abs(lbmaxy) > MIN_FORCE && abs(lbmaxy) < MAX_FORCE) {
     shifty = log(exp(-1.0 * lbmaxy) + 2 * randomGPU(molIndex * 3 + 1, step, seed) * sinh(lbmaxy)) / lbfy;

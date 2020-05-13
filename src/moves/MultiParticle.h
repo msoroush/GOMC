@@ -414,8 +414,6 @@ inline void MultiParticle::CalculateTrialDistRot()
         double rr = r123wrapper(m*3+0) * 2.0 - 1.0;
         num.x = t_max * rr;
       }
-      if(m * 3 == 3000)
-        cout << "rand 3000: " << r123wrapper(m*3+0) << "\n";
 
       if(abs(lbmax.y) > MIN_FORCE && abs(lbmax.y) < MAX_FORCE) {
         num.y = log(exp(-1.0 * lbmax.y) + 2 * r123wrapper(m*3+1) * sinh(lbmax.y)) / lbf.y;
