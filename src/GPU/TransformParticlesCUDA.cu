@@ -184,9 +184,9 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
   cudaMemcpy(newCOMs.x, vars->gpu_comx, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newCOMs.y, vars->gpu_comy, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newCOMs.z, vars->gpu_comz, molCount * sizeof(double), cudaMemcpyDeviceToHost);
-  checkLastErrorCUDA(__FILE__, __LINE__);
   // cout << "new position for atom 100: " << newMolPos.x[100] << ", " << newMolPos.y[100] << ", " << newMolPos.z[100] << "\n";
   cudaFree(gpu_particleMol);
+  checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
 void CallRotateParticlesGPU(VariablesCUDA *vars,
@@ -249,6 +249,7 @@ void CallRotateParticlesGPU(VariablesCUDA *vars,
   cudaMemcpy(newMolPos.y, vars->gpu_y, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.z, vars->gpu_z, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaFree(gpu_particleMol);
+  checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
 __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
