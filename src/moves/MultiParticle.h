@@ -12,7 +12,10 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "StaticVals.h"
 #include "TransformMatrix.h"
 #include "Random123Wrapper.h"
+#ifdef GOMC_CUDA
 #include "TransformParticlesCUDA.cuh"
+#include "VariablesCUDA.cuh"
+#endif
 #include <cmath>
 
 #define MIN_FORCE 1E-12
@@ -47,8 +50,10 @@ private:
   uint moveType;
   const MoleculeLookup& molLookup;
   Random123Wrapper &r123wrapper;
+#ifdef GOMC_CUDA
   VariablesCUDA *cudaVars;
   std::vector<int> particleMol;
+#endif
 
   long double GetCoeff();
   void CalculateTrialDistRot();
