@@ -374,6 +374,9 @@ __global__ void RotateParticlesKernel(unsigned int numberOfMolecules,
     rotz = r_max * rr;
   }
 
+  if(atomNumber < 100) {
+    printf("%d: %lf, %lf, %lf\n", atomNumber, rotx, roty, rotz);
+  }
   // perform the rot on the coordinates
   ApplyRotation(gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber],
                 gpu_comx[molIndex], gpu_comy[molIndex], gpu_comz[molIndex],
