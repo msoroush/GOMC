@@ -91,6 +91,7 @@ inline MultiParticle::MultiParticle(System &sys, StaticVals const &statV) :
 #ifdef GOMC_CUDA
   cudaVars = sys.statV.forcefield.particles->getCUDAVars();
 
+  uint maxAtomInMol = 0;
   for(uint m = 0; m < mols.count; ++m) {
     const MoleculeKind& molKind = mols.GetKind(m);
     if(molKind.NumAtoms() > maxAtomInMol)
@@ -196,6 +197,7 @@ inline uint MultiParticle::Transform()
   if(moveType == mp::MPALLROTATE) {
 
   } else {
+    double t_max = moveSetRef.GetTMAX(bPick);
     CallTranslateParticlesGPU(cudaVars, moleculeIndex, moveType, t_max,
                               molForceRef.x, molForceRef.y, molForceRef.z,
                               r123wrapper.GetStep(), r123wrapper.GetSeed(),
