@@ -23,6 +23,97 @@ __device__ inline double WrapPBC(double &v, double ax) {
   return v;
 }
 
+__device__ inline double UnwrapPBC(double &v, double ref, double ax, double halfax) {
+  if(abs(ref - v) > halfax) {
+    if(ref < halfax)
+      v -= ax;
+    else
+      v += ax;
+  }
+  return v;
+}
+
+__device__ inline void ApplyRotation(double &x, double &y, double &z,
+                                     double comx, double comy, double comz,
+                                     double rotx, double roty, double rotz,
+                                     double axx, double axy, double axz)
+{
+  double rotLen = rotx * roty * rotz;
+  double axisx = rotx * (1.0 / rotLen);
+  double axisy = roty * (1.0 / rotLen);
+  double axisz = rotz * (1.0 / rotLen);
+  double matrix[3][3], cross[3][3], tensor[3][3];
+
+  // build cross
+  cross[0][0] = 0.0;
+  cross[0][1] = -axisz;
+  cross[0][2] = axisy;
+
+  cross[1][0] = axisz;
+  cross[1][1] = 0.0;
+  cross[1][2] = -axisx;
+
+  cross[2][0] = -axisy;
+  cross[2][1] = axisx;
+  cross[2][2] = 0.0;
+
+  // build tensor
+  for(int i=0; i<3; i++) {
+    tensor[0][i] = axisx;
+    tensor[1][i] = axisy;
+    tensor[2][i] = axisz;
+  }
+  for(int i=0; i<3; i++) {
+    tensor[i][0] *= axisx;
+    tensor[i][1] *= axisy;
+    tensor[i][2] *= axixz;
+  }
+
+  // build matrix
+  double c = cos(rotLen);
+  for(int i=0; i<3; i++) {
+    for(int j=0; j<3; j++) {
+      matrix[i][j] = 0.0;
+    }
+    matrix[i][i] = c;
+  }
+  double s = sin(rotLen);
+  for(int i=0; i<3; i++) {
+    for(int j=0; j<3; j++) {
+      matrix[i][j] += s * cross[i][j] + (1-c) * tensor[i][j];
+    }
+  }
+
+  // unwrap molecule
+  UnwrapPBC(x, comx, axx, axx/2.0);
+  UnwrapPBC(y, comy, axy, axy/2.0);
+  UnwrapPBC(z, comz, axz, axz/2.0);
+
+  // move particle to zero
+  x -= comx;
+  y -= comy;
+  z -= comz;
+
+  // rotate
+  double newx = matrix[0][0] * x + matrix[0][1] * y + matrix[0][2] * z;
+  double newy = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z;
+  double newz = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z;
+
+  x = newx;
+  y = newy;
+  z = newz;
+
+  // move back to com
+  x += comx;
+  y += comy;
+  z += comz;
+
+  // wrap again
+  WrapPBC(x, axx);
+  WrapPBC(y, axy);
+  WrapPBC(z, axz);
+}
+
 void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                vector<uint> &moleculeIndex,
                                uint moveType,
@@ -70,6 +161,58 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                                                xAxes,
                                                                yAxes,
                                                                zAxes);
+}
+
+void CallRotateParticlesGPU(VariablesCUDA *vars,
+                            vector<uint> &moleculeIndex,
+                            uint moveType,
+                            double r_max,
+                            double *mTorquex,
+                            double *mTorquey,
+                            double *mTorquez,
+                            unsigned int step,
+                            unsigned int seed,
+                            vector<int> particleMol,
+                            int atomCount,
+                            int molCount,
+                            double xAxes,
+                            double yAxes,
+                            double zAxes)
+{
+int numberOfMolecules = moleculeIndex.size();
+int threadsPerBlock = 256;
+int blocksPerGrid = (int)(atomCount / threadsPerBlock) + 1;
+int *gpu_particleMol;
+
+cudaMalloc((void**) &gpu_particleMol, particleMol.size() * sizeof(int));
+
+cudaMemcpy(vars->gpu_mTorquex, mTorquex, molCount * sizeof(double),
+cudaMemcpyHostToDevice);
+cudaMemcpy(vars->gpu_mTorquey, mTorquey, molCount * sizeof(double),
+cudaMemcpyHostToDevice);
+cudaMemcpy(vars->gpu_mTorquez, mTorquez, molCount * sizeof(double),
+cudaMemcpyHostToDevice);
+cudaMemcpy(gpu_particleMol, &particleMol[0], particleMol.size() * sizeof(int),
+cudaMemcpyHostToDevice);
+
+RotateParticlesKernel<<<blocksPerGrid, threadsPerBlock>>>(numberOfMolecules,
+                                                          r_max,
+                                                          vars->gpu_mTorquex,
+                                                          vars->gpu_mTorquey,
+                                                          vars->gpu_mTorquez,
+                                                          step,
+                                                          seed,
+                                                          vars->gpu_x,
+                                                          vars->gpu_y,
+                                                          vars->gpu_z,
+                                                          gpu_particleMol,
+                                                          atomCount,
+                                                          xAxes,
+                                                          yAxes,
+                                                          zAxes,
+                                                          vars->gpu_comx,
+                                                          vars->gpu_comy,
+                                                          vars->gpu_comz);
 }
 
 __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
@@ -136,6 +279,67 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
   WrapPBC(gpu_z[atomNumber], zAxes);
 
   // TODO ======================= shift COM as well
+}
+
+__global__ void RotateParticlesKernel(unsigned int numberOfMolecules,
+                                      double r_max,
+                                      double *molTorquex,
+                                      double *molTorquey,
+                                      double *molTorquez,
+                                      unsigned int step,
+                                      unsigned int seed,
+                                      double *gpu_x,
+                                      double *gpu_y,
+                                      double *gpu_z,
+                                      int *gpu_particleMol,
+                                      int atomCount,
+                                      double xAxes,
+                                      double yAxes,
+                                      double zAxes,
+                                      double *gpu_comx,
+                                      double *gpu_comy,
+                                      double *gpu_comz)
+{
+  int atomNumber = blockIdx.x * blockDim.x + threadIdx.x;
+  if(atomNumber >= atomCount) return;
+
+  int molIndex = gpu_particleMol[atomNumber];
+
+  // This section calculates the amount of shift
+  double lbtx = molTorquex[molIndex];
+  double lbty = molTorquey[molIndex];
+  double lbtz = molTorquez[molIndex];
+  double lbmaxx = lbtx * r_max;
+  double lbmaxy = lbty * r_max;
+  double lbmaxz = lbtz * r_max;
+
+  double rotx, roty, rotz;
+
+  if(abs(lbmaxx) > MIN_FORCE && abs(lbmaxx) < MAX_FORCE) {
+    rotx = log(exp(-1.0 * lbmaxx) + 2 * randomGPU(molIndex * 3, step, seed) * sinh(lbmaxx)) / lbtx;
+  } else {
+    double rr = randomGPU(molIndex * 3, step, seed) * 2.0 - 1.0;
+    rotx = r_max * rr;
+  }
+
+  if(abs(lbmaxy) > MIN_FORCE && abs(lbmaxy) < MAX_FORCE) {
+    roty = log(exp(-1.0 * lbmaxy) + 2 * randomGPU(molIndex * 3 + 1, step, seed) * sinh(lbmaxx)) / lbty;
+  } else {
+    double rr = randomGPU(molIndex * 3 + 1, step, seed) * 2.0 - 1.0;
+    roty = r_max * rr;
+  }
+
+  if(abs(lbmaxz) > MIN_FORCE && abs(lbmaxz) < MAX_FORCE) {
+    rotz = log(exp(-1.0 * lbmaxz) + 2 * randomGPU(molIndex * 3 + 2, step, seed) * sinh(lbmaxz)) / lbtz;
+  } else {
+    double rr = randomGPU(molIndex * 3 + 2, step, seed) * 2.0 - 1.0;
+    rotz = r_max * rr;
+  }
+
+  // perform the rot on the coordinates
+  ApplyRotation(gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber],
+                gpu_comx[molIndex], gpu_comy[molIndex], gpu_comz[molIndex],
+                rotx, roty, rotz, xAxes, yAxes, zAxes);
 }
 
 #endif

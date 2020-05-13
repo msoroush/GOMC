@@ -26,6 +26,22 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                double yAxes,
                                double zAxes);
 
+void CallRotateParticlesGPU(VariablesCUDA *vars,
+                            vector<uint> &moleculeIndex,
+                            uint moveType,
+                            double r_max,
+                            double *mTorquex,
+                            double *mTorquey,
+                            double *mTorquez,
+                            unsigned int step,
+                            unsigned int seed,
+                            vector<int> particleMol,
+                            int atomCount,
+                            int molCount,
+                            double xAxes,
+                            double yAxes,
+                            double zAxes);
+
 __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
                                          double t_max,
                                          double *molForcex,
@@ -41,4 +57,20 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
                                          double xAxes,
                                          double yAxes,
                                          double zAxes);
+
+__global__ void RotateParticlesKernel(unsigned int numberOfMolecules,
+                                      double r_max,
+                                      double *molTorquex,
+                                      double *molTorquey,
+                                      double *molTorquez,
+                                      unsigned int step,
+                                      unsigned int seed,
+                                      double *gpu_x,
+                                      double *gpu_y,
+                                      double *gpu_z,
+                                      int *gpu_particleMol,
+                                      int atomCount,
+                                      double xAxes,
+                                      double yAxes,
+                                      double zAxes);
 #endif
