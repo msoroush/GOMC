@@ -156,10 +156,9 @@ inline uint MultiParticle::Prep(const double subDraw, const double movPerc)
   // In each step, we perform either:
   // 1- All displacement move.
   // 2- All rotation move.
-  // We can also add another move typr, where in this steps, each molecule
-  // can displace or rotate, independently from other molecule. To do that, we
-  // need to change the  mp::MPTOTALTYPES variable to 3, in MoveSetting.h
-  moveType = prng.randIntExc(mp::MPTOTALTYPES);
+  uint length = molRef.GetKind(moleculeIndex[0]).NumAtoms();
+  if(length == 1) moveType = mp::MPALLDISPLACE;
+  else moveType = prng.randIntExc(mp::MPTOTALTYPES);
   SetMolInBox(bPick);
 
   if(moveSetRef.GetSingleMoveAccepted()) {
