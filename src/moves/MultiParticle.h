@@ -210,7 +210,7 @@ inline uint MultiParticle::Transform()
                               particleMol, atomForceRecNew.Count(),
                               molForceRecNew.Count(), boxDimRef.GetAxis(bPick).x,
                               boxDimRef.GetAxis(bPick).y, boxDimRef.GetAxis(bPick).z,
-                              newMolsPos, newCOMs);
+                              newMolsPos, newCOMs, lambda * BETA);
   }
 #else
   // move particles according to force and torque and store them in the new pos

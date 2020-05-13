@@ -130,7 +130,8 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                double yAxes,
                                double zAxes,
                                XYZArray &newMolPos,
-                               XYZArray &newCOMs)
+                               XYZArray &newCOMs,
+                               double lambdaBETA)
 {
   int numberOfMolecules = moleculeIndex.size();
   int threadsPerBlock = 256;
@@ -172,7 +173,8 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                                                zAxes,
                                                                vars->gpu_comx,
                                                                vars->gpu_comy,
-                                                               vars->gpu_comz);
+                                                               vars->gpu_comz,
+                                                               lambdaBETA);
   
   cudaMemcpy(newMolPos.x, vars->gpu_x, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.y, vars->gpu_y, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
@@ -262,7 +264,8 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
                                          double zAxes,
                                          double *gpu_comx,
                                          double *gpu_comy,
-                                         double *gpu_comz)
+                                         double *gpu_comz,
+                                         double lambdaBETA)
 {
   int atomNumber = blockIdx.x * blockDim.x + threadIdx.x;
   if(atomNumber >= atomCount) return;
@@ -271,9 +274,9 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
   bool updateCOM = atomNumber == 0 || (gpu_particleMol[atomNumber] != gpu_particleMol[atomNumber-1]);
 
   // This section calculates the amount of shift
-  double lbfx = molForcex[molIndex];
-  double lbfy = molForcey[molIndex];
-  double lbfz = molForcez[molIndex];
+  double lbfx = molForcex[molIndex] * lambdaBETA;
+  double lbfy = molForcey[molIndex] * lambdaBETA;
+  double lbfz = molForcez[molIndex] * lambdaBETA;
   double lbmaxx = lbfx * t_max;
   double lbmaxy = lbfy * t_max;
   double lbmaxz = lbfz * t_max;
