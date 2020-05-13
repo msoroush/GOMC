@@ -269,6 +269,18 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
                cudaMemcpyDeviceToHost);
   }
 
+  cudaFree(vars->gpu_rT11);
+  cudaFree(vars->gpu_rT12);
+  cudaFree(vars->gpu_rT13);
+  cudaFree(vars->gpu_rT22);
+  cudaFree(vars->gpu_rT23);
+  cudaFree(vars->gpu_rT33);
+  cudaFree(vars->gpu_vT11);
+  cudaFree(vars->gpu_vT12);
+  cudaFree(vars->gpu_vT13);
+  cudaFree(vars->gpu_vT22);
+  cudaFree(vars->gpu_vT23);
+  cudaFree(vars->gpu_vT33);
   cudaFree(d_temp_storage);
   cudaFree(gpu_neighborList);
   cudaFree(gpu_cellStartIndex);
