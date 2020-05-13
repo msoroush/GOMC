@@ -90,7 +90,7 @@ __device__ inline void ApplyRotation(double &x, double &y, double &z,
   UnwrapPBC(z, comz, axz, axz/2.0);
 
   // move particle to zero
-  printf("%lf, %lf, %lf\n", x, y, z);
+  printf("%lf, %lf, %lf -> %lf, %lf, %lf\n", x, y, z, comx, comy, comz);
   x -= comx;
   y -= comy;
   z -= comz;
