@@ -156,6 +156,7 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
   cudaMemcpy(vars->gpu_comz, newCOMs.z, molCount * sizeof(double), cudaMemcpyHostToDevice);
   // cout << "old position for atom 100: " << newMolPos.x[100] << ", " << newMolPos.y[100] << ", " << newMolPos.z[100] << "\n";
 
+  checkLastErrorCUDA(__FILE__, __LINE__);
   TranslateParticlesKernel<<<blocksPerGrid, threadsPerBlock>>>(numberOfMolecules,
                                                                t_max,
                                                                vars->gpu_mForcex,
