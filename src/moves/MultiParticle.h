@@ -202,7 +202,7 @@ inline uint MultiParticle::Transform()
                            particleMol, atomForceRecNew.Count(),
                            molForceRecNew.Count(), boxDimRef.GetAxis(bPick).x,
                            boxDimRef.GetAxis(bPick).y, boxDimRef.GetAxis(bPick).z,
-                              coordCurrRef.x, coordCurrRef.y, coordCurrRef.z);
+                           coordCurrRef.x, coordCurrRef.y, coordCurrRef.z);
   } else {
     double t_max = moveSetRef.GetTMAX(bPick);
     CallTranslateParticlesGPU(cudaVars, moleculeIndex, moveType, t_max,
