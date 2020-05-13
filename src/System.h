@@ -24,6 +24,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "CellList.h"
 #include "Clock.h"
 #include "CheckpointSetup.h"
+#include "Random123Wrapper.h"
 
 //Initialization variables
 class Setup;
@@ -103,6 +104,7 @@ public:
   Ewald *calcEwald;
   CellList cellList;
   PRNG prng;
+  Random123Wrapper r123wrapper;
 
   CheckpointSetup checkpointSet;
 

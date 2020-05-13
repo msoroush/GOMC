@@ -1095,7 +1095,7 @@ void CalculateEnergy::CalculateTorque(vector<uint>& moleculeIndex,
                                       XYZArray const& atomForce,
                                       XYZArray const& atomForceRec,
                                       XYZArray& molTorque,
-                                      vector<uint>& moveType,
+                                      uint moveType,
                                       const uint box)
 {
   if(multiParticleEnabled && (box < BOXES_WITH_U_NB)) {
@@ -1120,7 +1120,7 @@ distFromCOM, tempTorque) reduction(+: torquex[:torqueCount], \
       start = mols.MolStart(moleculeIndex[m]);
 
       //Only if move is rotation
-      if(moveType[moleculeIndex[m]]) {
+      if(moveType) {
         // atom iterator
         for(p = start; p < start + length; p++) {
           distFromCOM = coordinates.Difference(p, com, (moleculeIndex[m]));
