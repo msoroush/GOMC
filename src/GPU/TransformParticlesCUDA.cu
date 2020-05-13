@@ -34,6 +34,7 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                unsigned int seed,
                                vector<int> particleMol,
                                int atomCount,
+                               int molCount,
                                double xAxes,
                                double yAxes,
                                double zAxes)
@@ -41,16 +42,15 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
   int numberOfMolecules = moleculeIndex.size();
   int threadsPerBlock = 256;
   int blocksPerGrid = (int)(atomCount / threadsPerBlock) + 1;
-  double *gpu_mForcex, *gpu_mForcey, *gpu_mForcez;
   int *gpu_particleMol;
 
   cudaMalloc((void**) &gpu_particleMol, particleMol.size() * sizeof(int));
 
-  cudaMemcpy(vars->gpu_mForcex, mForcex, numberOfMolecules * sizeof(double),
+  cudaMemcpy(vars->gpu_mForcex, mForcex, molCount * sizeof(double),
              cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_mForcey, mForcey, numberOfMolecules * sizeof(double),
+  cudaMemcpy(vars->gpu_mForcey, mForcey, molCount * sizeof(double),
              cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_mForcez, mForcez, numberOfMolecules * sizeof(double),
+  cudaMemcpy(vars->gpu_mForcez, mForcez, molCount * sizeof(double),
              cudaMemcpyHostToDevice);
   cudaMemcpy(gpu_particleMol, &particleMol[0], particleMol.size() * sizeof(int),
              cudaMemcpyHostToDevice);

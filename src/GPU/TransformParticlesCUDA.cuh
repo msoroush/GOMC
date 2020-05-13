@@ -21,6 +21,7 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                unsigned int seed,
                                vector<int> particleMol,
                                int atomCount,
+                               int molCount,
                                double xAxes,
                                double yAxes,
                                double zAxes);
