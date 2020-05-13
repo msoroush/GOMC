@@ -12,6 +12,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "StaticVals.h"
 #include "TransformMatrix.h"
 #include "Random123Wrapper.h"
+#include "TransformParticlesCUDA.cuh"
 #include <cmath>
 
 #define MIN_FORCE 1E-12
@@ -46,6 +47,8 @@ private:
   uint moveType;
   const MoleculeLookup& molLookup;
   Random123Wrapper &r123wrapper;
+  VariablesCUDA *cudaVars;
+  std::vector<int> particleMol;
 
   long double GetCoeff();
   void CalculateTrialDistRot();
@@ -77,6 +80,16 @@ inline MultiParticle::MultiParticle(System &sys, StaticVals const &statV) :
   lambda = 0.5;
   for(uint b = 0; b < BOX_TOTAL; b++) {
     initMol[b] = false;
+  }
+  cudaVars = sys.statV.forcefield.particles->getCUDAVars();
+
+  for(uint m = 0; m < mols.count; ++m) {
+    const MoleculeKind& molKind = mols.GetKind(m);
+    if(molKind.NumAtoms() > maxAtomInMol)
+      maxAtomInMol = molKind.NumAtoms();
+    for(uint a = 0; a < molKind.NumAtoms(); ++a) {
+      particleMol.push_back(m);
+    }
   }
 }
 
@@ -155,7 +168,9 @@ inline uint MultiParticle::Prep(const double subDraw, const double movPerc)
                                 moveType, bPick);
     }
   }
+#ifndef GOMC_CUDA // if GPU is enabled this part will be combined with Transform section
   CalculateTrialDistRot();
+#endif
   coordCurrRef.CopyRange(newMolsPos, 0, 0, coordCurrRef.Count());
   comCurrRef.CopyRange(newCOMs, 0, 0, comCurrRef.Count());
   return state;
@@ -166,8 +181,18 @@ inline uint MultiParticle::Transform()
   // Based on the reference force decided whether to displace or rotate each
   // individual particle.
   uint state = mv::fail_state::NO_FAIL;
-  uint m;
 
+#ifdef GOMC_CUDA
+  // This kernel will calculate translation/rotation amout + shifting/rotating
+  if(moveType == mp::MPALLROTATE) {
+
+  } else {
+    CallTranslateParticlesGPU(cudaVars, moleculeIndex, moveType, t_max,
+                              molForceRef.x, molForceRef.y, molForceRef.z,
+                              r123wrapper.GetStep(), r123wrapper.GetSeed(),
+                              particleMol, atomForceRecNew.Count(), boxAxes);
+  }
+#else
   // move particles according to force and torque and store them in the new pos
   if(moveType == mp::MPALLROTATE) {
     // rotate
@@ -176,6 +201,7 @@ inline uint MultiParticle::Transform()
     // displacement
     TranslateForceBiased(moleculeIndex);
   }
+#endif
   return state;
 }
 
@@ -323,24 +349,23 @@ inline void MultiParticle::CalculateTrialDistRot()
       if(abs(lbmax.x) > MIN_FORCE && abs(lbmax.x) < MAX_FORCE) {
         num.x = log(exp(-1.0 * lbmax.x) + 2 * r123wrapper(m*3+0) * sinh(lbmax.x)) / lbt.x;
       } else {
-        num.x = prng.Sym(r_max);
+        double rr = r123wrapper(m*3+0) * 2.0 - 1.0;
+        num.x = r_max * rr;
       }
-
-      cout << r123wrapper(m*3+0) << ", ";
 
       if(abs(lbmax.y) > MIN_FORCE && abs(lbmax.y) < MAX_FORCE) {
         num.y = log(exp(-1.0 * lbmax.y) + 2 * r123wrapper(m*3+1) * sinh(lbmax.y)) / lbt.y;
       } else {
-        num.y = prng.Sym(r_max);
+        double rr = r123wrapper(m*3+1) * 2.0 - 1.0;
+        num.y = r_max * rr;
       }
-      cout << r123wrapper(m*3+1) << ", ";
 
       if(abs(lbmax.z) > MIN_FORCE && abs(lbmax.z) < MAX_FORCE) {
         num.z = log(exp(-1.0 * lbmax.z) + 2 * r123wrapper(m*3+2) * sinh(lbmax.z)) / lbt.z;
       } else {
-        num.z = prng.Sym(r_max);
+        double rr = r123wrapper(m*3+2) * 2.0 - 1.0;
+        num.z = r_max * rr;
       }
-      cout << r123wrapper(m*3+2) << "\n";
 
       if(num.Length() >= boxDimRef.axis.Min(bPick)) {
         std::cout << "Trial Displacement exceed half of the box length in Multiparticle move." << endl;
@@ -366,19 +391,22 @@ inline void MultiParticle::CalculateTrialDistRot()
       if(abs(lbmax.x) > MIN_FORCE && abs(lbmax.x) < MAX_FORCE) {
         num.x = log(exp(-1.0 * lbmax.x) + 2 * r123wrapper(m*3+0) * sinh(lbmax.x)) / lbf.x;
       } else {
-        num.x = prng.Sym(t_max);
+        double rr = r123wrapper(m*3+0) * 2.0 - 1.0;
+        num.x = t_max * rr;
       }
 
       if(abs(lbmax.y) > MIN_FORCE && abs(lbmax.y) < MAX_FORCE) {
         num.y = log(exp(-1.0 * lbmax.y) + 2 * r123wrapper(m*3+1) * sinh(lbmax.y)) / lbf.y;
       } else {
-        num.y = prng.Sym(t_max);
+        double rr = r123wrapper(m*3+1) * 2.0 - 1.0;
+        num.y = t_max * rr;
       }
 
       if(abs(lbmax.z) > MIN_FORCE && abs(lbmax.z) < MAX_FORCE) {
         num.z = log(exp(-1.0 * lbmax.z) + 2 * r123wrapper(m*3+2) * sinh(lbmax.z)) / lbf.z;
       } else {
-        num.z = prng.Sym(t_max);
+        double rr = r123wrapper(m*3+2) * 2.0 - 1.0;
+        num.z = t_max * rr;
       }
 
       if(num.Length() >= boxDimRef.axis.Min(bPick)) {
@@ -434,6 +462,10 @@ inline void MultiParticle::TranslateForceBiased(std::vector<uint> molIndeces)
     XYZ shift = t_k.Get(molIndex);
 
     XYZ newcom = newCOMs.Get(molIndex);
+    newcom += shift;
+    newcom = boxDimRef.WrapPBC(newcom, bPick);
+    newCOMs.Set(molIndex, newcom);
+
     uint stop, start, len;
     molRef.GetRange(start, stop, len, molIndex);
     // Copy the range into temporary array
@@ -441,13 +473,10 @@ inline void MultiParticle::TranslateForceBiased(std::vector<uint> molIndeces)
     newMolsPos.CopyRange(temp, start, 0, len);
     //Shift the coordinate and COM
     temp.AddAll(shift);
-    newcom += shift;
     //rewrapping
     boxDimRef.WrapPBC(temp, bPick);
-    newcom = boxDimRef.WrapPBC(newcom, bPick);
     //set the new coordinate
     temp.CopyRange(newMolsPos, 0, start, len);
-    newCOMs.Set(molIndex, newcom);
   }
 }
 
