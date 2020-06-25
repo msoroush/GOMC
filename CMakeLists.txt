@@ -8,6 +8,14 @@ include_directories(src/cbmc)
 include_directories(src/moves)
 include_directories(src/GPU)
 
+# define C and C++ standards
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 11)
+
+# enable google test
+enable_testing()
+add_subdirectory(lib/googletest)
+
 #fix new policy of cmake about FindOpenMP.cmake (will have to check later if they fixed this issue)
 if(POLICY CMP0012)
   cmake_policy(SET CMP0012 NEW)

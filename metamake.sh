@@ -50,9 +50,15 @@ fi
 
 mkdir -p bin
 cd bin
+
+# set icc compiler if exists
 ICC_PATH="$(which icc)"
 ICPC_PATH="$(which icpc)"
+if [ -z $ICC_PATH ]
+then
 export CC=${ICC_PATH}
 export CXX=${ICPC_PATH}
+fi
+
 cmake ..
-make -j8
+make
