@@ -4,6 +4,7 @@ set(This GOMCTest)
 
 set(Sources
   BasicTypesTest.cpp
+  BitLibTest.cpp
 )
 
 add_executable(${This} ${Sources})
