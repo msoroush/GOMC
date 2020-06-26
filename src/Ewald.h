@@ -49,7 +49,7 @@ class Ewald
 public:
 
   Ewald(StaticVals & stat, System & sys);
-  ~Ewald();
+  virtual ~Ewald();
 
   virtual void Init();
 
@@ -169,17 +169,19 @@ public:
                            const uint box) const;
 
 private:
+#ifdef GOMC_CUDA
   double currentEnergyRecip[BOXES_WITH_U_NB];
+#endif
 
 protected:
   const Forcefield& ff;
   const Molecules& mols;
   const Coordinates& currentCoords;
-  const MoleculeLookup& molLookup;
-  const BoxDimensions& currentAxes;
   const COM& currentCOM;
   const SystemPotential &sysPotRef;
   const Lambda& lambdaRef;
+  const MoleculeLookup& molLookup;
+  const BoxDimensions& currentAxes;
 
   bool electrostatic, ewald, multiParticleEnabled;
   double alpha;

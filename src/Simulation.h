@@ -35,7 +35,6 @@ private:
   ulong totalSteps;
   Setup set;
   std::vector<ulong> frameSteps;
-  uint remarksCount;
   ulong startStep;
 };
 

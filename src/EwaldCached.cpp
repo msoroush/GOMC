@@ -17,9 +17,6 @@ template< class T > void SafeDeleteArray( T*& pVal )
 }
 
 EwaldCached::EwaldCached(StaticVals & stat, System & sys) : Ewald(stat, sys)
-#if ENSEMBLE == GEMC
-  , GEMC_KIND(stat.kindOfGEMC)
-#endif
 {}
 
 
@@ -167,7 +164,7 @@ void EwaldCached::AllocMem()
 //calculate reciprocate term for a box
 void EwaldCached::BoxReciprocalSetup(uint box, XYZArray const& molCoords)
 {
-  uint j, m;
+  uint j;
   int i;
   double dotProduct = 0.0;
 

@@ -24,9 +24,13 @@ class MoleculeExchange1 : public MoveBase
 public:
 
   MoleculeExchange1(System &sys, StaticVals const& statV) :
-    ffRef(statV.forcefield), molLookRef(sys.molLookupRef), MoveBase(sys, statV),
-    cavity(statV.memcVal.subVol), cavA(3), invCavA(3),
-    perAdjust(statV.GetPerAdjust())
+    MoveBase(sys, statV),
+    perAdjust(statV.GetPerAdjust()),
+    cavity(statV.memcVal.subVol),
+    cavA(3),
+    invCavA(3),
+    molLookRef(sys.molLookupRef),
+    ffRef(statV.forcefield)
   {
     enableID = statV.memcVal.enable;
     trial.resize(BOX_TOTAL);
@@ -599,9 +603,9 @@ inline void MoleculeExchange1::CalcEn()
 
 inline double MoleculeExchange1::GetCoeff() const
 {
+#if ENSEMBLE == GEMC
   double volSource = boxDimRef.volume[sourceBox];
   double volDest = boxDimRef.volume[destBox];
-#if ENSEMBLE == GEMC
   if(insertL) {
     //kindA is the small molecule
     double ratioF =  num::Factorial(totMolInCav) /
@@ -622,6 +626,7 @@ inline double MoleculeExchange1::GetCoeff() const
     return ratioF * ratioV  * numTypeASource / (numTypeADest + 1.0);
   }
 #elif ENSEMBLE == GCMC
+  double volSource = boxDimRef.volume[sourceBox];
   if(ffRef.isFugacity) {
     double delA = molRef.kinds[kindIndexA[0]].chemPot * numInCavA;
     double insB = molRef.kinds[kindIndexB[0]].chemPot * numInCavB;

@@ -47,7 +47,9 @@ private:
   const Lambda& lambdaRef;
   Energy dUdL_VDW[BOXES_WITH_U_NB], dUdL_Coulomb[BOXES_WITH_U_NB];
   Energy *energyDiff[BOXES_WITH_U_NB];
+#if ENSEMBLE == NVT || ENSEMBLE == NPT
   double PV; // Pressure * Volume
+#endif
   double Etotal; //Total Energy
   uint lambdaSize, iState;
 

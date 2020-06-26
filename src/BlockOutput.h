@@ -27,7 +27,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 class System;
 
 struct BlockAverage {
-  BlockAverage(): enable(false), block(NULL), uintSrc(NULL), dblSrc(NULL) {}
+  BlockAverage(): uintSrc(NULL), dblSrc(NULL), block(NULL), enable(false) {}
   ~BlockAverage()
   {
     if (dblSrc != NULL) {
@@ -132,8 +132,6 @@ private:
   //Block vars
   BlockAverage * blocks;
   uint numKindBlocks, totalBlocks;
-  //Intermediate vars.
-  uint samplesWrites;
   //Constants
   double invSteps;
 };

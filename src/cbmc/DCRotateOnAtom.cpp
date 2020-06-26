@@ -27,7 +27,7 @@ struct FindA1 {
 };
 
 struct FindAngle {
-  FindAngle(uint x, uint y) : x(x), y(y) {}
+  FindAngle(uint x, uint y) : y(y), x(x) {}
   uint y, x;
   bool operator()(const mol_setup::Angle& a)
   {
@@ -378,7 +378,6 @@ double DCRotateOnAtom::CalcIntraBonded(TrialMol& mol, uint molIndex)
 
   double bondedEn = 0.0;
   uint box = mol.GetBox();
-  const MoleculeKind& molKind = mol.GetKind();
   XYZ b1, b2, b3;
   const XYZArray &coords = mol.GetCoords();
   for(uint i = 0; i < ang.size(); i++) {

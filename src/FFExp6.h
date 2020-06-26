@@ -88,7 +88,7 @@ public:
                                   const uint kind2, const double qi_qj_Fact,
                                   const double lambda, uint b) const;
 
-  double *expConst, *expConst_1_4, *rMaxSq, *rMin, *rMaxSq_1_4, *rMin_1_4;
+  double *expConst, *rMin, *rMaxSq, *expConst_1_4, *rMin_1_4, *rMaxSq_1_4;
 
 protected:
   virtual double CalcEn(const double distSq, const uint index) const;

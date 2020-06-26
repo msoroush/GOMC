@@ -28,7 +28,7 @@ struct FindA1 {
 
 DCCrankShaftDih::DCCrankShaftDih(DCData* data, const mol_setup::MolKind& kind,
                                  uint a0, uint a1, uint a2, uint a3) :
-  data(data), a0(a0), a1(a1), a2(a2), a3(a3)
+  data(data), a0(a0), a3(a3)
 {
   using namespace mol_setup;
   std::vector<bool> visited(kind.atoms.size(), false);
@@ -337,7 +337,6 @@ void DCCrankShaftDih::ChooseTorsionOld(TrialMol& mol, uint molIndex,
   double* torsion = data->angles;
   double* torWeights = data->angleWeights;
   double* torEnergy = data->angleEnergy;
-  double* intraNonbonded = data->nonbonded_1_4;
 
   XYZ center = mol.AtomPosition(a0);
   for (uint tor = 0; tor < nDihTrials; ++tor) {
@@ -361,7 +360,6 @@ double DCCrankShaftDih::CalcIntraBonded(TrialMol& mol, uint molIndex)
 
   double bondedEn = 0.0;
   uint box = mol.GetBox();
-  const MoleculeKind& molKind = mol.GetKind();
   XYZ b1, b2, b3;
   const XYZArray &coords = mol.GetCoords();
   for(uint i = 0; i < ang.size(); i++) {

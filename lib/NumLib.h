@@ -221,7 +221,7 @@ inline double POW(const double d2, const double d4, const double d6,
 class Exp6Fun
 {
 public:
-  Exp6Fun(const double a, const double s) : alpha(a), sigma(s) {}
+  Exp6Fun(const double a, const double s) : sigma(s), alpha(a) {}
   virtual ~Exp6Fun() {};
   virtual float operator() (float x) = 0;
 

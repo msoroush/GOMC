@@ -189,7 +189,6 @@ void ConsoleOutput::PrintMove(const uint box, const ulong step) const
 
 void ConsoleOutput::PrintStatistic(const uint box, const ulong step) const
 {
-  double density = 0.0;
   uint offset = box * var->numKinds;
 
   std::string title = "STAT_";

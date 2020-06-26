@@ -187,7 +187,6 @@ double CheckpointSetup::readDoubleIn8Chars()
 
 uint32_t CheckpointSetup::readUintIn8Chars()
 {
-  uint32_t data;
   if(inputFile == NULL) {
     fprintf(stderr, "Error opening checkpoint output file %s\n",
             filename.c_str());

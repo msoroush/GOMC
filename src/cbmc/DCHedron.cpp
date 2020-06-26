@@ -29,7 +29,7 @@ struct FindA1 {
 };
 
 struct FindAngle {
-  FindAngle(uint x, uint y) : x(x), y(y) {}
+  FindAngle(uint x, uint y) : y(y), x(x) {}
   uint y, x;
   bool operator()(const mol_setup::Angle& a)
   {

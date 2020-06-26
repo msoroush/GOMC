@@ -772,22 +772,6 @@ int ReadPSFAngles(FILE* psf, MolMap& kindMap,
   return 0;
 }
 
-
-
-bool ContainsDihedral(const std::vector<uint>& vec, const int dih[])
-{
-  for (uint i = 0; i < vec.size(); i += 4) {
-    bool match = true;
-    for (uint j = 0; j < 4; ++j)
-      if (vec[i + j] != dih[j])
-        match = false;
-    if (match)
-      return true;
-  }
-  return false;
-}
-
-
 //adds dihedrals in psf to kindMap
 //pre: stream is before !NPHI   post: stream is in dihedral section just after
 //the first appearance of the last molecule

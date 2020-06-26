@@ -91,8 +91,8 @@ public:
   Energy(double bond, double nonbond, double inter, double real,
          double recip, double self, double correc) :
     intraBond(bond), intraNonbond(nonbond), inter(inter),
-    tc(0.0), real(real), recip(recip), self(self), correction(correc),
-    totalElect(0.0), total(0.0) {}
+    tc(0.0), total(0.0), real(real), recip(recip),
+    self(self), correction(correc), totalElect(0.0){}
 
   //VALUE SETTERS
   double Total()

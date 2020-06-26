@@ -93,22 +93,22 @@ public:
   BoxDimensions & boxDimRef;
   MoleculeLookup & molLookupRef;
 
-  MoveSettings moveSettings;
-  SystemPotential potential;
+  PRNG prng;
   Coordinates coordinates;
+  COM com;
+  MoveSettings moveSettings;
+  CellList cellList;
+  CalculateEnergy calcEnergy;
+  CheckpointSetup checkpointSet;
+  SystemPotential potential;
   XYZArray atomForceRef;
   XYZArray molForceRef;
   XYZArray atomForceRecRef;
   XYZArray molForceRecRef;
   Lambda lambdaRef;
-  COM com;
 
-  CalculateEnergy calcEnergy;
   Ewald *calcEwald;
-  CellList cellList;
-  PRNG prng;
 
-  CheckpointSetup checkpointSet;
 
   //Procedure to run once move is picked... can also be called directly for
   //debugging...

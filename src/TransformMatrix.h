@@ -173,7 +173,6 @@ inline TransformMatrix TransformMatrix::operator*(const TransformMatrix& o) cons
   TransformMatrix result(0.0);
   for(uint i = 0; i < N; ++i) {
     for(uint j = 0; j < N; ++j) {
-      double entry = 0.0;
       for(uint k = 0; k < N; ++k) {
         result.matrix[i][j] += matrix[i][k] * o.matrix[k][j];
       }

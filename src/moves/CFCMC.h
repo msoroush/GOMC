@@ -20,8 +20,8 @@ class CFCMC : public MoveBase
 public:
 
   CFCMC(System &sys, StaticVals const& statV) :
-    ffRef(statV.forcefield), molLookRef(sys.molLookupRef),
-    lambdaRef(sys.lambdaRef), MoveBase(sys, statV), MP(sys, statV)
+    MoveBase(sys, statV), molLookRef(sys.molLookupRef),
+    ffRef(statV.forcefield), lambdaRef(sys.lambdaRef), MP(sys, statV)
   {
     if(statV.cfcmcVal.enable) {
       MPEnable = statV.cfcmcVal.MPEnable;
@@ -75,7 +75,6 @@ private:
   uint TransformRelaxing(uint box);
   void RelaxingMolecules();
 
-  Lambda & lambdaRef;
   uint sourceBox, destBox;
   uint pStartCFCMC, pLenCFCMC;
   uint molIndex, kindIndex;
@@ -95,21 +94,21 @@ private:
   vector< double > lambdaCoulomb, lambdaVDW;
   vector< vector<double> > nu;
 
+  MoleculeLookup & molLookRef;
+  Forcefield const& ffRef;
+  Lambda & lambdaRef;
+  cbmc::TrialMol oldMolCFCMC, newMolCFCMC;
+  Energy oldEnergy[BOX_TOTAL], newEnergy[BOX_TOTAL];
+  SystemPotential sysPotNew;
+
   //variable needs for relaxing
   MultiParticle MP;
   bool MPEnable;
-  uint b, m, mk, pStart, pLen;
+  uint m, mk, pStart, pLen;
   long steps;
   XYZ newCOM;
   XYZArray newMolPos;
   Intermolecular inter_LJ, inter_Real, recip;
-
-
-  cbmc::TrialMol oldMolCFCMC, newMolCFCMC;
-  Energy oldEnergy[BOX_TOTAL], newEnergy[BOX_TOTAL];
-  MoleculeLookup & molLookRef;
-  Forcefield const& ffRef;
-  SystemPotential sysPotNew;
 };
 
 void CFCMC::PrintAcceptKind()

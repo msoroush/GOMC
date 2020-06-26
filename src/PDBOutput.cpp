@@ -16,10 +16,13 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <iostream>                 //for cout;
 
 PDBOutput::PDBOutput(System  & sys, StaticVals const& statV) :
-  moveSetRef(sys.moveSettings), molLookupRef(sys.molLookupRef),
-  coordCurrRef(sys.coordinates), comCurrRef(sys.com),
-  pStr(coordCurrRef.Count(), GetDefaultAtomStr()),
-  boxDimRef(sys.boxDimRef), molRef(statV.mol)
+  moveSetRef(sys.moveSettings),
+  molLookupRef(sys.molLookupRef),
+  boxDimRef(sys.boxDimRef),
+  molRef(statV.mol),
+  coordCurrRef(sys.coordinates),
+  comCurrRef(sys.com),
+  pStr(coordCurrRef.Count(), GetDefaultAtomStr())
 {
   for(int i = 0; i < BOX_TOTAL; i++)
     frameNumber[i] = 0;
@@ -245,7 +248,6 @@ void PDBOutput::PrintCrystRest(const uint b, const uint step, Writer & out)
 #endif
   sstrm::Converter toStr;
   std::string outStr(pdb_entry::LINE_WIDTH, ' ');
-  XYZ axis = boxDimRef.axis.Get(b);
   //Tag for remark
   outStr.replace(label::POS.START, label::POS.LENGTH, label::REMARK);
   //Tag GOMC

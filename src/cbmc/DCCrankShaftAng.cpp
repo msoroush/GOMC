@@ -28,7 +28,7 @@ struct FindA1 {
 
 DCCrankShaftAng::DCCrankShaftAng(DCData* data, const mol_setup::MolKind& kind,
                                  uint a0, uint a1, uint a2) :
-  data(data), a0(a0), a1(a1), a2(a2)
+  data(data), a0(a0)
 {
   using namespace mol_setup;
   std::vector<bool> visited(kind.atoms.size(), false);
@@ -350,7 +350,6 @@ double DCCrankShaftAng::CalcIntraBonded(TrialMol& mol, uint molIndex)
 
   double bondedEn = 0.0;
   uint box = mol.GetBox();
-  const MoleculeKind& molKind = mol.GetKind();
   XYZ b1, b2, b3;
   const XYZArray &coords = mol.GetCoords();
   for(uint i = 0; i < ang.size(); i++) {

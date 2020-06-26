@@ -73,9 +73,6 @@ private:
   double **sinMolRef;
   double **cosMolBoxRecip;
   double **sinMolBoxRecip;
-#if ENSEMBLE == GEMC
-  const uint GEMC_KIND;
-#endif
 };
 
 

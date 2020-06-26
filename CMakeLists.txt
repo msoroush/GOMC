@@ -15,6 +15,7 @@ set(CMAKE_CXX_STANDARD 11)
 # enable google test
 enable_testing()
 add_subdirectory(lib/googletest)
+add_subdirectory(test)
 
 #fix new policy of cmake about FindOpenMP.cmake (will have to check later if they fixed this issue)
 if(POLICY CMP0012)
@@ -25,8 +26,8 @@ endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 #Versioning
-set (GOMC_VERSION_MAJOR 2)
-set (GOMC_VERSION_MINOR 60)
+set(GOMC_VERSION_MAJOR 2)
+set(GOMC_VERSION_MINOR 60)
 
 IF(NOT CMAKE_BUILD_TYPE)
    SET(CMAKE_BUILD_TYPE Release CACHE STRING

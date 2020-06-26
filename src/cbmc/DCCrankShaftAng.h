@@ -55,7 +55,7 @@ private:
 
   DCData* data;
   XYZArray *multiPosRotions;
-  uint a0, a1, a2, numAtom, totAtoms;
+  uint a0, a2, numAtom, totAtoms;
   std::vector<uint> atoms;
   std::vector<Angle> ang;
   std::vector<Dihedral> dih;

@@ -75,27 +75,27 @@ public:
 
 protected:
   uint subPick;
-  //If a single molecule move, this is set by the target.
+  BoxDimensions & boxDimRef;
   MoveSettings & moveSetRef;
   SystemPotential & sysPotRef;
-  Coordinates & coordCurrRef;
-  COM & comCurrRef;
   CalculateEnergy & calcEnRef;
-  Ewald * calcEwald;
-  XYZArray& atomForceRef;
-  XYZArray atomForceNew;
-  XYZArray& molForceRef;
-  XYZArray molForceNew;
-  XYZArray& atomForceRecRef;
-  XYZArray& molForceRecRef;
-
+  COM & comCurrRef;
+  Coordinates & coordCurrRef;
   PRNG & prng;
-  BoxDimensions & boxDimRef;
   Molecules const& molRef;
   const double BETA;
   const bool ewald;
   CellList& cellList;
   bool molRemoved, fixBox0, overlap;
+  XYZArray& atomForceRef;
+  XYZArray& molForceRef;
+  XYZArray& atomForceRecRef;
+  XYZArray& molForceRecRef;
+
+  Ewald * calcEwald;
+  XYZArray atomForceNew;
+  XYZArray molForceNew;
+
   bool multiParticleEnabled;
 };
 

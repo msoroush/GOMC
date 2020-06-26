@@ -48,8 +48,10 @@ System::System(StaticVals& statics) :
   prng(molLookupRef),
   coordinates(boxDimRef, com, molLookupRef, prng, statics.mol),
   com(boxDimRef, coordinates, molLookupRef, statics.mol),
-  moveSettings(boxDimRef), cellList(statics.mol, boxDimRef),
-  calcEnergy(statics, *this), checkpointSet(*this, statics)
+  moveSettings(boxDimRef),
+  cellList(statics.mol, boxDimRef),
+  calcEnergy(statics, *this),
+  checkpointSet(*this, statics)
 {
   calcEwald = NULL;
 }

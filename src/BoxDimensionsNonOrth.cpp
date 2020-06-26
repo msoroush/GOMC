@@ -31,7 +31,6 @@ void BoxDimensionsNonOrth::Init(config_setup::RestartSettings const& restart,
         beta = 0.0;
       if(float(cryst.cellAngle[b][2]) == 90.0)
         gamma = 0.0;
-      double cosASq = alpha * alpha;
       double cosBSq = beta * beta;
       double cosGSq = gamma * gamma;
       double temp = (alpha - beta * gamma) / (sqrt(1.0 - cosGSq));
@@ -75,9 +74,9 @@ void BoxDimensionsNonOrth::Init(config_setup::RestartSettings const& restart,
     cosAngle[b][2] = Dot(cellBasis[b].Get(0), cellBasis[b].Get(1)) /
                      (cellLength.Get(b).x * cellLength.Get(b).y);
     //Calculate Cross Product
-    XYZ axb = Cross(cellBasis[b].Get(0), cellBasis[b].Get(1));
+    // XYZ axb = Cross(cellBasis[b].Get(0), cellBasis[b].Get(1)); unused
     XYZ bxc = Cross(cellBasis[b].Get(1), cellBasis[b].Get(2));
-    XYZ cxa = Cross(cellBasis[b].Get(2), cellBasis[b].Get(0));
+    // XYZ cxa = Cross(cellBasis[b].Get(2), cellBasis[b].Get(0)); unused
     //Calculate volume = A.(B x C)
     volume[b] = std::abs(Dot(cellBasis[b].Get(0), bxc));
     volInv[b] = 1.0 / volume[b];

@@ -23,7 +23,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 namespace config_setup
 {
-class Output;
+struct Output;
 }
 
 struct EnPartCntSample : OutputableBase {

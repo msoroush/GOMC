@@ -192,7 +192,7 @@ void Ewald::AllocMem()
 //calculate reciprocate term for a box
 void Ewald::BoxReciprocalSetup(uint box, XYZArray const& molCoords)
 {
-  uint j, m;
+  uint j;
   int i;
   double dotProduct = 0.0;
   double sumReal = 0.0;
@@ -300,7 +300,6 @@ double Ewald::MolReciprocal(XYZArray const& molCoords,
                             const uint molIndex, const uint box)
 {
   double energyRecipNew = 0.0;
-  double energyRecipOld = 0.0;
 
   if (box < BOXES_WITH_U_NB) {
     MoleculeKind const& thisKind = mols.GetKind(molIndex);
@@ -1037,7 +1036,6 @@ Virial Ewald::VirialReciprocal(Virial& virial, uint box) const
   double wT11 = 0.0, wT12 = 0.0, wT13 = 0.0;
   double wT22 = 0.0, wT23 = 0.0, wT33 = 0.0;
 
-  double recipIntra = 0.0;
   double constVal = 1.0 / (4.0 * ff.alphaSq[box]);
   double factor, arg, charge, lambdaCoef;
   uint p, length, start, atom;

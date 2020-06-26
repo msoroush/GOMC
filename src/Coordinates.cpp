@@ -25,7 +25,7 @@ void Coordinates::InitFromPDB(pdb_setup::Atoms const& atoms)
 
 void Coordinates::CheckCoordinate()
 {
-  int p, start, atom, length, stRange, endRange;
+  int p, start, atom, stRange, endRange;
   XYZ min, max;
   bool sawZeroCoordinate;
 

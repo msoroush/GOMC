@@ -10,7 +10,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "ConstantDefinitionsCUDAKernel.cuh"
 #endif
 
-FFParticle::FFParticle(Forcefield &ff) : forcefield(ff), mass(NULL), nameFirst(NULL), nameSec(NULL),
+FFParticle::FFParticle(Forcefield &ff) : forcefield(ff), mass(NULL),
+  nameFirst(NULL), nameSec(NULL),
   n(NULL), n_1_4(NULL), sigmaSq(NULL), sigmaSq_1_4(NULL), epsilon_cn(NULL),
   epsilon(NULL), epsilon_1_4(NULL), epsilon_cn_1_4(NULL), epsilon_cn_6(NULL),
   epsilon_cn_6_1_4(NULL), nOver6(NULL), nOver6_1_4(NULL)
@@ -158,8 +159,6 @@ void FFParticle::Blend(ff_setup::Particle const& mie)
         n_1_4[idx] = num::MeanA(mie.n_1_4, mie.n_1_4, i, j);
       }
       double cn = n[idx] / (n[idx] - 6) * pow(n[idx] / 6, (6 / (n[idx] - 6)));
-      double cn_1_4 = n_1_4[idx] / (n_1_4[idx] - 6) *
-                      pow(n_1_4[idx] / 6, (6 / (n_1_4[idx] - 6)));
 
       double sigma, sigma_1_4;
       sigma = sigma_1_4 = 0.0;

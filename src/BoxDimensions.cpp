@@ -30,7 +30,6 @@ void BoxDimensions::Init(config_setup::RestartSettings const& restart,
         beta = 0.0;
       if(float(cryst.cellAngle[b][2]) == 90.0)
         gamma = 0.0;
-      double cosASq = alpha * alpha;
       double cosBSq = beta * beta;
       double cosGSq = gamma * gamma;
       double temp = (alpha - beta * gamma) / (sqrt(1.0 - cosGSq));

@@ -141,9 +141,16 @@ protected:
   double *n, *n_1_4;
 #endif
   //For LJ eps_cn(en) --> 4eps, eps_cn_6 --> 24eps, eps_cn_n --> 48eps
-  double * sigmaSq, * epsilon, * epsilon_1_4, * epsilon_cn, * epsilon_cn_6,
-         * nOver6, * sigmaSq_1_4, * epsilon_cn_1_4, * epsilon_cn_6_1_4,
-         * nOver6_1_4;
+  double * sigmaSq;
+  double * sigmaSq_1_4;
+  double * epsilon_cn;
+  double * epsilon;
+  double * epsilon_1_4;
+  double * epsilon_cn_1_4;
+  double * epsilon_cn_6;
+  double * epsilon_cn_6_1_4;
+  double * nOver6;
+  double * nOver6_1_4;
 
   uint count;
   bool exp6;

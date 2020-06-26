@@ -86,7 +86,6 @@ void Molecules::Init(Setup & setup, Forcefield & forcefield,
   if(printFlag) {
     //calculating netcharge of all molecule kind
     double netCharge = 0.0;
-    bool hasCharge;
     for (uint mk = 0 ; mk < kindsCount; mk++) {
       netCharge += (countByKind[mk] * kinds[mk].GetMoleculeCharge());
       if(kinds[mk].MoleculeHasCharge()) {

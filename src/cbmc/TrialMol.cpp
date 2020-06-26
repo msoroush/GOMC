@@ -41,9 +41,9 @@ TrialMol::TrialMol(const MoleculeKind& k, const BoxDimensions& ax,
 }
 
 TrialMol::TrialMol()
-  : kind(NULL), axes(NULL), box(0), tCoords(0), atomBuilt(NULL),
-    comInCav(false), comFix(false), rotateBB(false), overlap(false),
-    cavMatrix(3), bCoords(0), bonds()
+  : kind(NULL), axes(NULL), box(0), tCoords(0),
+    cavMatrix(3), comInCav(false), comFix(false), rotateBB(false), bCoords(0),
+    overlap(false), bonds(), atomBuilt(NULL)
 {
   cavMatrix.Set(0, 1.0, 0.0, 0.0);
   cavMatrix.Set(1, 0.0, 1.0, 0.0);
@@ -52,9 +52,9 @@ TrialMol::TrialMol()
 
 TrialMol::TrialMol(const TrialMol& other) :
   kind(other.kind), axes(other.axes), box(other.box),
-  tCoords(other.tCoords), cavMatrix(other.cavMatrix), en(other.en),
-  bCoords(other.bCoords), totalWeight(other.totalWeight),
-  basisPoint(other.basisPoint), bonds(other.bonds)
+  tCoords(other.tCoords), cavMatrix(other.cavMatrix),
+  totalWeight(other.totalWeight), bCoords(other.bCoords),
+  bonds(other.bonds), basisPoint(other.basisPoint), en(other.en)
 {
   atomBuilt = new bool[kind->NumAtoms()];
   std::copy(other.atomBuilt, other.atomBuilt + kind->NumAtoms(), atomBuilt);

@@ -34,6 +34,7 @@ public:
     }
   }
   BoxDimensions(BoxDimensions const& other);
+  virtual ~BoxDimensions() {}
   virtual BoxDimensions& operator=(BoxDimensions const& other);
 
   virtual void Init(config_setup::RestartSettings const& restart,
@@ -50,11 +51,11 @@ public:
 
   virtual void SetVolume(const uint b, const double vol);
 
-  virtual uint ShiftVolume(BoxDimensions & newDim, XYZ & scale,
+  uint ShiftVolume(BoxDimensions & newDim, XYZ & scale,
                            const uint b, const double delta) const;
 
   //!Calculate and execute volume exchange based on transfer
-  virtual uint ExchangeVolume(BoxDimensions & newDim, XYZ * scale,
+  uint ExchangeVolume(BoxDimensions & newDim, XYZ * scale,
                               const double transfer, const uint *box) const;
 
   //Vector btwn two points, accounting for PBC, on an individual axis

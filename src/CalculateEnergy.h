@@ -303,20 +303,18 @@ private:
   const Forcefield& forcefield;
   const Molecules& mols;
   const Coordinates& currentCoords;
+  const COM& currentCOM;
+  const Lambda& lambdaRef;
   const MoleculeLookup& molLookup;
   const BoxDimensions& currentAxes;
-  const COM& currentCOM;
+  const CellList& cellList;
   const Ewald *calcEwald;
-  const Lambda& lambdaRef;
-  XYZArray& atomForceRef;
-  XYZArray& molForceRef;
   bool multiParticleEnabled;
   bool electrostatic, ewald;
 
   std::vector<int> particleKind;
   std::vector<int> particleMol;
   std::vector<double> particleCharge;
-  const CellList& cellList;
 };
 
 #endif /*ENERGY_H*/

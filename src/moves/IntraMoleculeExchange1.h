@@ -21,9 +21,15 @@ class IntraMoleculeExchange1 : public MoveBase
 public:
 
   IntraMoleculeExchange1(System &sys, StaticVals const& statV) :
-    ffRef(statV.forcefield), molLookRef(sys.molLookupRef), MoveBase(sys, statV),
-    cavity(statV.intraMemcVal.subVol), cavA(3), invCavA(3),
-    perAdjust(statV.GetPerAdjust()), cavB(3), invCavB(3)
+    MoveBase(sys, statV),
+    perAdjust(statV.GetPerAdjust()),
+    molLookRef(sys.molLookupRef),
+    ffRef(statV.forcefield),
+    cavity(statV.intraMemcVal.subVol),
+    cavA(3),
+    invCavA(3),
+    cavB(3),
+    invCavB(3)
   {
     enableID = statV.intraMemcVal.enable;
     trial.resize(BOX_TOTAL);
@@ -97,11 +103,11 @@ protected:
   double volCav, lastAccept;
   double W_recip, recipDiffA, recipDiffB, correctDiff;
 
-  XYZ centerA, centerB, cavity;
-  XYZArray cavA, invCavA, cavB, invCavB;
-
   MoleculeLookup & molLookRef;
   Forcefield const& ffRef;
+
+  XYZ centerA, centerB, cavity;
+  XYZArray cavA, invCavA, cavB, invCavB;
 };
 
 inline void IntraMoleculeExchange1::AcceptKind(const uint rejectState, const uint kind,

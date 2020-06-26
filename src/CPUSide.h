@@ -34,9 +34,10 @@ struct CPUSide {
   ulong equilSteps;
 private:
   Clock timer;
+  OutputVars varRef;
   std::vector<OutputableBase *> outObj;
-  ConsoleOutput console;
   PDBOutput pdb;
+  ConsoleOutput console;
   BlockAverages block;
   Histogram hist;
   CheckpointOutput checkpoint;
@@ -46,7 +47,6 @@ private:
 #if ENSEMBLE == NVT || ENSEMBLE == NPT
   FreeEnergyOutput freeEnergy;
 #endif
-  OutputVars varRef;
 };
 
 #endif /*CPU_SIDE_H*/

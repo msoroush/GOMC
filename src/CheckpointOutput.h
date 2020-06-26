@@ -43,12 +43,11 @@ private:
   MoveSettings & moveSetRef;
   MoleculeLookup & molLookupRef;
   BoxDimensions & boxDimRef;
-  Molecules const & molRef;
   PRNG & prngRef;
   Coordinates & coordCurrRef;
+  std::string filename;
 
   bool enableOutCheckpoint;
-  std::string filename;
   FILE* outputFile;
   ulong stepsPerCheckpoint;
 

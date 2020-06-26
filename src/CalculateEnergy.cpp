@@ -45,8 +45,6 @@ using namespace geom;
 CalculateEnergy::CalculateEnergy(StaticVals & stat, System & sys) :
   forcefield(stat.forcefield), mols(stat.mol), currentCoords(sys.coordinates),
   currentCOM(sys.com),
-  atomForceRef(sys.atomForceRef),
-  molForceRef(sys.molForceRef),
   lambdaRef(sys.lambdaRef),
 #ifdef VARIABLE_PARTICLE_NUMBER
   molLookup(sys.molLookup),
@@ -95,7 +93,7 @@ SystemPotential CalculateEnergy::SystemTotal()
   for (uint b = 0; b < BOX_TOTAL; ++b) {
     int i;
     double bondEnergy[2] = {0};
-    double bondEn = 0.0, nonbondEn = 0.0, self = 0.0, correction = 0.0;
+    double bondEn = 0.0, nonbondEn = 0.0, correction = 0.0;
     MoleculeLookup::box_iterator thisMol = molLookup.BoxBegin(b);
     MoleculeLookup::box_iterator end = molLookup.BoxEnd(b);
     std::vector<uint> molID;
@@ -174,7 +172,6 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
 
   double tempREn = 0.0, tempLJEn = 0.0;
   double distSq, qi_qj_fact, lambdaVDW, lambdaCoulomb;
-  int i;
   XYZ virComponents;
 
   std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
@@ -283,7 +280,6 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 
   double tempREn = 0.0, tempLJEn = 0.0;
   double distSq, qi_qj_fact, lambdaVDW, lambdaCoulomb;
-  int i;
   XYZ virComponents, forceLJ, forceReal;
   // make a pointer to atom force and mol force for openmp
   double *aForcex = atomForce.x;
@@ -292,8 +288,6 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   double *mForcex = molForce.x;
   double *mForcey = molForce.y;
   double *mForcez = molForce.z;
-  int atomCount = atomForce.Count();
-  int molCount = molForce.Count();
 
   // Reset Force Arrays
   ResetForce(atomForce, molForce, box);
@@ -907,16 +901,7 @@ void CalculateEnergy::MolBond(double & energy,
 
   for (uint b = 0; b < molKind.bondList.count; ++b) {
     double molLength = vecs.Get(b).Length();
-    double eqLength = forcefield.bonds.Length(molKind.bondList.kinds[b]);
     energy += forcefield.bonds.Calc(molKind.bondList.kinds[b], molLength);
-    /*if(std::abs(molLength - eqLength) > 0.02) {
-      uint p1 = molKind.bondList.part1[b];
-      uint p2 = molKind.bondList.part2[b];
-      printf("Warning: Box%d, %6d %4s,", box, molIndex, molKind.name.c_str());
-      printf("%3s-%-3s bond: Par-file ", molKind.atomNames[p1].c_str(),
-          molKind.atomNames[p2].c_str());
-      printf("%2.3f A, PDB file %2.3f A!\n", eqLength, molLength);
-    }*/
   }
 }
 
@@ -1363,7 +1348,6 @@ void CalculateEnergy::VirialCorrection(Virial& virial,
   else {
     //Get the kind and lambda value
     uint fk = lambdaRef.GetKind(box);
-    double lambdaVDW = lambdaRef.GetLambdaVDW(fk, box);
     //remove the LRC for one molecule with lambda = 1
     vir += MoleculeTailVirChange(box, fk, false).virial;
 
@@ -1402,7 +1386,6 @@ void CalculateEnergy::CalculateTorque(std::vector<uint>& moleculeIndex,
     double *torquex = molTorque.x;
     double *torquey = molTorque.y;
     double *torquez = molTorque.z;
-    int torqueCount = molTorque.Count();
 
     molTorque.Reset();
 

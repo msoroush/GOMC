@@ -35,7 +35,6 @@ private:
   //Note: This is only used for GEMC-NPT and NPT
   uint box;
   SystemPotential sysPotNew;
-  const Forcefield& forcefield;
   BoxDimensions newDim;
   BoxDimensionsNonOrth newDimNonOrth;
   Coordinates newMolsPos;
@@ -48,13 +47,15 @@ private:
 };
 
 inline VolumeTransfer::VolumeTransfer(System &sys, StaticVals const& statV)  :
-  MoveBase(sys, statV), molLookRef(sys.molLookupRef),
-  newMolsPos(boxDimRef, newCOMs, sys.molLookupRef,
-             sys.prng, statV.mol), forcefield(statV.forcefield),
-  newDim(), newDimNonOrth(),
-  newCOMs(sys.boxDimRef, newMolsPos, sys.molLookupRef,
-          statV.mol), GEMC_KIND(statV.kindOfGEMC),
-  PRESSURE(statV.pressure), regrewGrid(false)
+  MoveBase(sys, statV),
+  newDim(),
+  newDimNonOrth(),
+  newMolsPos(boxDimRef, newCOMs, sys.molLookupRef, sys.prng, statV.mol),
+  newCOMs(sys.boxDimRef, newMolsPos, sys.molLookupRef, statV.mol),
+  molLookRef(sys.molLookupRef),
+  GEMC_KIND(statV.kindOfGEMC),
+  PRESSURE(statV.pressure),
+  regrewGrid(false)
 {
   newMolsPos.Init(sys.coordinates.Count());
   newCOMs.Init(statV.mol.count);

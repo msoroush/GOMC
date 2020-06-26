@@ -318,19 +318,19 @@ private:
   const BoxDimensions* axes;
   uint box;
   XYZArray tCoords, cavMatrix;
-  XYZArray bCoords; //used to find the angle and theta in rings molecule
-  Energy en;
+  bool comInCav, comFix, rotateBB;
   double totalWeight;
+  XYZArray bCoords; //used to find the angle and theta in rings molecule
+  bool overlap;
+  Bonds bonds;
+  bool* atomBuilt;
+  XYZ basisPoint;
+  Energy en;
   RotationMatrix growthToWorld;
   RotationMatrix worldToGrowth;
-  XYZ basisPoint;
   XYZ cavityCenter, cavity; //The center and cavity dimensions
   uint backbone[2];
-  bool comInCav, comFix, rotateBB;
-  bool overlap;
-  bool* atomBuilt;
   //To check the status of built bonds
-  Bonds bonds;
 };
 }
 

@@ -19,8 +19,9 @@ class MoleculeTransfer : public MoveBase
 public:
 
   MoleculeTransfer(System &sys, StaticVals const& statV) :
-    ffRef(statV.forcefield), molLookRef(sys.molLookupRef),
-    MoveBase(sys, statV) {}
+    MoveBase(sys, statV),
+    molLookRef(sys.molLookupRef),
+    ffRef(statV.forcefield) {}
 
   virtual uint Prep(const double subDraw, const double movPerc);
   virtual uint Transform();
@@ -32,7 +33,6 @@ private:
 
   double GetCoeff() const;
   uint GetBoxPairAndMol(const double subDraw, const double movPerc);
-  MolPick molPick;
   uint sourceBox, destBox;
   uint pStart, pLen;
   uint molIndex, kindIndex;

@@ -13,7 +13,7 @@ using namespace mol_setup;
 namespace
 {
 const char* remarkHeader = "!NTITLE";
-const char* remarkTag = " REMARKS ";
+// const char* remarkTag = " REMARKS "; unused
 const char* atomHeader = "!NATOM";
 const char* bondHeader = "!NBOND: bonds";
 const char* angleHeader = "!NTHETA: angles";
@@ -33,8 +33,9 @@ const int dihPerLine = 2;
 PSFOutput::PSFOutput(const Molecules& molecules, const System &sys,
                      mol_setup::MolMap& molMap,
                      const std::vector<std::string>& kindNames) :
-  molecules(&molecules), molNames(kindNames),
-  molLookRef(sys.molLookup)
+  molecules(&molecules),
+  molLookRef(sys.molLookup),
+  molNames(kindNames)
 {
   molKinds.resize(molMap.size());
   for(uint i = 0; i < kindNames.size(); ++i) {

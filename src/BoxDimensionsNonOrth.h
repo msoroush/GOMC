@@ -40,11 +40,11 @@ public:
 
   virtual void SetVolume(const uint b, const double vol);
 
-  virtual uint ShiftVolume(BoxDimensionsNonOrth & newDim, XYZ & scale,
+  uint ShiftVolume(BoxDimensionsNonOrth & newDim, XYZ & scale,
                            const uint b, const double delta) const;
 
   //!Calculate and execute volume exchange based on transfer
-  virtual uint ExchangeVolume(BoxDimensionsNonOrth & newDim, XYZ * scale,
+  uint ExchangeVolume(BoxDimensionsNonOrth & newDim, XYZ * scale,
                               const double transfer, const uint *box) const;
 
   //Construct cell basis based on new axis dimension

@@ -381,9 +381,8 @@ inline void MoleculeExchange2::CalcEn()
 
 inline double MoleculeExchange2::GetCoeff() const
 {
-  double volSource = boxDimRef.volume[sourceBox];
-  double volDest = boxDimRef.volume[destBox];
 #if ENSEMBLE == GEMC
+  double volDest = boxDimRef.volume[destBox];
   if(insertL) {
     //kindA is the small molecule
     double ratioF = num::Factorial(totMolInCav - 1) /

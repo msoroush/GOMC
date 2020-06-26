@@ -49,8 +49,8 @@ struct FF_SWITCH_MARTINI : public FFParticle {
 public:
 
   FF_SWITCH_MARTINI(Forcefield &ff) : FFParticle(ff), An(NULL), Bn(NULL), Cn(NULL),
-    An_1_4(NULL), Bn_1_4(NULL), Cn_1_4(NULL), sig6(NULL), sign(NULL),
-    sig6_1_4(NULL), sign_1_4(NULL)
+    An_1_4(NULL), Bn_1_4(NULL), Cn_1_4(NULL), sig6(NULL), sig6_1_4(NULL),
+    sign(NULL), sign_1_4(NULL)
   {
     A1 = B1 = C1 = A6 = B6 = C6 = 0.0;
   }
