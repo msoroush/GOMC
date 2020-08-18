@@ -79,6 +79,27 @@ public:
     gpu_lambdaVDW = NULL;
     gpu_lambdaCoulomb = NULL;
     gpu_isFraction = NULL;
+
+      // new pair interaction calculation done on GPU
+    gpu_cellVector = NULL;
+    gpu_mapParticleToCell = NULL;
+
+    // new pair interaction calculation done on GPU
+    gpu_cellVector  = NULL;
+    gpu_mapParticleToCell  = NULL;
+
+
+    // COO Matrix
+    gpu_nnz  = NULL;
+    gpu_cooRowIndA  = NULL;
+    gpu_cooColIndA = NULL;
+    gpu_cooValAx = NULL;
+    gpu_cooValAy = NULL;
+    gpu_cooValAz  = NULL;
+
+    // Temporary
+    gpu_neighborsPerCell  = NULL;
+
   }
   double *gpu_sigmaSq;
   double *gpu_epsilon_Cn;
@@ -123,5 +144,13 @@ public:
 
   // new pair interaction calculation done on GPU
   int *gpu_cellVector, *gpu_mapParticleToCell;
+
+  // COO Matrix
+  int *gpu_nnz, *gpu_cooRowIndA, *gpu_cooColIndA;
+  double *gpu_cooValAx, *gpu_cooValAy, *gpu_cooValAz;
+
+  // Temporary
+  int* gpu_neighborsPerCell;
+
 };
 #endif

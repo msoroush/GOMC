@@ -368,6 +368,17 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y / 2.0,
                                 boxAxes.GetAxis(box).z / 2.0);
 
+  int * gpu_neighborsPerCell;
+  CUMALLOC((void**) &gpu_neighborsPerCell, numberOfCells * sizeof(int));
+  cudaMemcpy(vars->gpu_neighborsPerCell, &gpu_neighborsPerCell, numberOfCells * sizeof(int), cudaMemcpyHostToDevice);
+
+  allocateCOO <<< numberOfCells, threadsPerBlock >>>( gpu_cellStartIndex,
+                                                      gpu_neighborList,
+                                                      gpu_neighborsPerCell);
+
+  for (int i = 0; i < numberOfCells; i++)
+    printf("cell %d : %d\n", i, gpu_neighborsPerCell[i]);
+
   BoxForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
                                                     vars->gpu_cellVector,
                                                     gpu_neighborList,

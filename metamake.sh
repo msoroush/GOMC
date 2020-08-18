@@ -55,4 +55,4 @@ cd bin
 #export CC=${ICC_PATH}
 #export CXX=${ICPC_PATH}
 cmake ..
-make -j8 GPU_NVT
+make -j4 GPU_NVT

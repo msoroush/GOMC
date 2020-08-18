@@ -189,6 +189,7 @@ set(cudaHeaders
     src/GPU/CalculateEnergyCUDAKernel.cuh
     src/GPU/CalculateForceCUDAKernel.cuh
     src/GPU/CalculateEwaldCUDAKernel.cuh
+    src/GPU/COO.cuh
     src/GPU/CUDAMemoryManager.cuh
     src/GPU/TransformParticlesCUDAKernel.cuh
     src/GPU/VariablesCUDA.cuh)
@@ -198,6 +199,7 @@ set(cudaSources
     src/GPU/CalculateForceCUDAKernel.cu
     src/GPU/CalculateEwaldCUDAKernel.cu
     src/GPU/ConstantDefinitionsCUDAKernel.cu
+    src/GPU/COO.cu
     src/GPU/CUDAMemoryManager.cu
     src/GPU/TransformParticlesCUDAKernel.cu)
 

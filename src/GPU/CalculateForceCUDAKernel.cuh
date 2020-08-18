@@ -14,6 +14,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "VariablesCUDA.cuh"
 #include "ConstantDefinitionsCUDAKernel.cuh"
 #include "CalculateMinImageCUDAKernel.cuh"
+#include "COO.cuh"
 
 void CallBoxForceGPU(VariablesCUDA *vars,
                      std::vector<int> &cellVector,
