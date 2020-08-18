@@ -48,8 +48,10 @@ __global__ void allocateCOO(int *gpu_cellStartIndex,
     // Calculate number of particles inside current Cell
     endIndex = gpu_cellStartIndex[currentCell + 1];
     particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
-    gpu_neighborsPerCell[blockIdx.x] = numberOfPairsCache[0] + particlesInsideCurrentCell;
+    gpu_neighborsPerCell[currentCell] = numberOfPairsCache[0] + particlesInsideCurrentCell;
   }
+
+  printf("cell %d : %d\n", currentCell, gpu_neighborsPerCell[currentCell]);
 }
 
 #endif
