@@ -142,20 +142,20 @@ void CallBoxInterGPU(VariablesCUDA *vars,
     host_forcefieldDoubleParameters_const[2] = Ron;
     host_forcefieldDoubleParameters_const[3] = diElectric_1;
   
-    cudaMemcpyToSymbol(gpu_sigmaSq_const, sigmaSq, sizeof(double) * count*count);  
+    cudaMemcpyToSymbol(gpu_sigmaSq_const, sigmaSq, sizeof(double) * count*count, 0, cudaMemcpyHostToDevice);  
     checkLastErrorCUDA(__FILE__, __LINE__);
 
-    cudaMemcpyToSymbol(gpu_epsilon_Cn_const, epsilon_Cn, sizeof(double) * count*count);  
+    cudaMemcpyToSymbol(gpu_epsilon_Cn_const, epsilon_Cn, sizeof(double) * count*count, 0, cudaMemcpyHostToDevice);  
 
-    cudaMemcpyToSymbol(gpu_n_const, n, sizeof(double) * count*count);  
+    cudaMemcpyToSymbol(gpu_n_const, n, sizeof(double) * count*count, 0, cudaMemcpyHostToDevice);  
 
-    cudaMemcpyToSymbol(gpu_rCutCoulomb_const, rCutCoulomb, sizeof(double) * BOX_TOTAL);  
+    cudaMemcpyToSymbol(gpu_rCutCoulomb_const, rCutCoulomb, sizeof(double) * BOX_TOTAL, 0, cudaMemcpyHostToDevice);  
 
-    cudaMemcpyToSymbol(gpu_alpha_const, alpha, sizeof(double) * BOX_TOTAL);  
+    cudaMemcpyToSymbol(gpu_alpha_const, alpha, sizeof(double) * BOX_TOTAL, 0, cudaMemcpyHostToDevice);  
 
-    cudaMemcpyToSymbol(gpu_forcefieldIntParameters_const, host_forcefieldIntParameters_const, sizeof(int) * 4);  
+    cudaMemcpyToSymbol(gpu_forcefieldIntParameters_const, host_forcefieldIntParameters_const, sizeof(int) * 4, 0, cudaMemcpyHostToDevice);  
 
-    cudaMemcpyToSymbol(gpu_forcefieldDoubleParameters_const, host_forcefieldDoubleParameters_const, sizeof(double) * 4);  
+    cudaMemcpyToSymbol(gpu_forcefieldDoubleParameters_const, host_forcefieldDoubleParameters_const, sizeof(double) * 4, 0, cudaMemcpyHostToDevice);  
 
 
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
