@@ -111,6 +111,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
 
 
     cudaMemcpyToSymbol(gpu_sigmaSq_const, vars->gpu_sigmaSq, sizeof(double) * ESTIMATED_COUNT*ESTIMATED_COUNT);  
+    checkLastErrorCUDA(__FILE__, __LINE__);
 
     cudaMemcpyToSymbol(gpu_epsilon_Cn_const, vars->gpu_epsilon_Cn, sizeof(double) * ESTIMATED_COUNT*ESTIMATED_COUNT);  
 
@@ -135,7 +136,6 @@ void CallBoxInterGPU(VariablesCUDA *vars,
     cudaMemcpyToSymbol(gpu_ewald_const, vars->gpu_ewald, sizeof(int)); 
 
     cudaMemcpyToSymbol(gpu_diElectric_1_const, vars->gpu_diElectric_1, sizeof(double)); 
-    checkLastErrorCUDA(__FILE__, __LINE__);
 
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
       vars->gpu_cellVector,
