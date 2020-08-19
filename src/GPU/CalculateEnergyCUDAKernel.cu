@@ -110,12 +110,12 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).z / 2.0);
 
 
-    cudaMemcpyToSymbol(gpu_sigmaSq_const, vars->gpu_sigmaSq, sizeof(double) * ESTIMATED_COUNT*ESTIMATED_COUNT);  
+    cudaMemcpyToSymbol(gpu_sigmaSq_const, vars->gpu_sigmaSq, sizeof(double) * vars->gpu_count*vars->gpu_count);  
     checkLastErrorCUDA(__FILE__, __LINE__);
 
-    cudaMemcpyToSymbol(gpu_epsilon_Cn_const, vars->gpu_epsilon_Cn, sizeof(double) * ESTIMATED_COUNT*ESTIMATED_COUNT);  
+    cudaMemcpyToSymbol(gpu_epsilon_Cn_const, vars->gpu_epsilon_Cn, sizeof(double) * vars->gpu_count*vars->gpu_count);  
 
-    cudaMemcpyToSymbol(gpu_n_const, vars->gpu_n, sizeof(double) * ESTIMATED_COUNT*ESTIMATED_COUNT);  
+    cudaMemcpyToSymbol(gpu_n_const, vars->gpu_n, sizeof(double) * vars->gpu_count*vars->gpu_count);  
 
     cudaMemcpyToSymbol(gpu_VDW_Kind_const, vars->gpu_VDW_Kind, sizeof(int));  
 
@@ -131,7 +131,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
 
     cudaMemcpyToSymbol(gpu_rOn_const, vars->gpu_rOn, sizeof(double));
 
-    cudaMemcpyToSymbol(gpu_alpha_const, vars->gpu_alpha, sizeof(double));  
+    cudaMemcpyToSymbol(gpu_alpha_const, vars->gpu_alpha, sizeof(double) * BOX_TOTAL);  
 
     cudaMemcpyToSymbol(gpu_ewald_const, vars->gpu_ewald, sizeof(int)); 
 
