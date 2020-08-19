@@ -23,20 +23,31 @@ using namespace cub;
 __constant__ double gpu_sigmaSq_const[ESTIMATED_COUNT*ESTIMATED_COUNT];
 __constant__ double gpu_epsilon_Cn_const[ESTIMATED_COUNT*ESTIMATED_COUNT];
 __constant__ double gpu_n_const[ESTIMATED_COUNT*ESTIMATED_COUNT];
-__constant__ int gpu_VDW_Kind_const;
-__constant__ int gpu_isMartini_const;
-__constant__ int gpu_count_const;
-__constant__ double gpu_rCut_const;
+/*
+  gpu_forcefieldIntParameters_const:
+  [0] - gpu_VDW_Kind_const
+  [1] - gpu_isMartini_const
+  [2] - gpu_count_const
+  [3] - gpu_ewald_const
+*/
+__constant__ int gpu_forcefieldIntParameters_const[4];
+
+/*
+  gpu_forcefieldDoubleParameters_const:
+  [0] - gpu_rCut_const
+  [1] - gpu_rCutLow_const
+  [2] - gpu_rOn_const
+  [3] - gpu_diElectric_1_const
+*/
+
+__constant__ double gpu_forcefieldDoubleParameters_const[4];
+
 // BOX total
 __constant__ double gpu_rCutCoulomb_const[BOX_TOTAL];
 //
-__constant__ double gpu_rCutLow_const;
-__constant__ double gpu_rOn_const;
 // Box total
 __constant__ double gpu_alpha_const[BOX_TOTAL];
-//
-__constant__ int gpu_ewald_const;
-__constant__ double gpu_diElectric_1_const;
+
 
 void CallBoxInterGPU(VariablesCUDA *vars,
                      std::vector<int> cellVector,
@@ -118,33 +129,34 @@ void CallBoxInterGPU(VariablesCUDA *vars,
 
     std::cout << "count : " << count << std::endl;
     std::cout << "estimated size : " << ESTIMATED_COUNT << std::endl;
+
+    int host_forcefieldIntParameters_const[4];
+    host_forcefieldIntParameters_const[0] = VDW_Kind;
+    host_forcefieldIntParameters_const[1] = isMartini;
+    host_forcefieldIntParameters_const[2] = count;
+    host_forcefieldIntParameters_const[1] = ewald;
+
+    int host_forcefieldDoubleParameters_const[4];
+    host_forcefieldDoubleParameters_const[0] = Rcut;
+    host_forcefieldDoubleParameters_const[1] = RcutLow;
+    host_forcefieldDoubleParameters_const[2] = Ron;
+    host_forcefieldDoubleParameters_const[3] = diElectric_1;
   
-    cudaMemcpyToSymbol(gpu_sigmaSq_const, vars->gpu_sigmaSq, sizeof(double) * count*count);  
+    cudaMemcpyToSymbol(gpu_sigmaSq_const, sigmaSq, sizeof(double) * count*count);  
     checkLastErrorCUDA(__FILE__, __LINE__);
 
-    cudaMemcpyToSymbol(gpu_epsilon_Cn_const, vars->gpu_epsilon_Cn, sizeof(double) * count*count);  
+    cudaMemcpyToSymbol(gpu_epsilon_Cn_const, epsilon_Cn, sizeof(double) * count*count);  
 
-    cudaMemcpyToSymbol(gpu_n_const, vars->gpu_n, sizeof(double) * count*count);  
+    cudaMemcpyToSymbol(gpu_n_const, n, sizeof(double) * count*count);  
 
-    cudaMemcpyToSymbol(gpu_VDW_Kind_const, vars->gpu_VDW_Kind, sizeof(int));  
+    cudaMemcpyToSymbol(gpu_rCutCoulomb_const, rCutCoulomb, sizeof(double) * BOX_TOTAL);  
 
-    cudaMemcpyToSymbol(gpu_isMartini_const, vars->gpu_isMartini, sizeof(int));  
+    cudaMemcpyToSymbol(gpu_alpha_const, alpha, sizeof(double) * BOX_TOTAL);  
 
-    cudaMemcpyToSymbol(gpu_count_const, vars->gpu_count, sizeof(int));  
+    cudaMemcpyToSymbol(gpu_forcefieldIntParameters_const, host_forcefieldIntParameters_const, sizeof(int) * 4);  
 
-    cudaMemcpyToSymbol(gpu_rCut_const, vars->gpu_rCut, sizeof(double));  
+    cudaMemcpyToSymbol(gpu_forcefieldDoubleParameters_const, host_forcefieldDoubleParameters_const, sizeof(double) * 4);  
 
-    cudaMemcpyToSymbol(gpu_rCutCoulomb_const, vars->gpu_rCutCoulomb, sizeof(double) * BOX_TOTAL);  
-
-    cudaMemcpyToSymbol(gpu_rCutLow_const, vars->gpu_rCutLow, sizeof(double));
-
-    cudaMemcpyToSymbol(gpu_rOn_const, vars->gpu_rOn, sizeof(double));
-
-    cudaMemcpyToSymbol(gpu_alpha_const, vars->gpu_alpha, sizeof(double) * BOX_TOTAL);  
-
-    cudaMemcpyToSymbol(gpu_ewald_const, vars->gpu_ewald, sizeof(int)); 
-
-    cudaMemcpyToSymbol(gpu_diElectric_1_const, vars->gpu_diElectric_1, sizeof(double)); 
 
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
       vars->gpu_cellVector,
@@ -340,24 +352,24 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                                  gpu_isFraction, gpu_molIndex,
                                                  gpu_kindIndex, gpu_lambdaCoulomb);
           gpu_REn[threadID] += CalcCoulombGPU(distSq, kA, kB,
-                                              qi_qj_fact, gpu_rCutLow_const,
-                                              gpu_ewald_const, gpu_VDW_Kind_const,
+                                              qi_qj_fact, gpu_forcefieldDoubleParameters_const[1],
+                                              gpu_forcefieldIntParameters_const[3], gpu_forcefieldIntParameters_const[0],
                                               gpu_alpha_const[box],
                                               gpu_rCutCoulomb_const[box],
-                                              gpu_isMartini_const,
-                                              gpu_diElectric_1_const,
+                                              gpu_forcefieldIntParameters_const[1],
+                                              gpu_forcefieldDoubleParameters_const[3],
                                               lambdaCoulomb,
                                               sc_coul,
                                               sc_sigma_6,
                                               sc_alpha,
                                               sc_power,
                                               gpu_sigmaSq_const,
-                                              gpu_count_const);
+                                              gpu_forcefieldIntParameters_const[2]);
         }
         gpu_LJEn[threadID] += CalcEnGPU(distSq, kA, kB,
                                         gpu_sigmaSq_const, gpu_n_const, gpu_epsilon_Cn_const,
-                                        gpu_VDW_Kind_const, gpu_isMartini_const,
-                                        gpu_rCut_const, gpu_rOn_const, gpu_count_const, lambdaVDW,
+                                        gpu_forcefieldIntParameters_const[0], gpu_forcefieldIntParameters_const[1],
+                                        gpu_forcefieldDoubleParameters_const[0], gpu_forcefieldDoubleParameters_const[2], gpu_forcefieldIntParameters_const[2], lambdaVDW,
                                         sc_sigma_6, sc_alpha, sc_power, gpu_rMin,
                                         gpu_rMaxSq, gpu_expConst);
       }
