@@ -109,13 +109,14 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y / 2.0,
                                 boxAxes.GetAxis(box).z / 2.0);
 
+    int count = *vars->gpu_count;
 
-    cudaMemcpyToSymbol(gpu_sigmaSq_const, vars->gpu_sigmaSq, sizeof(double) * vars->gpu_count*vars->gpu_count);  
+    cudaMemcpyToSymbol(gpu_sigmaSq_const, vars->gpu_sigmaSq, sizeof(double) * count*count);  
     checkLastErrorCUDA(__FILE__, __LINE__);
 
-    cudaMemcpyToSymbol(gpu_epsilon_Cn_const, vars->gpu_epsilon_Cn, sizeof(double) * vars->gpu_count*vars->gpu_count);  
+    cudaMemcpyToSymbol(gpu_epsilon_Cn_const, vars->gpu_epsilon_Cn, sizeof(double) * count*count);  
 
-    cudaMemcpyToSymbol(gpu_n_const, vars->gpu_n, sizeof(double) * vars->gpu_count*vars->gpu_count);  
+    cudaMemcpyToSymbol(gpu_n_const, vars->gpu_n, sizeof(double) * count*count);  
 
     cudaMemcpyToSymbol(gpu_VDW_Kind_const, vars->gpu_VDW_Kind, sizeof(int));  
 
