@@ -110,7 +110,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).z / 2.0);
 
     int count = *vars->gpu_count;
-
+    printf("count : %d\n", count);
+    printf("estimated size : %d", ESTIMATED_COUNT);
     cudaMemcpyToSymbol(gpu_sigmaSq_const, vars->gpu_sigmaSq, sizeof(double) * count*count);  
     checkLastErrorCUDA(__FILE__, __LINE__);
 
