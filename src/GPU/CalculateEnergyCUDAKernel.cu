@@ -18,7 +18,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 using namespace cub;
 
-#define ESTIMATED_COUNT 5
+#define ESTIMATED_COUNT 20
 
 __constant__ double gpu_sigmaSq_const[ESTIMATED_COUNT*ESTIMATED_COUNT];
 __constant__ double gpu_epsilon_Cn_const[ESTIMATED_COUNT*ESTIMATED_COUNT];
