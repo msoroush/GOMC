@@ -54,7 +54,14 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      double sc_sigma_6,
                      double sc_alpha,
                      uint sc_power,
-                     uint const box)
+                     uint const box,
+                     double const *sigmaSq,
+                       double const *epsilon_Cn,
+                       double const *n, int VDW_Kind, int isMartini,
+                       int count, double Rcut, double const *rCutCoulomb,
+                       double RcutLow, double Ron, double const *alpha,
+                       int ewald, double diElectric_1
+                     )
 {
   int atomNumber = coords.Count();
   int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
@@ -109,7 +116,6 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y / 2.0,
                                 boxAxes.GetAxis(box).z / 2.0);
 
-    int count = *vars->gpu_count;
     std::cout << "count : " << count << std::endl;
     std::cout << "estimated size : " << ESTIMATED_COUNT << std::endl;
   

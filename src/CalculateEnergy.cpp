@@ -205,7 +205,20 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                   neighborList, coords, boxAxes, electrostatic, particleCharge,
                   particleKind, particleMol, tempREn, tempLJEn, forcefield.sc_coul,
                   forcefield.sc_sigma_6, forcefield.sc_alpha,
-                  forcefield.sc_power, box);
+                  forcefield.sc_power, box,
+                  forcefield.particles->sigmaSq,
+                  forcefield.particles->epsilon_cn,
+                  forcefield.particles->n,
+                  forcefield.vdwKind,
+                  forcefield.isMartini,
+                  forcefield.particles->count,
+                  forcefield.rCut,
+                  forcefield.rCutCoulomb,
+                  forcefield.rCutLow,
+                  forcefield.rswitch, 
+                  forcefield.alpha,
+                  forcefield.ewald,
+                  1.0 / forcefield.dielectric);
 #else
 #ifdef _OPENMP
   #pragma omp parallel for default(shared) \

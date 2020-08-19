@@ -18,6 +18,27 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 using namespace cub;
 
+
+#define ESTIMATED_COUNT 5
+
+__constant__ double gpu_sigmaSq_const[ESTIMATED_COUNT*ESTIMATED_COUNT];
+__constant__ double gpu_epsilon_Cn_const[ESTIMATED_COUNT*ESTIMATED_COUNT];
+__constant__ double gpu_n_const[ESTIMATED_COUNT*ESTIMATED_COUNT];
+__constant__ int gpu_VDW_Kind_const;
+__constant__ int gpu_isMartini_const;
+__constant__ int gpu_count_const;
+__constant__ double gpu_rCut_const;
+// BOX total
+__constant__ double gpu_rCutCoulomb_const[BOX_TOTAL];
+//
+__constant__ double gpu_rCutLow_const;
+__constant__ double gpu_rOn_const;
+// Box total
+__constant__ double gpu_alpha_const[BOX_TOTAL];
+//
+__constant__ int gpu_ewald_const;
+__constant__ double gpu_diElectric_1_const;
+
 void CallBoxInterForceGPU(VariablesCUDA *vars,
                           std::vector<int> &cellVector,
                           std::vector<int> &cellStartIndex,
@@ -876,34 +897,34 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                                                  gpu_kindIndex,
                                                  gpu_lambdaCoulomb);
           gpu_REn[threadID] += CalcCoulombGPU(distSq, kA, kB,
-                                              qi_qj_fact, gpu_rCutLow[0],
-                                              gpu_ewald[0], gpu_VDW_Kind[0],
-                                              gpu_alpha[box],
-                                              gpu_rCutCoulomb[box],
-                                              gpu_isMartini[0],
-                                              gpu_diElectric_1[0],
+                                              qi_qj_fact, gpu_rCutLow_const,
+                                              gpu_ewald_const, gpu_VDW_Kind_const,
+                                              gpu_alpha_const[box],
+                                              gpu_rCutCoulomb_const[box],
+                                              gpu_isMartini_const,
+                                              gpu_diElectric_1_const,
                                               lambdaCoulomb, sc_coul, sc_sigma_6,
                                               sc_alpha, sc_power,
                                               gpu_sigmaSq,
-                                              gpu_count[0]);
+                                              gpu_count_const);
         }
-        gpu_LJEn[threadID] += CalcEnGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
-                                        gpu_epsilon_Cn, gpu_VDW_Kind[0],
-                                        gpu_isMartini[0], gpu_rCut[0],
-                                        gpu_rOn[0], gpu_count[0], lambdaVDW,
+        gpu_LJEn[threadID] += CalcEnGPU(distSq, kA, kB, gpu_sigmaSq_const, gpu_n_const,
+                                        gpu_epsilon_Cn_const, gpu_VDW_Kind_const,
+                                        gpu_isMartini_const, gpu_rCut_const,
+                                        gpu_rOn_const, gpu_count_const, lambdaVDW,
                                         sc_sigma_6, sc_alpha, sc_power,
                                         gpu_rMin, gpu_rMaxSq, gpu_expConst);
         if(electrostatic) {
           double coulombVir = CalcCoulombForceGPU(distSq, qi_qj_fact,
-                                                  gpu_VDW_Kind[0], gpu_ewald[0],
-                                                  gpu_isMartini[0],
-                                                  gpu_alpha[box],
-                                                  gpu_rCutCoulomb[box],
-                                                  gpu_diElectric_1[0],
-                                                  gpu_sigmaSq, sc_coul,
+                                                  gpu_VDW_Kind_const, gpu_ewald_const,
+                                                  gpu_isMartini_const,
+                                                  gpu_alpha_const[box],
+                                                  gpu_rCutCoulomb_const[box],
+                                                  gpu_diElectric_1_const,
+                                                  gpu_sigmaSq_const, sc_coul,
                                                   sc_sigma_6, sc_alpha,
                                                   sc_power, lambdaCoulomb,
-                                                  gpu_count[0], kA, kB);
+                                                  gpu_count_const, kA, kB);
           forceReal.x = virComponents.x * coulombVir;
           forceReal.y = virComponents.y * coulombVir;
           forceReal.z = virComponents.z * coulombVir;

@@ -29,7 +29,13 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      double sc_sigma_6,
                      double sc_alpha,
                      uint sc_power,
-                     uint const box);
+                     uint const box,
+                     double const *sigmaSq,
+                     double const *epsilon_Cn,
+                     double const *n, int VDW_Kind, int isMartini,
+                     int count, double Rcut, double const *rCutCoulomb,
+                     double RcutLow, double Ron, double const *alpha,
+                     int ewald, double diElectric_1);
 
 __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int *gpu_cellVector,
