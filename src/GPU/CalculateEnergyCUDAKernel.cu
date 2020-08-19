@@ -18,6 +18,26 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 using namespace cub;
 
+#define ESTIMATED_COUNT 5
+
+__constant__ double gpu_sigmaSq_const[ESTIMATED_COUNT*ESTIMATED_COUNT];
+__constant__ double gpu_epsilon_Cn_const[ESTIMATED_COUNT*ESTIMATED_COUNT];
+__constant__ double gpu_n_const[ESTIMATED_COUNT*ESTIMATED_COUNT];
+__constant__ int gpu_VDW_Kind_const;
+__constant__ int gpu_isMartini_const;
+__constant__ int gpu_count_const;
+__constant__ double gpu_rCut_const;
+// BOX total
+__constant__ double gpu_rCutCoulomb_const[BOX_TOTAL];
+//
+__constant__ double gpu_rCutLow_const;
+__constant__ double gpu_rOn_const;
+// Box total
+__constant__ double gpu_alpha_const[BOX_TOTAL];
+//
+__constant__ int gpu_ewald_const;
+__constant__ double gpu_diElectric_1_const;
+
 void CallBoxInterGPU(VariablesCUDA *vars,
                      std::vector<int> cellVector,
                      std::vector<int> cellStartIndex,
@@ -82,13 +102,41 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
 
   double3 axis = make_double3(boxAxes.GetAxis(box).x,
-  boxAxes.GetAxis(box).y,
-  boxAxes.GetAxis(box).z);
+                              boxAxes.GetAxis(box).y,
+                              boxAxes.GetAxis(box).z);
 
   double3 halfAx = make_double3(boxAxes.GetAxis(box).x / 2.0,
                                 boxAxes.GetAxis(box).y / 2.0,
                                 boxAxes.GetAxis(box).z / 2.0);
 
+ 
+
+    cudaMemcpyToSymbol(gpu_sigmaSq_const, vars->gpu_sigmaSq, sizeof(double) * ESTIMATED_COUNT*ESTIMATED_COUNT);  
+
+    cudaMemcpyToSymbol(gpu_epsilon_Cn_const, vars->gpu_epsilon_Cn, sizeof(double) * ESTIMATED_COUNT*ESTIMATED_COUNT);  
+
+    cudaMemcpyToSymbol(gpu_n_const, vars->gpu_n, sizeof(double) * ESTIMATED_COUNT*ESTIMATED_COUNT);  
+
+    cudaMemcpyToSymbol(gpu_VDW_Kind_const, vars->gpu_VDW_Kind, sizeof(int));  
+
+    cudaMemcpyToSymbol(gpu_isMartini_const, vars->gpu_isMartini, sizeof(int));  
+
+    cudaMemcpyToSymbol(gpu_count_const, vars->gpu_count, sizeof(int));  
+
+    cudaMemcpyToSymbol(gpu_rCut_const, vars->gpu_rCut, sizeof(double));  
+
+    cudaMemcpyToSymbol(gpu_rCutCoulomb_const, vars->gpu_rCutCoulomb, sizeof(double) * BOX_TOTAL);  
+
+    cudaMemcpyToSymbol(gpu_rCutLow_const, vars->gpu_rCutLow, sizeof(double));
+
+    cudaMemcpyToSymbol(gpu_rOn_const, vars->gpu_rOn, sizeof(double));
+
+    cudaMemcpyToSymbol(gpu_alpha_const, vars->gpu_alpha, sizeof(double));  
+
+    cudaMemcpyToSymbol(gpu_ewald_const, vars->gpu_ewald, sizeof(int)); 
+
+    cudaMemcpyToSymbol(gpu_diElectric_1_const, vars->gpu_diElectric_1, sizeof(double)); 
+  
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
       vars->gpu_cellVector,
       gpu_neighborList,
@@ -283,24 +331,24 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                                  gpu_isFraction, gpu_molIndex,
                                                  gpu_kindIndex, gpu_lambdaCoulomb);
           gpu_REn[threadID] += CalcCoulombGPU(distSq, kA, kB,
-                                              qi_qj_fact, gpu_rCutLow[0],
-                                              gpu_ewald[0], gpu_VDW_Kind[0],
-                                              gpu_alpha[box],
-                                              gpu_rCutCoulomb[box],
-                                              gpu_isMartini[0],
-                                              gpu_diElectric_1[0],
+                                              qi_qj_fact, gpu_rCutLow_const,
+                                              gpu_ewald_const, gpu_VDW_Kind_const,
+                                              gpu_alpha_const[box],
+                                              gpu_rCutCoulomb_const[box],
+                                              gpu_isMartini_const,
+                                              gpu_diElectric_1_const,
                                               lambdaCoulomb,
                                               sc_coul,
                                               sc_sigma_6,
                                               sc_alpha,
                                               sc_power,
-                                              gpu_sigmaSq,
-                                              gpu_count[0]);
+                                              gpu_sigmaSq_const,
+                                              gpu_count_const);
         }
         gpu_LJEn[threadID] += CalcEnGPU(distSq, kA, kB,
-                                        gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
-                                        gpu_VDW_Kind[0], gpu_isMartini[0],
-                                        gpu_rCut[0], gpu_rOn[0], gpu_count[0], lambdaVDW,
+                                        gpu_sigmaSq_const, gpu_n_const, gpu_epsilon_Cn_const,
+                                        gpu_VDW_Kind_const, gpu_isMartini_const,
+                                        gpu_rCut_const, gpu_rOn_const, gpu_count_const, lambdaVDW,
                                         sc_sigma_6, sc_alpha, sc_power, gpu_rMin,
                                         gpu_rMaxSq, gpu_expConst);
       }
