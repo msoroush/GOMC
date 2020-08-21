@@ -140,6 +140,9 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y / 2.0,
                                 boxAxes.GetAxis(box).z / 2.0);
 
+  cudaFuncSetSharedMemConfig(BoxInterForceGPU, cudaSharedMemBankSizeEightByte);
+                              
+
   BoxInterForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
       vars->gpu_cellVector,
       gpu_neighborList,
@@ -370,6 +373,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   double3 halfAx = make_double3(boxAxes.GetAxis(box).x / 2.0,
                                 boxAxes.GetAxis(box).y / 2.0,
                                 boxAxes.GetAxis(box).z / 2.0);
+
+  cudaFuncSetSharedMemConfig(BoxForceGPU, cudaSharedMemBankSizeEightByte);
 
   BoxForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
                                                     vars->gpu_cellVector,
