@@ -16,10 +16,37 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #define NUMBER_OF_NEIGHBOR_CELL 27
 #define PARTICLE_PER_BLOCK 64
-#define PARTICLE_PER_BLOCK_FORCE 128
-
+#define PARTICLE_PER_BLOCK_FORCE 48
+#define THREADS_PER_BLOCK_INTERFORCE 128
+#define THREADS_PER_BLOCK_FORCE 256
 
 using namespace cub;
+
+// This method is not general and will only work if number of cells is 27.
+__global__ void GetMaxAtomsInACell(int * gpu_maxPtr,
+                                   int *gpu_cellStartIndex){
+
+                        __shared__ int cellSizes[32];
+                        if (threadIdx.x < 27){
+                          int cellIndex = threadIdx.x;
+                          int endIndex =  gpu_cellStartIndex[cellIndex+1];
+                          int particlesInsideCell = endIndex - gpu_cellStartIndex[cellIndex];
+                          cellSizes[threadIdx.x] = particlesInsideCell;
+                        } else {
+                          cellSizes[threadIdx.x] = 0;
+                        }
+                        int i = blockDim.x/2;
+                        printf("thread %d has %d particles\n", threadIdx.x, cellSizes[threadIdx.x]);
+                        while (i != 0){
+                          if (threadIdx.x < i){
+                            cellSizes[threadIdx.x] = max(cellSizes[threadIdx.x], cellSizes[threadIdx.x + i]);
+                          }
+                          __syncthreads();
+                          i /= 2;
+                        }
+                        gpu_maxPtr[0] = cellSizes[0];
+
+}
 
 void CallBoxInterForceGPU(VariablesCUDA *vars,
                           std::vector<int> &cellVector,
@@ -58,15 +85,14 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   int *gpu_particleKind;
   int *gpu_particleMol;
   int *gpu_neighborList, *gpu_cellStartIndex;
-  int blocksPerGrid, threadsPerBlock;
+  int blocksPerGrid;
   int energyVectorLen = 0;
   double *gpu_particleCharge;
   double *gpu_final_value;
 
   // Run the kernel...
-  threadsPerBlock = 128;
   blocksPerGrid = (int)(numberOfCells * NUMBER_OF_NEIGHBOR_CELL);
-  energyVectorLen = numberOfCells * NUMBER_OF_NEIGHBOR_CELL * threadsPerBlock;
+  energyVectorLen = numberOfCells * NUMBER_OF_NEIGHBOR_CELL * THREADS_PER_BLOCK_INTERFORCE;
 
   // Convert neighbor list to 1D array
   std::vector<int> neighborlist1D(neighborListCount);
@@ -141,9 +167,24 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).z / 2.0);
 
   cudaFuncSetSharedMemConfig(BoxInterForceGPU, cudaSharedMemBankSizeEightByte);
-                              
 
-  BoxInterForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
+  int hostMax = 0;
+  int * hostPtr;
+  hostPtr = &hostMax;
+  int * gpu_maxPtr;
+  CUMALLOC((void**) &gpu_maxPtr, sizeof(int));
+  cudaMemcpy(gpu_maxPtr, hostPtr, sizeof(int), cudaMemcpyHostToDevice);
+  GetMaxAtomsInACell<<<1, 32>>>(gpu_maxPtr, gpu_cellStartIndex);
+  cudaMemcpy(hostPtr, gpu_maxPtr, sizeof(int), cudaMemcpyDeviceToHost);
+  
+  printf("Max particles per block : %d\n", hostMax);
+  printf("Least amount of memory to allocate: %lu bytes, hex: 0x%lx\n", 3*THREADS_PER_BLOCK_INTERFORCE*hostMax*sizeof(double), 3*THREADS_PER_BLOCK_INTERFORCE*hostMax*sizeof(double));
+
+  // This is a square block of threads so we can have a
+  // virtual array of shared memory for each thread.
+  // Dynamically sized shared array will support up 
+// x stored bank free, y and z subject to banks
+  BoxInterForceGPU <<< blocksPerGrid, THREADS_PER_BLOCK_INTERFORCE, 3*THREADS_PER_BLOCK_INTERFORCE*hostMax*sizeof(double)>>>(gpu_cellStartIndex,
       vars->gpu_cellVector,
       gpu_neighborList,
       numberOfCells,
@@ -205,7 +246,8 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
       vars->gpu_lambdaVDW,
       vars->gpu_lambdaCoulomb,
       vars->gpu_isFraction,
-      box);
+      box,
+      hostMax);
   checkLastErrorCUDA(__FILE__, __LINE__);
   cudaDeviceSynchronize();
   // ReduceSum // Virial of LJ
@@ -663,22 +705,25 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  double *gpu_lambdaVDW,
                                  double *gpu_lambdaCoulomb,
                                  bool *gpu_isFraction,
-                                 int box)
+                                 int box,
+                                 int maxNumberOfAtomsInACell)
 {
-  __shared__ double shared_neighborcoordsx[PARTICLE_PER_BLOCK_FORCE*3];
-  __shared__ double shared_neighborcoordsy[PARTICLE_PER_BLOCK_FORCE*3];
-  __shared__ double shared_neighborcoordsz[PARTICLE_PER_BLOCK_FORCE*3];
+  extern __shared__ double totalSharedMemory[];  
+
+  double * shared_neighborcoordsx = totalSharedMemory;
+  double * shared_neighborcoordsy = &shared_neighborcoordsx[THREADS_PER_BLOCK_INTERFORCE*maxNumberOfAtomsInACell];
+  double * shared_neighborcoordsz = &shared_neighborcoordsy[THREADS_PER_BLOCK_INTERFORCE*maxNumberOfAtomsInACell];
 
   double distSq;
   double3 virComponents;
 
-  double pRF = 0.0, qi_qj, pVF = 0.0;
+  double pRF = 0.0, qi_qj, pVF = 0.0;   
   double lambdaVDW = 0.0, lambdaCoulomb = 0.0;
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   //tensors for VDW and real part of electrostatic
   gpu_vT11[threadID] = 0.0, gpu_vT22[threadID] = 0.0, gpu_vT33[threadID] = 0.0;
   gpu_rT11[threadID] = 0.0, gpu_rT22[threadID] = 0.0, gpu_rT33[threadID] = 0.0;
-  // extra tensors reserved for later on
+  // extra tensors reserved for later on  
   gpu_vT12[threadID] = 0.0, gpu_vT13[threadID] = 0.0, gpu_vT23[threadID] = 0.0;
   gpu_rT12[threadID] = 0.0, gpu_rT13[threadID] = 0.0, gpu_rT23[threadID] = 0.0;
 
@@ -694,17 +739,28 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
   int particlesInsideCurrentCell, particlesInsideNeighboringCells;
   int endIndex = gpu_cellStartIndex[neighborCell + 1];
   particlesInsideNeighboringCells = endIndex - gpu_cellStartIndex[neighborCell];
-
+ 
   int offset_vector_index = gpu_cellStartIndex[neighborCell];
  
-  if (particlesInsideNeighboringCells > PARTICLE_PER_BLOCK_FORCE)
-    printf("Increase PARTICLE_PER_BLOCK cmake flag to be larger than %d\n", particlesInsideNeighboringCells);
+  //if (particlesInsideNeighboringCells > PARTICLE_PER_BLOCK_FORCE)
+  //  printf("Increase PARTICLE_PER_BLOCK cmake flag to be larger than %d\n", particlesInsideNeighboringCells);
 
-  if(threadIdx.x < particlesInsideNeighboringCells) {
-    shared_neighborcoordsx[threadIdx.x] = gpu_x[gpu_cellVector[offset_vector_index + threadIdx.x]];
-    shared_neighborcoordsy[threadIdx.x] = gpu_y[gpu_cellVector[offset_vector_index + threadIdx.x]];
-    shared_neighborcoordsz[threadIdx.x] = gpu_z[gpu_cellVector[offset_vector_index + threadIdx.x]];
+    // This for loop allows us to do the same thing as this
+    // threadIdx.x + threadIdx.y*THREADS_PER_BLOCK_INTERFORCE
+    // but with less threads since to do this in one go we'd need THREADS_PER_BLOCK_INTERFORCE ^ 2 threads
+    // https://developer.nvidia.com/blog/fast-dynamic-indexing-private-arrays-cuda/
+    // Fig 3. Conflict-free storage of private arrays in shared memory. 
+
+
+  // z stored conflict free, x y subject to bank
+  int loopBound = min(maxNumberOfAtomsInACell, particlesInsideNeighboringCells);
+ 
+  for(int col = threadIdx.x; col < loopBound*THREADS_PER_BLOCK_INTERFORCE; col+= blockDim.x) {
+    shared_neighborcoordsx[col] = gpu_x[gpu_cellVector[offset_vector_index + threadIdx.x/loopBound]];
+    shared_neighborcoordsy[col] = gpu_y[gpu_cellVector[offset_vector_index + threadIdx.x/loopBound]];
+    shared_neighborcoordsz[col] = gpu_z[gpu_cellVector[offset_vector_index + threadIdx.x/loopBound]];
   }
+  
   __syncthreads();
 
   // Calculate number of particles inside current Cell
@@ -724,11 +780,13 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
 
     if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
       if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z,
+                 // gpu_x[neighborParticle], gpu_y[neighborParticle], gpu_z[neighborParticle],
                     // shared array of coords 
-                    shared_neighborcoordsx[neighborParticleIndex],
-                    shared_neighborcoordsy[neighborParticleIndex],
-                    shared_neighborcoordsz[neighborParticleIndex],
-                   // indices into a global array of coords
+                    shared_neighborcoordsx[threadIdx.x + neighborParticleIndex*THREADS_PER_BLOCK_INTERFORCE],
+                   // gpu_y[neighborParticle], gpu_z[neighborParticle],
+                    shared_neighborcoordsy[threadIdx.x + neighborParticleIndex*THREADS_PER_BLOCK_INTERFORCE],
+                    shared_neighborcoordsz[threadIdx.x + neighborParticleIndex*THREADS_PER_BLOCK_INTERFORCE],
+                  // indices into a global array of coords
                    currentParticle, neighborParticle, 
                    axis, halfAx, cutoff, gpu_nonOrth[0], gpu_cell_x, 
                    gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
@@ -864,6 +922,14 @@ should be stored in shared memory for broadcasting.
  conducted to see if we are close enough to halfwarp size to benefit from shared mem. 
  If we used it for current particle then we would get abysmal slowdown as all
  the threads in a warp broadcast one at a time
+
+ Since we will have greater than 1 thread accessing the same neighbor, we have 
+ room for improvement with shared memory.  However, in the case that the number of sequential 
+ threads accessing this location in shared memory isn't a factor of 16, we will 
+ access the location serially.  To avoid this we create threadNumber of virtual arrays
+ so that each thread has it's own copy of the same data.  This way we will still get the benefit
+ of broadcasts when an entire half warp accesses one value, but avoid serialization of memory
+ accesses in the case the number of threads accessing one value isn't a multiple of 16.
 */
   __shared__ double shared_neighborcoordsx[PARTICLE_PER_BLOCK_FORCE*3];
   __shared__ double shared_neighborcoordsy[PARTICLE_PER_BLOCK_FORCE*3];
@@ -893,7 +959,7 @@ should be stored in shared memory for broadcasting.
   int endIndex = gpu_cellStartIndex[neighborCell + 1];
   particlesInsideNeighboringCells = endIndex - gpu_cellStartIndex[neighborCell];
 
-  int offset_vector_index = gpu_cellStartIndex[neighborCell];
+//  int offset_vector_index = gpu_cellStartIndex[neighborCell];
  
   if (particlesInsideNeighboringCells > PARTICLE_PER_BLOCK_FORCE) 
     printf("Increase PARTICLE_PER_BLOCK cmake flag to be larger than %d\n", particlesInsideNeighboringCells);

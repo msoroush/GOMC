@@ -127,19 +127,8 @@ __device__ inline bool InRcutGPU(double &distSq, double3 & dist,
 {
   distSq = 0;
   double3 t;
-  double3 test;
   dist = Difference(x, y, z, a, b, c, currentParticleIndex);
-/*
-  test = Difference(x, y, z, currentParticleIndex, neighborParticleIndex);
 
-  if (dist.x != test.x || dist.y != test.y || dist.z != test.z){
-    printf("oldway (%d, %d) : x: %f , y: %f, z: %f\n)", currentParticleIndex
-    , neighborParticleIndex, dist.x, dist.y, dist.z);
-    printf("newway (%d, %d) : x: %f , y: %f, z: %f\n)", currentParticleIndex
-    , neighborParticleIndex, test.x, test.y, test.z);
-  } 
-*/
-  // Do a binary print here of dist
   if(gpu_nonOrth) {
     TransformUnSlantGPU(t, dist, gpu_Invcell_x,
                         gpu_Invcell_y, gpu_Invcell_z);

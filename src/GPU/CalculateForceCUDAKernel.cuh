@@ -15,6 +15,9 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "ConstantDefinitionsCUDAKernel.cuh"
 #include "CalculateMinImageCUDAKernel.cuh"
 
+__global__ void GetMaxAtomsInACell(int * gpu_maxPtr,
+                                   int *gpu_cellStartIndex);
+
 void CallBoxForceGPU(VariablesCUDA *vars,
                      std::vector<int> &cellVector,
                      std::vector<int> &cellStartIndex,
@@ -205,7 +208,8 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  double *gpu_lambdaVDW,
                                  double *gpu_lambdaCoulomb,
                                  bool *gpu_isFraction,
-                                 int box);
+                                 int box,
+                                 int maxNumberOfAtomsInACell);
 
 __global__ void VirialReciprocalGPU(double *gpu_x,
                                     double *gpu_y,
