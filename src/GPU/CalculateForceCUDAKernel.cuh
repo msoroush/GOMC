@@ -144,7 +144,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaVDW,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
-                            int box);
+                            int box,
+                            int maxNumberOfAtomsInACell);
 
 __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  int *gpu_cellVector,
