@@ -175,11 +175,8 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   cudaMemcpy(gpu_maxPtr, hostPtr, sizeof(int), cudaMemcpyHostToDevice);
   GetMaxAtomsInACell<<<1, 32>>>(gpu_maxPtr, gpu_cellStartIndex);
   cudaMemcpy(hostPtr, gpu_maxPtr, sizeof(int), cudaMemcpyDeviceToHost);
-  
-  printf("Max particles per block : %d\n", hostMax);
-  printf("Least amount of memory to allocate: %lu bytes, hex: 0x%lx\n", 3*THREADS_PER_BLOCK_INTERFORCE*hostMax*sizeof(double), 3*THREADS_PER_BLOCK_INTERFORCE*hostMax*sizeof(double));
 
-  BoxInterForceGPU <<< blocksPerGrid, THREADS_PER_BLOCK_INTERFORCE, 3*THREADS_PER_BLOCK_INTERFORCE*hostMax*sizeof(double)>>>(gpu_cellStartIndex,
+  BoxInterForceGPU <<< blocksPerGrid, THREADS_PER_BLOCK_INTERFORCE, 3*hostMax*sizeof(double)>>>(gpu_cellStartIndex,
       vars->gpu_cellVector,
       gpu_neighborList,
       numberOfCells,
@@ -422,7 +419,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   GetMaxAtomsInACell<<<1, 32>>>(gpu_maxPtr, gpu_cellStartIndex);
   cudaMemcpy(hostPtr, gpu_maxPtr, sizeof(int), cudaMemcpyDeviceToHost);
 
-  BoxForceGPU <<< blocksPerGrid, threadsPerBlock, 3*THREADS_PER_BLOCK_INTERFORCE*hostMax*sizeof(double)>>>(gpu_cellStartIndex,
+  BoxForceGPU <<< blocksPerGrid, threadsPerBlock, 3*hostMax*sizeof(double)>>>(gpu_cellStartIndex,
                                                     vars->gpu_cellVector,
                                                     gpu_neighborList,
                                                     numberOfCells,
@@ -477,7 +474,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                                                     vars->gpu_lambdaVDW,
                                                     vars->gpu_lambdaCoulomb,
                                                     vars->gpu_isFraction,
-                                                    box);
+                                                    box,
+                                                    hostMax);
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
   // ReduceSum
@@ -927,6 +925,7 @@ extern __shared__ double totalSharedMemory[];
 double * shared_neighborcoordsx = totalSharedMemory;
 double * shared_neighborcoordsy = &shared_neighborcoordsx[maxNumberOfAtomsInACell];
 double * shared_neighborcoordsz = &shared_neighborcoordsy[maxNumberOfAtomsInACell];
+
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
 
   double distSq;
@@ -951,24 +950,15 @@ double * shared_neighborcoordsz = &shared_neighborcoordsy[maxNumberOfAtomsInACel
   int endIndex = gpu_cellStartIndex[neighborCell + 1];
   particlesInsideNeighboringCells = endIndex - gpu_cellStartIndex[neighborCell];
 
-//  int offset_vector_index = gpu_cellStartIndex[neighborCell];
+  int offset_vector_index = gpu_cellStartIndex[neighborCell];
  
-  if (particlesInsideNeighboringCells > PARTICLE_PER_BLOCK_FORCE) 
-    printf("Increase PARTICLE_PER_BLOCK cmake flag to be larger than %d\n", particlesInsideNeighboringCells);
-
-  if(threadIdx.x < particlesInsideNeighboringCells) {    
-    //printf("Block ID : %d, thread ID %d, neighborCell : %d, gpuCellStartInde %d, gpucellVector %d, gpu_x %f  \n", 
-    //blockIdx.x, threadIdx.x, neighborCell, gpu_cellStartIndex[neighborCell], gpu_cellVector[gpu_cellStartIndex[neighborCell] + threadIdx.x], 
-    //gpu_x[gpu_cellVector[gpu_cellStartIndex[neighborCell] + threadIdx.x]]);
-  
-    shared_neighborcoordsx[threadIdx.x] = gpu_x[gpu_cellVector[gpu_cellStartIndex[neighborCell] + threadIdx.x]];
-    shared_neighborcoordsy[threadIdx.x] = gpu_y[gpu_cellVector[gpu_cellStartIndex[neighborCell] + threadIdx.x]];
-    shared_neighborcoordsz[threadIdx.x] = gpu_z[gpu_cellVector[gpu_cellStartIndex[neighborCell] + threadIdx.x]];
+  if(threadIdx.x < particlesInsideNeighboringCells) {
+    shared_neighborcoordsx[threadIdx.x] = gpu_x[gpu_cellVector[offset_vector_index + threadIdx.x]];
+    shared_neighborcoordsy[threadIdx.x] = gpu_y[gpu_cellVector[offset_vector_index + threadIdx.x]];
+    shared_neighborcoordsz[threadIdx.x] = gpu_z[gpu_cellVector[offset_vector_index + threadIdx.x]];
   }
   __syncthreads();
-
- 
-
+  
   // Calculate number of particles inside current Cell
   endIndex = gpu_cellStartIndex[currentCell + 1];
   particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
