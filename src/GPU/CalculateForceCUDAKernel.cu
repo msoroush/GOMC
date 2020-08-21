@@ -16,6 +16,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #define NUMBER_OF_NEIGHBOR_CELL 27
 #define PARTICLE_PER_BLOCK 64
+#define PARTICLE_PER_BLOCK_FORCE 128
+
 
 using namespace cub;
 
@@ -321,7 +323,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   double *gpu_final_REn, *gpu_final_LJEn;
   double cpu_final_REn, cpu_final_LJEn;
 
-  threadsPerBlock = 512;
+  threadsPerBlock = 256;
   blocksPerGrid = (int)(numberOfCells * NUMBER_OF_NEIGHBOR_CELL);
   energyVectorLen = numberOfCells * NUMBER_OF_NEIGHBOR_CELL * threadsPerBlock;
 
@@ -658,6 +660,10 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  bool *gpu_isFraction,
                                  int box)
 {
+  __shared__ double shared_neighborcoordsx[PARTICLE_PER_BLOCK_FORCE*3];
+  __shared__ double shared_neighborcoordsy[PARTICLE_PER_BLOCK_FORCE*3];
+  __shared__ double shared_neighborcoordsz[PARTICLE_PER_BLOCK_FORCE*3];
+
   double distSq;
   double3 virComponents;
 
@@ -684,6 +690,18 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
   int endIndex = gpu_cellStartIndex[neighborCell + 1];
   particlesInsideNeighboringCells = endIndex - gpu_cellStartIndex[neighborCell];
 
+  int offset_vector_index = gpu_cellStartIndex[neighborCell];
+ 
+  if (particlesInsideNeighboringCells > PARTICLE_PER_BLOCK_FORCE)
+    printf("Increase PARTICLE_PER_BLOCK cmake flag to be larger than %d\n", particlesInsideNeighboringCells);
+
+  if(threadIdx.x < particlesInsideNeighboringCells) {
+    shared_neighborcoordsx[threadIdx.x] = gpu_x[gpu_cellVector[offset_vector_index + threadIdx.x]];
+    shared_neighborcoordsy[threadIdx.x] = gpu_y[gpu_cellVector[offset_vector_index + threadIdx.x]];
+    shared_neighborcoordsz[threadIdx.x] = gpu_z[gpu_cellVector[offset_vector_index + threadIdx.x]];
+  }
+  __syncthreads();
+
   // Calculate number of particles inside current Cell
   endIndex = gpu_cellStartIndex[currentCell + 1];
   particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
@@ -692,6 +710,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
   int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCells;
 
   for(int pairIndex = threadIdx.x; pairIndex < numberOfPairs; pairIndex += blockDim.x) {
+    
     int neighborParticleIndex = pairIndex / particlesInsideCurrentCell;
     int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
 
@@ -699,7 +718,12 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
     int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
 
     if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
-      if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z, 
+      if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z,
+                    // shared array of coords 
+                    shared_neighborcoordsx[neighborParticleIndex],
+                    shared_neighborcoordsy[neighborParticleIndex],
+                    shared_neighborcoordsz[neighborParticleIndex],
+                   // indices into a global array of coords
                    currentParticle, neighborParticle, 
                    axis, halfAx, cutoff, gpu_nonOrth[0], gpu_cell_x, 
                    gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
@@ -816,6 +840,30 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             bool *gpu_isFraction,
                             int box)
 {
+/*
+In our current implementation we have different current particles all calculating
+the distance between themself and the same neighbor particle, 
+one neighbor particle at a time.
+
+The first NumberInNeighborCell (NNC) pairs will have the same value of index and value
+It's not clear at first, but the index of neighborcell is the pair divided by 
+NumberInCurrentCell so if we have NCC : 1 and NNC : 16
+Then the first 16 pairs would have (0,0), (1,0) ... (15,0)
+the values indexed the second part of the ordered pair into global memory
+should be stored in shared memory for broadcasting.
+
+ Due to the nature of shared memory broadcasting this neighbor particles coordinates
+ across the entire warp, we should use shared memory for the neighbor.
+ Currently the number of neighbors may not be a multiple of half warp size,
+ so we dont have perfect broadcasting, but the average case analysis will be 
+ conducted to see if we are close enough to halfwarp size to benefit from shared mem. 
+ If we used it for current particle then we would get abysmal slowdown as all
+ the threads in a warp broadcast one at a time
+*/
+  __shared__ double shared_neighborcoordsx[PARTICLE_PER_BLOCK_FORCE*3];
+  __shared__ double shared_neighborcoordsy[PARTICLE_PER_BLOCK_FORCE*3];
+  __shared__ double shared_neighborcoordsz[PARTICLE_PER_BLOCK_FORCE*3];
+
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
 
   double distSq;
@@ -840,6 +888,24 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
   int endIndex = gpu_cellStartIndex[neighborCell + 1];
   particlesInsideNeighboringCells = endIndex - gpu_cellStartIndex[neighborCell];
 
+  int offset_vector_index = gpu_cellStartIndex[neighborCell];
+ 
+  if (particlesInsideNeighboringCells > PARTICLE_PER_BLOCK_FORCE) 
+    printf("Increase PARTICLE_PER_BLOCK cmake flag to be larger than %d\n", particlesInsideNeighboringCells);
+
+  if(threadIdx.x < particlesInsideNeighboringCells) {    
+    //printf("Block ID : %d, thread ID %d, neighborCell : %d, gpuCellStartInde %d, gpucellVector %d, gpu_x %f  \n", 
+    //blockIdx.x, threadIdx.x, neighborCell, gpu_cellStartIndex[neighborCell], gpu_cellVector[gpu_cellStartIndex[neighborCell] + threadIdx.x], 
+    //gpu_x[gpu_cellVector[gpu_cellStartIndex[neighborCell] + threadIdx.x]]);
+  
+    shared_neighborcoordsx[threadIdx.x] = gpu_x[gpu_cellVector[gpu_cellStartIndex[neighborCell] + threadIdx.x]];
+    shared_neighborcoordsy[threadIdx.x] = gpu_y[gpu_cellVector[gpu_cellStartIndex[neighborCell] + threadIdx.x]];
+    shared_neighborcoordsz[threadIdx.x] = gpu_z[gpu_cellVector[gpu_cellStartIndex[neighborCell] + threadIdx.x]];
+  }
+  __syncthreads();
+
+ 
+
   // Calculate number of particles inside current Cell
   endIndex = gpu_cellStartIndex[currentCell + 1];
   particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
@@ -853,9 +919,17 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
 
     int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + currentParticleIndex];
     int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
-
+/*
+    if (gpu_x[neighborParticle] != shared_neighborcoordsxyz[neighborParticleIndex]){
+      printf("block id : %d : global index my way : %d\n", neighborCell, gpu_cellVector[offset_vector_index + threadIdx.x]);
+      printf("block id : %d : global index his way : %d\n", neighborCell, neighborParticle);
+    }
+*/
     if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
-      if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z, 
+      if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z,
+                   shared_neighborcoordsx[neighborParticleIndex],
+                   shared_neighborcoordsy[neighborParticleIndex],
+                   shared_neighborcoordsz[neighborParticleIndex],
                    currentParticle, neighborParticle,
                    axis, halfAx, cutoff, gpu_nonOrth[0], gpu_cell_x,
                    gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,

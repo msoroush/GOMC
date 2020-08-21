@@ -11,8 +11,12 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <cuda_runtime.h>
 #include "ConstantDefinitionsCUDAKernel.cuh"
 
-__device__ inline double3 Difference(double * x, double * y, double * z, uint i, uint j){
-  return make_double3(x[i] - x[j], y[i] - y[j], z[i] - z[j]);
+__device__ inline double3 Difference(double * x, double * y, double * z, uint currentParticleIndex, uint neighborParticleIndex){
+  return make_double3(x[currentParticleIndex] - x[neighborParticleIndex], y[currentParticleIndex] - y[neighborParticleIndex], z[currentParticleIndex] - z[neighborParticleIndex]);
+}
+
+__device__ inline double3 Difference(double * x, double * y, double * z, double a, double b, double c, uint currentParticleIndex){
+  return make_double3(x[currentParticleIndex] - a, y[currentParticleIndex] - b, z[currentParticleIndex] - c);
 }
 
 __device__ inline void TransformSlantGPU(double3 & dist,
@@ -113,7 +117,8 @@ __device__ inline bool InRcutGPU(double &distSq,
 // Call by force calculate to return the distance and virial component
 __device__ inline bool InRcutGPU(double &distSq, double3 & dist, 
                                  double * x, double * y, double * z,
-                                 uint i, uint j,
+                                 double a, double b, double c,
+                                 uint currentParticleIndex, uint neighborParticleIndex,
                                  double3 axis, double3 halfAx, 
                                  double gpu_rCut, int gpu_nonOrth,
                                  double *gpu_cell_x, double *gpu_cell_y,
@@ -122,7 +127,18 @@ __device__ inline bool InRcutGPU(double &distSq, double3 & dist,
 {
   distSq = 0;
   double3 t;
-  dist = Difference(x, y, z, i, j);
+  double3 test;
+  dist = Difference(x, y, z, a, b, c, currentParticleIndex);
+/*
+  test = Difference(x, y, z, currentParticleIndex, neighborParticleIndex);
+
+  if (dist.x != test.x || dist.y != test.y || dist.z != test.z){
+    printf("oldway (%d, %d) : x: %f , y: %f, z: %f\n)", currentParticleIndex
+    , neighborParticleIndex, dist.x, dist.y, dist.z);
+    printf("newway (%d, %d) : x: %f , y: %f, z: %f\n)", currentParticleIndex
+    , neighborParticleIndex, test.x, test.y, test.z);
+  } 
+*/
   // Do a binary print here of dist
   if(gpu_nonOrth) {
     TransformUnSlantGPU(t, dist, gpu_Invcell_x,
