@@ -418,8 +418,9 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaMemcpy(gpu_maxPtr, hostPtr, sizeof(int), cudaMemcpyHostToDevice);
   GetMaxAtomsInACell<<<1, 32>>>(gpu_maxPtr, gpu_cellStartIndex);
   cudaMemcpy(hostPtr, gpu_maxPtr, sizeof(int), cudaMemcpyDeviceToHost);
+  CUFREE(gpu_maxPtr);
 
-  BoxForceGPU <<< blocksPerGrid, threadsPerBlock, 3*hostMax*sizeof(double)>>>(gpu_cellStartIndex,
+  BoxForceGPU <<< blocksPerGrid, threadsPerBlock, 6*hostMax*sizeof(double)>>>(gpu_cellStartIndex,
                                                     vars->gpu_cellVector,
                                                     gpu_neighborList,
                                                     numberOfCells,
@@ -522,6 +523,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   CUFREE(gpu_final_LJEn);
   CUFREE(gpu_neighborList);
   CUFREE(gpu_cellStartIndex);
+  
 }
 
 void CallVirialReciprocalGPU(VariablesCUDA *vars,
@@ -922,9 +924,15 @@ should be stored in shared memory for broadcasting.
 */
 extern __shared__ double totalSharedMemory[];  
 
+/* For input - Prefetching Neighbor Coords from Global Memory */
 double * shared_neighborcoordsx = totalSharedMemory;
 double * shared_neighborcoordsy = &shared_neighborcoordsx[maxNumberOfAtomsInACell];
 double * shared_neighborcoordsz = &shared_neighborcoordsy[maxNumberOfAtomsInACell];
+
+/* For output - Avoid calling atomicAdd on global memory bigO(6*n^2) times */
+double * shared_currentatomforcex = &shared_neighborcoordsz[maxNumberOfAtomsInACell];
+double * shared_currentatomforcey = &shared_currentatomforcex[maxNumberOfAtomsInACell];
+double * shared_currentatomforcez = &shared_currentatomforcey[maxNumberOfAtomsInACell];
 
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -994,9 +1002,9 @@ double * shared_neighborcoordsz = &shared_neighborcoordsy[maxNumberOfAtomsInACel
         // int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
 
         // These will broadcast to the whole warp
-        double nx = shared_neighborcoordsx[neighborParticle];
-        double ny = shared_neighborcoordsy[neighborParticle];
-        double nz = shared_neighborcoordsz[neighborParticle];
+        double nx = shared_neighborcoordsx[neighborParticleIndex];
+        double ny = shared_neighborcoordsy[neighborParticleIndex];
+        double nz = shared_neighborcoordsz[neighborParticleIndex];
 
         if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
           if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z,
