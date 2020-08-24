@@ -932,10 +932,6 @@ double * shared_neighborcoordsz = &shared_neighborcoordsy[maxNumberOfAtomsInACel
   double qi_qj_fact;
   double qqFact = 167000.0;
 
-  // GJS - XYZ cuda type initialized to 0.0 
-  double3 virComponents, forceReal, forceLJ;
-  // GJS
-
   double lambdaVDW = 0.0, lambdaCoulomb = 0.0;
   gpu_REn[threadID] = 0.0;
   gpu_LJEn[threadID] = 0.0;
@@ -964,101 +960,130 @@ double * shared_neighborcoordsz = &shared_neighborcoordsy[maxNumberOfAtomsInACel
   particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
 
   // total number of pairs
-  int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCells;
+//  int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCells;
 
-  for(int pairIndex = threadIdx.x; pairIndex < numberOfPairs; pairIndex += blockDim.x) {
-    int neighborParticleIndex = pairIndex / particlesInsideCurrentCell;
-    int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
+//  for(int pairIndex = threadIdx.x; pairIndex < numberOfPairs; pairIndex += blockDim.x) {
+    /* unoptimized by compiler
+    enum : unsigned { warp_size = 32 };
+    auto lane_id = threadIdx.x % warp_size;
+    auto warp_id = threadIdx.x / warp_size;
+    */    
 
-    int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + currentParticleIndex];
-    int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
-/*
-    if (gpu_x[neighborParticle] != shared_neighborcoordsxyz[neighborParticleIndex]){
-      printf("block id : %d : global index my way : %d\n", neighborCell, gpu_cellVector[offset_vector_index + threadIdx.x]);
-      printf("block id : %d : global index his way : %d\n", neighborCell, neighborParticle);
-    }
-*/
-    if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
-      if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z,
-                   shared_neighborcoordsx[neighborParticleIndex],
-                   shared_neighborcoordsy[neighborParticleIndex],
-                   shared_neighborcoordsz[neighborParticleIndex],
-                   currentParticle, neighborParticle,
-                   axis, halfAx, cutoff, gpu_nonOrth[0], gpu_cell_x,
-                   gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
-                   gpu_Invcell_z)) {
-        double cA = gpu_particleCharge[currentParticle];
-        double cB = gpu_particleCharge[neighborParticle];
-        int kA = gpu_particleKind[currentParticle];
-        int kB = gpu_particleKind[neighborParticle];
-        int mA = gpu_particleMol[currentParticle];
-        int mB = gpu_particleMol[neighborParticle];
+    /* compiler optimized */
+    enum : unsigned { warp_size = 32, log_warp_size = 5 };
+    auto lane_id = threadIdx.x & (warp_size - 1);
+    auto warp_id = threadIdx.x >> log_warp_size;
 
-        lambdaVDW = DeviceGetLambdaVDW(mA, kA, mB, kB, box, gpu_isFraction,
-                                       gpu_molIndex, gpu_kindIndex,
-                                       gpu_lambdaVDW);
-        if(electrostatic) {
-          qi_qj_fact = cA * cB * qqFact;
-          lambdaCoulomb = DeviceGetLambdaCoulomb(mA, kA, mB, kB, box,
-                                                 gpu_isFraction, gpu_molIndex,
-                                                 gpu_kindIndex,
-                                                 gpu_lambdaCoulomb);
-          gpu_REn[threadID] += CalcCoulombGPU(distSq, kA, kB,
-                                              qi_qj_fact, gpu_rCutLow[0],
-                                              gpu_ewald[0], gpu_VDW_Kind[0],
-                                              gpu_alpha[box],
-                                              gpu_rCutCoulomb[box],
-                                              gpu_isMartini[0],
-                                              gpu_diElectric_1[0],
-                                              lambdaCoulomb, sc_coul, sc_sigma_6,
-                                              sc_alpha, sc_power,
-                                              gpu_sigmaSq,
-                                              gpu_count[0]);
-        }
-        gpu_LJEn[threadID] += CalcEnGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
-                                        gpu_epsilon_Cn, gpu_VDW_Kind[0],
-                                        gpu_isMartini[0], gpu_rCut[0],
-                                        gpu_rOn[0], gpu_count[0], lambdaVDW,
-                                        sc_sigma_6, sc_alpha, sc_power,
-                                        gpu_rMin, gpu_rMaxSq, gpu_expConst);
-        if(electrostatic) {
-          double coulombVir = CalcCoulombForceGPU(distSq, qi_qj_fact,
-                                                  gpu_VDW_Kind[0], gpu_ewald[0],
-                                                  gpu_isMartini[0],
+/* Assuming number of threads per block is a 2^N */
+    auto blockDimInWarps = blockDim.x >> log_warp_size;
+
+  // Force broadcasts without bank conflicts
+    for(int neighborParticleIndex = warp_id; neighborParticleIndex < particlesInsideNeighboringCells; neighborParticleIndex += blockDimInWarps) {
+
+    // GJS - XYZ cuda type initialized to 0.0 
+      double3 virComponents, forceReal, forceLJ;
+    // GJS
+      // Offset vector index is starting offset of neighboring cell
+      // neighborParticleIndex is warp ID so all threads in a warp will have the same neighborParticle
+      int neighborParticle = gpu_cellVector[offset_vector_index + neighborParticleIndex];
+      // I need a way to get currentParticleIndex..
+      for (int currentParticleIndex = lane_id; currentParticleIndex < particlesInsideCurrentCell; currentParticleIndex+= warp_size){
+        int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + currentParticleIndex];
+
+        //int neighborParticleIndex = pairIndex / particlesInsideCurrentCell;
+        // int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
+
+        // These will broadcast to the whole warp
+        double nx = shared_neighborcoordsx[neighborParticle];
+        double ny = shared_neighborcoordsy[neighborParticle];
+        double nz = shared_neighborcoordsz[neighborParticle];
+
+        if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
+          if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z,
+                      nx, ny, nz,
+                      currentParticle, neighborParticle,
+                      axis, halfAx, cutoff, gpu_nonOrth[0], gpu_cell_x,
+                      gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
+                      gpu_Invcell_z)) {
+            double cA = gpu_particleCharge[currentParticle];
+            double cB = gpu_particleCharge[neighborParticle];
+            int kA = gpu_particleKind[currentParticle];
+            int kB = gpu_particleKind[neighborParticle];
+            int mA = gpu_particleMol[currentParticle];
+            int mB = gpu_particleMol[neighborParticle];
+
+            lambdaVDW = DeviceGetLambdaVDW(mA, kA, mB, kB, box, gpu_isFraction,
+                                          gpu_molIndex, gpu_kindIndex,
+                                          gpu_lambdaVDW);
+            if(electrostatic) {
+              qi_qj_fact = cA * cB * qqFact;
+              lambdaCoulomb = DeviceGetLambdaCoulomb(mA, kA, mB, kB, box,
+                                                    gpu_isFraction, gpu_molIndex,
+                                                    gpu_kindIndex,
+                                                    gpu_lambdaCoulomb);
+              gpu_REn[threadID] += CalcCoulombGPU(distSq, kA, kB,
+                                                  qi_qj_fact, gpu_rCutLow[0],
+                                                  gpu_ewald[0], gpu_VDW_Kind[0],
                                                   gpu_alpha[box],
                                                   gpu_rCutCoulomb[box],
+                                                  gpu_isMartini[0],
                                                   gpu_diElectric_1[0],
-                                                  gpu_sigmaSq, sc_coul,
-                                                  sc_sigma_6, sc_alpha,
-                                                  sc_power, lambdaCoulomb,
-                                                  gpu_count[0], kA, kB);
-          forceReal.x = virComponents.x * coulombVir;
-          forceReal.y = virComponents.y * coulombVir;
-          forceReal.z = virComponents.z * coulombVir;
+                                                  lambdaCoulomb, sc_coul, sc_sigma_6,
+                                                  sc_alpha, sc_power,
+                                                  gpu_sigmaSq,
+                                                  gpu_count[0]);
+            }
+            gpu_LJEn[threadID] += CalcEnGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
+                                            gpu_epsilon_Cn, gpu_VDW_Kind[0],
+                                            gpu_isMartini[0], gpu_rCut[0],
+                                            gpu_rOn[0], gpu_count[0], lambdaVDW,
+                                            sc_sigma_6, sc_alpha, sc_power,
+                                            gpu_rMin, gpu_rMaxSq, gpu_expConst);
+            if(electrostatic) {
+              double coulombVir = CalcCoulombForceGPU(distSq, qi_qj_fact,
+                                                      gpu_VDW_Kind[0], gpu_ewald[0],
+                                                      gpu_isMartini[0],
+                                                      gpu_alpha[box],
+                                                      gpu_rCutCoulomb[box],
+                                                      gpu_diElectric_1[0],
+                                                      gpu_sigmaSq, sc_coul,
+                                                      sc_sigma_6, sc_alpha,
+                                                      sc_power, lambdaCoulomb,
+                                                      gpu_count[0], kA, kB);
+              forceReal.x = virComponents.x * coulombVir;
+              forceReal.y = virComponents.y * coulombVir;
+              forceReal.z = virComponents.z * coulombVir;
+            }
+            double pVF = CalcEnForceGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
+                                        gpu_epsilon_Cn, gpu_rCut[0], gpu_rOn[0],
+                                        gpu_isMartini[0], gpu_VDW_Kind[0],
+                                        gpu_count[0], lambdaVDW, sc_sigma_6,
+                                        sc_alpha, sc_power, gpu_rMin, gpu_rMaxSq,
+                                        gpu_expConst);
+            forceLJ.x = virComponents.x * pVF;
+            forceLJ.y = virComponents.y * pVF;
+            forceLJ.z = virComponents.z * pVF;
+          /*} else {
+              // GJS - XYZ cuda type initialized to 0.0 are still 0.0
+              double3 virComponents, forceReal, forceLJ;
+              // GJS
+          }*/
+
+          // This was inside the for loop so we would update the global memory for each particle once.
+          atomicAdd(&gpu_aForcex[currentParticle], forceReal.x + forceLJ.x);
+          atomicAdd(&gpu_aForcey[currentParticle], forceReal.y + forceLJ.y);
+          atomicAdd(&gpu_aForcez[currentParticle], forceReal.z + forceLJ.z);
+          atomicAdd(&gpu_aForcex[neighborParticle], -1.0 * (forceReal.x + forceLJ.x));
+          atomicAdd(&gpu_aForcey[neighborParticle], -1.0 * (forceReal.y + forceLJ.y));
+          atomicAdd(&gpu_aForcez[neighborParticle], -1.0 * (forceReal.z + forceLJ.z));
+
+          atomicAdd(&gpu_mForcex[mA], forceReal.x + forceLJ.x);
+          atomicAdd(&gpu_mForcey[mA], forceReal.y + forceLJ.y);
+          atomicAdd(&gpu_mForcez[mA], forceReal.z + forceLJ.z);
+          atomicAdd(&gpu_mForcex[mB], -1.0 * (forceReal.x + forceLJ.x));
+          atomicAdd(&gpu_mForcey[mB], -1.0 * (forceReal.y + forceLJ.y));
+          atomicAdd(&gpu_mForcez[mB], -1.0 * (forceReal.z + forceLJ.z));
         }
-        double pVF = CalcEnForceGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
-                                    gpu_epsilon_Cn, gpu_rCut[0], gpu_rOn[0],
-                                    gpu_isMartini[0], gpu_VDW_Kind[0],
-                                    gpu_count[0], lambdaVDW, sc_sigma_6,
-                                    sc_alpha, sc_power, gpu_rMin, gpu_rMaxSq,
-                                    gpu_expConst);
-        forceLJ.x = virComponents.x * pVF;
-        forceLJ.y = virComponents.y * pVF;
-        forceLJ.z = virComponents.z * pVF;
-
-        atomicAdd(&gpu_aForcex[currentParticle], forceReal.x + forceLJ.x);
-        atomicAdd(&gpu_aForcey[currentParticle], forceReal.y + forceLJ.y);
-        atomicAdd(&gpu_aForcez[currentParticle], forceReal.z + forceLJ.z);
-        atomicAdd(&gpu_aForcex[neighborParticle], -1.0 * (forceReal.x + forceLJ.x));
-        atomicAdd(&gpu_aForcey[neighborParticle], -1.0 * (forceReal.y + forceLJ.y));
-        atomicAdd(&gpu_aForcez[neighborParticle], -1.0 * (forceReal.z + forceLJ.z));
-
-        atomicAdd(&gpu_mForcex[mA], forceReal.x + forceLJ.x);
-        atomicAdd(&gpu_mForcey[mA], forceReal.y + forceLJ.y);
-        atomicAdd(&gpu_mForcez[mA], forceReal.z + forceLJ.z);
-        atomicAdd(&gpu_mForcex[mB], -1.0 * (forceReal.x + forceLJ.x));
-        atomicAdd(&gpu_mForcey[mB], -1.0 * (forceReal.y + forceLJ.y));
-        atomicAdd(&gpu_mForcez[mB], -1.0 * (forceReal.z + forceLJ.z));
       }
     }
   }
