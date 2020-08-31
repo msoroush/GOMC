@@ -393,8 +393,8 @@ inline double MultiParticle::GetCoeff(bool print)
       XYZ lbf_new = (molForceNew.Get(molNumber) + molForceRecNew.Get(molNumber)) *
                 lBeta;
       w_ratio *= CalculateWRatio(lbf_new, lbf_old, t_k.Get(molNumber), t_max);
+      if(print) std::cout << imie(w_ratio) imie(molForceRef.Get(molNumber)) imie(molForceNew.Get(molNumber));
     }
-    if(print) std::cout << imie(w_ratio);
   }
 
   // In case where force or torque is a large negative number (ex. -800)
