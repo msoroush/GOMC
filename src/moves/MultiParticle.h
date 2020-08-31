@@ -377,7 +377,7 @@ inline double MultiParticle::GetCoeff(bool print)
   double t_max = moveSetRef.GetTMAX(bPick);
 
 #ifdef _OPENMP
-  #pragma omp parallel for default(none) shared(lBeta, r_max, t_max) reduction(*:w_ratio)
+  #pragma omp parallel for default(none) shared(lBeta, r_max, t_max, print) reduction(*:w_ratio)
 #endif
   for(uint m = 0; m < moleculeIndex.size(); m++) {
     uint molNumber = moleculeIndex[m];
