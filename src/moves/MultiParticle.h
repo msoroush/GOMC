@@ -405,7 +405,6 @@ inline double MultiParticle::GetCoeff(bool print)
   //   std::cout << "w_ratio is not a finite number. Auto-rejecting move.\n";
   //   return 0.0;
   // }
-  if(print) exit(EXIT_SUCCESS);
   return w_ratio;
 }
 
@@ -414,6 +413,10 @@ inline void MultiParticle::Accept(const uint rejectState, const uint step)
   // Here we compare the values of reference and trial and decide whether to
   // accept or reject the move
   double MPCoeff = GetCoeff(step == 356);
+  if(step == 356) {
+    printf("%%.15lf\n", MPCoeff);
+    exit(EXIT_SUCCESS);
+  }
   double uBoltz = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()));
   double accept = MPCoeff * uBoltz;
   double pr = prng();
