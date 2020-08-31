@@ -414,7 +414,7 @@ inline void MultiParticle::Accept(const uint rejectState, const uint step)
   // accept or reject the move
   double MPCoeff = GetCoeff(step == 356);
   if(step == 356) {
-    printf("%%.15lf\n", MPCoeff);
+    printf("%.15lf\n", MPCoeff);
     exit(EXIT_SUCCESS);
   }
   double uBoltz = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()));
