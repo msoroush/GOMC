@@ -394,7 +394,7 @@ inline double MultiParticle::GetCoeff(bool print)
                 lBeta;
       w_ratio *= CalculateWRatio(lbf_new, lbf_old, t_k.Get(molNumber), t_max);
     }
-    if(print) printf("%.15lf\n", w_ratio);
+    if(print) std::cout << imie(w_ratio);
   }
 
   // In case where force or torque is a large negative number (ex. -800)
@@ -414,7 +414,7 @@ inline void MultiParticle::Accept(const uint rejectState, const uint step)
   // accept or reject the move
   double MPCoeff = GetCoeff(step >= 356);
   if(step == 357) {
-    printf("%.15lf\n", MPCoeff);
+    std::cout << imie(MPCoeff);
     exit(EXIT_SUCCESS);
   }
   double uBoltz = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()));
