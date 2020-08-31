@@ -56,7 +56,7 @@ private:
   Random123Wrapper &r123wrapper;
   const Molecules& mols;
 
-  double GetCoeff();
+  double GetCoeff(bool print);
   void CalculateTrialDistRot();
   void RotateForceBiased(uint molIndex);
   void TranslateForceBiased(uint molIndex);
@@ -368,7 +368,7 @@ inline double MultiParticle::CalculateWRatio(XYZ const &lb_new, XYZ const &lb_ol
   return w_ratio;
 }
 
-inline double MultiParticle::GetCoeff()
+inline double MultiParticle::GetCoeff(bool print)
 {
   // calculate (w_new->old/w_old->new) and return it.
   double w_ratio = 1.0;
@@ -385,7 +385,7 @@ inline double MultiParticle::GetCoeff()
       // rotate: lbt_old, lbt_new are lambda * BETA * torque
       XYZ lbt_old = molTorqueRef.Get(molNumber) * lBeta;
       XYZ lbt_new = molTorqueNew.Get(molNumber) * lBeta;
-      w_ratio *= CalculateWRatio(lbt_new, lbt_old, r_k.Get(molNumber), r_max);
+      w_ratio *=  (lbt_new, lbt_old, r_k.Get(molNumber), r_max);
     } else {
       // displace: lbf_old, lbf_new are lambda * BETA * force
       XYZ lbf_old = (molForceRef.Get(molNumber) + molForceRecRef.Get(molNumber)) *
@@ -394,6 +394,7 @@ inline double MultiParticle::GetCoeff()
                 lBeta;
       w_ratio *= CalculateWRatio(lbf_new, lbf_old, t_k.Get(molNumber), t_max);
     }
+    if(print) printf("%.15lf\n", w_ratio);
   }
 
   // In case where force or torque is a large negative number (ex. -800)
@@ -404,6 +405,7 @@ inline double MultiParticle::GetCoeff()
   //   std::cout << "w_ratio is not a finite number. Auto-rejecting move.\n";
   //   return 0.0;
   // }
+  if(print) exit(EXIT_SUCCESS);
   return w_ratio;
 }
 
@@ -411,7 +413,7 @@ inline void MultiParticle::Accept(const uint rejectState, const uint step)
 {
   // Here we compare the values of reference and trial and decide whether to
   // accept or reject the move
-  double MPCoeff = GetCoeff();
+  double MPCoeff = GetCoeff(step == 356);
   double uBoltz = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()));
   double accept = MPCoeff * uBoltz;
   double pr = prng();
