@@ -33,6 +33,12 @@ inline void record_debug(double x, std::string filename, int linenumber) {
   out << std::setprecision(12) << "double," << filename << "," << linenumber << "," << x << "\n";
 }
 
+inline void record_debug(uint x, std::string filename, int linenumber) {
+  std::ofstream out;
+  out.open(RECORD_DEBUG_FILE_NAME, std::ofstream::out | std::ofstream::app);
+  out << "uint," << filename << "," << linenumber << "," << x << "\n";
+}
+
 inline void record_debug(std::vector<double> x, std::string filename, int linenumber) {
   std::ofstream out;
   out.open(RECORD_DEBUG_FILE_NAME, std::ofstream::out | std::ofstream::app);
