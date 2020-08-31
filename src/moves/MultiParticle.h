@@ -412,8 +412,8 @@ inline void MultiParticle::Accept(const uint rejectState, const uint step)
 {
   // Here we compare the values of reference and trial and decide whether to
   // accept or reject the move
-  double MPCoeff = GetCoeff(step == 356);
-  if(step == 356) {
+  double MPCoeff = GetCoeff(step >= 356);
+  if(step == 357) {
     printf("%.15lf\n", MPCoeff);
     exit(EXIT_SUCCESS);
   }
