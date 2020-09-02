@@ -412,10 +412,6 @@ inline void MultiParticle::Accept(const uint rejectState, const uint step)
   // Here we compare the values of reference and trial and decide whether to
   // accept or reject the move
   double MPCoeff = GetCoeff(step == 356);
-  if(step == 356) {
-    std::cout << imie(MPCoeff);
-    exit(EXIT_SUCCESS);
-  }
   double uBoltz = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()));
   double accept = MPCoeff * uBoltz;
   double pr = prng();
