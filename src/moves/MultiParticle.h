@@ -393,7 +393,6 @@ inline double MultiParticle::GetCoeff(bool print)
       XYZ lbf_new = (molForceNew.Get(molNumber) + molForceRecNew.Get(molNumber)) *
                 lBeta;
       w_ratio *= CalculateWRatio(lbf_new, lbf_old, t_k.Get(molNumber), t_max);
-      if(print) std::cout << imie(w_ratio) imie(molForceRef.Get(molNumber)) imie(molForceNew.Get(molNumber));
     }
   }
 
@@ -420,12 +419,6 @@ inline void MultiParticle::Accept(const uint rejectState, const uint step)
   double uBoltz = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()));
   double accept = MPCoeff * uBoltz;
   double pr = prng();
-#ifdef RECORD_DEBUG
-  record_debug_macro(step);
-  record_debug_macro(MPCoeff);
-  record_debug_macro(sysPotNew.Total());
-  record_debug_macro(sysPotRef.Total());
-#endif
   bool result = (rejectState == mv::fail_state::NO_FAIL) && pr < accept;
   if(result) {
     sysPotRef = sysPotNew;
