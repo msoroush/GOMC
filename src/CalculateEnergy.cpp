@@ -317,7 +317,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 #else
 #if defined _OPENMP && _OPENMP >= 201511 // check if OpenMP version is 4.5
   #pragma omp parallel for default(none) shared(boxAxes, cellStartIndex, cellVector, coords, mapParticleToCell, \
-  neighborList, box, num::qqFact) \
+  neighborList) \
   reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
   aForcez[:atomCount], mForcex[:molCount], mForcey[:molCount], mForcez[:molCount])
 #endif
