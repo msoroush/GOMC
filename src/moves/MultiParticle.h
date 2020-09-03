@@ -385,7 +385,7 @@ inline double MultiParticle::GetCoeff(bool print)
       // rotate: lbt_old, lbt_new are lambda * BETA * torque
       XYZ lbt_old = molTorqueRef.Get(molNumber) * lBeta;
       XYZ lbt_new = molTorqueNew.Get(molNumber) * lBeta;
-      w_ratio *=  (lbt_new, lbt_old, r_k.Get(molNumber), r_max);
+      w_ratio *= CalculateWRatio(lbt_new, lbt_old, r_k.Get(molNumber), r_max);
     } else {
       // displace: lbf_old, lbf_new are lambda * BETA * force
       XYZ lbf_old = (molForceRef.Get(molNumber) + molForceRecRef.Get(molNumber)) *
