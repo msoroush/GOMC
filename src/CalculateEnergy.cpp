@@ -300,6 +300,21 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   cellList.GetCellListNeighbor(box, coords.Count(), cellVector, cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborList(box);
 
+#ifdef RECORD_DEBUG
+  record_debug_macro_len(coords.x, atomCount);
+  record_debug_macro_len(coords.y, atomCount);
+  record_debug_macro_len(coords.z, atomCount);
+  record_debug_macro_len(atomForce.x, atomCount);
+  record_debug_macro_len(atomForce.y, atomCount);
+  record_debug_macro_len(atomForce.z, atomCount);
+  record_debug_macro_len(molForce.x, molCount);
+  record_debug_macro_len(molForce.y, molCount);
+  record_debug_macro_len(molForce.z, molCount);
+  record_debug_macro_len(boxAxes.axis.x, boxAxes.axis.Count());
+  record_debug_macro_len(boxAxes.axis.y, boxAxes.axis.Count());
+  record_debug_macro_len(boxAxes.axis.z, boxAxes.axis.Count());
+#endif
+
 #ifdef GOMC_CUDA
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
