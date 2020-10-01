@@ -334,6 +334,8 @@ inline double FFParticle::CalcVir(const double distSq, const uint kind1,
   if(forcefield.rCutSq < distSq)
     return 0.0;
 
+  return 1.0;
+
   uint index = FlatIndex(kind1, kind2);
   if(lambda >= 0.999999) {
     //save computation time

@@ -279,6 +279,8 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   if (box >= BOXES_WITH_U_NB)
     return potential;
 
+  FFParticle * ff = forcefield.particles;
+
   double tempREn = 0.0, tempLJEn = 0.0;
   // make a pointer to atom force and mol force for openmp
   double *aForcex = atomForce.x;
@@ -324,15 +326,31 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 #else
 #if defined _OPENMP && _OPENMP >= 201511 // check if OpenMP version is 4.5
 #if GCC_VERSION >= 90000
-#pragma omp parallel for default(none) shared(boxAxes, cellStartIndex, \
-  cellVector, coords, mapParticleToCell, box, neighborList) \
-  reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
-  aForcez[:atomCount], mForcex[:molCount], mForcey[:molCount], mForcez[:molCount])
+#pragma omp parallel for \
+  default(none) \
+  shared(boxAxes, cellStartIndex, cellVector, coords, mapParticleToCell, \
+         box, neighborList) \
+  reduction(+:tempREn, \
+            tempLJEn, \
+            aForcex[:atomCount], \
+            aForcey[:atomCount], \
+            aForcez[:atomCount], \
+            mForcex[:molCount], \
+            mForcey[:molCount], \
+            mForcez[:molCount])
 #else
-#pragma omp parallel for default(none) shared(boxAxes, cellStartIndex, \
-  cellVector, coords, mapParticleToCell, neighborList) \
-  reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
-  aForcez[:atomCount], mForcex[:molCount], mForcey[:molCount], mForcez[:molCount])
+#pragma omp parallel for \
+  default(none) \
+  shared(boxAxes, cellStartIndex, cellVector, coords, mapParticleToCell, \
+         neighborList) \
+  reduction(+:tempREn, \
+            tempLJEn, \
+            aForcex[:atomCount], \
+            aForcey[:atomCount], \
+            aForcez[:atomCount], \
+            mForcex[:molCount], \
+            mForcey[:molCount], \
+            mForcez[:molCount])
 #endif
 #endif
   for(int currParticleIdx = 0; currParticleIdx < cellVector.size(); currParticleIdx++) {
@@ -353,20 +371,29 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
           if(boxAxes.InRcut(distSq, virComponents, coords, currParticle, nParticle, box)) {
             double lambdaVDW = GetLambdaVDW(particleMol[currParticle], particleMol[nParticle], box);
             if (electrostatic) {
-              double lambdaCoulomb = GetLambdaCoulomb(particleMol[currParticle],
-                                               particleMol[nParticle], box);
-              double qi_qj_fact = particleCharge[currParticle] * particleCharge[nParticle] *
-                           num::qqFact;
-              tempREn += forcefield.particles->CalcCoulomb(distSq, particleKind[currParticle],
-                         particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box);
+              double lambdaCoulomb = GetLambdaCoulomb(particleMol[currParticle], particleMol[nParticle], box);
+              double qi_qj_fact = particleCharge[currParticle] * particleCharge[nParticle] * num::qqFact;
+              tempREn += ff->CalcCoulomb(distSq,
+                                         particleKind[currParticle],
+                                         particleKind[nParticle],
+                                         qi_qj_fact,
+                                         lambdaCoulomb,
+                                         box);
               // Calculating the force
-              forceReal = virComponents * forcefield.particles->CalcCoulombVir(distSq,
-                          particleKind[currParticle], particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box);
+              forceReal = virComponents *
+                ff->CalcCoulombVir(distSq, particleKind[currParticle],
+                                   particleKind[nParticle],
+                                   qi_qj_fact,
+                                   lambdaCoulomb,
+                                   box);
             }
-            tempLJEn += forcefield.particles->CalcEn(distSq, particleKind[currParticle],
-                        particleKind[nParticle], lambdaVDW);
-            forceLJ = virComponents * forcefield.particles->CalcVir(distSq, particleKind[currParticle],
-                      particleKind[nParticle], lambdaVDW);
+            tempLJEn += ff->CalcEn(distSq, particleKind[currParticle],
+                                   particleKind[nParticle],
+                                   lambdaVDW);
+            forceLJ = virComponents * ff->CalcVir(distSq,
+                                                  particleKind[currParticle],
+                                                  particleKind[nParticle],
+                                                  lambdaVDW);
             aForcex[currParticle] += forceLJ.x + forceReal.x;
             aForcey[currParticle] += forceLJ.y + forceReal.y;
             aForcez[currParticle] += forceLJ.z + forceReal.z;
