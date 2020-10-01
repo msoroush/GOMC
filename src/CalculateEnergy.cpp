@@ -413,6 +413,17 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   }
 #endif
 
+#ifdef RECORD_DEBUG
+  record_debug_macro(tempLJEn);
+  record_debug_macro(tempREn);
+  record_debug_macro_len(aForcex, atomCount);
+  record_debug_macro_len(aForcey, atomCount);
+  record_debug_macro_len(aForcez, atomCount);
+  record_debug_macro_len(mForcex, molCount);
+  record_debug_macro_len(mForcey, molCount);
+  record_debug_macro_len(mForcez, molCount);
+#endif
+
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
   // setting energy and virial of coulomb interaction
