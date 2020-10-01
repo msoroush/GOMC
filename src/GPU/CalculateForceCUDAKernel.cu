@@ -870,8 +870,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
         int mB = gpu_particleMol[neighborParticle];
 
         double lambdaVDW = DeviceGetLambdaVDW(mA, kA, mB, kB, box, gpu_isFraction,
-                                       gpu_molIndex, gpu_kindIndex,
-                                       gpu_lambdaVDW);
+                                              gpu_molIndex, gpu_kindIndex,
+                                              gpu_lambdaVDW);
 
         LJEn += CalcEnGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
                                         gpu_epsilon_Cn, gpu_VDW_Kind[0],
@@ -893,20 +893,20 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
           static const double qqFact = 167000.0;
           double qi_qj_fact = cA * cB * qqFact;
           double lambdaCoulomb = DeviceGetLambdaCoulomb(mA, kA, mB, kB, box,
-                                                 gpu_isFraction, gpu_molIndex,
-                                                 gpu_kindIndex,
-                                                 gpu_lambdaCoulomb);
+                                                        gpu_isFraction, gpu_molIndex,
+                                                        gpu_kindIndex,
+                                                        gpu_lambdaCoulomb);
           REn += CalcCoulombGPU(distSq, kA, kB,
-                                              qi_qj_fact, gpu_rCutLow[0],
-                                              gpu_ewald[0], gpu_VDW_Kind[0],
-                                              gpu_alpha[box],
-                                              gpu_rCutCoulomb[box],
-                                              gpu_isMartini[0],
-                                              gpu_diElectric_1[0],
-                                              lambdaCoulomb, sc_coul, sc_sigma_6,
-                                              sc_alpha, sc_power,
-                                              gpu_sigmaSq,
-                                              gpu_count[0]);
+                                qi_qj_fact, gpu_rCutLow[0],
+                                gpu_ewald[0], gpu_VDW_Kind[0],
+                                gpu_alpha[box],
+                                gpu_rCutCoulomb[box],
+                                gpu_isMartini[0],
+                                gpu_diElectric_1[0],
+                                lambdaCoulomb, sc_coul, sc_sigma_6,
+                                sc_alpha, sc_power,
+                                gpu_sigmaSq,
+                                gpu_count[0]);
 
           double coulombVir = CalcCoulombForceGPU(distSq, qi_qj_fact,
                                                   gpu_VDW_Kind[0], gpu_ewald[0],
