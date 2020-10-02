@@ -301,15 +301,15 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   neighborList = cellList.GetNeighborList(box);
 
 #ifdef RECORD_DEBUG
-  record_debug_macro_len(coords.x, atomCount);
-  record_debug_macro_len(coords.y, atomCount);
-  record_debug_macro_len(coords.z, atomCount);
-  record_debug_macro_len(atomForce.x, atomCount);
-  record_debug_macro_len(atomForce.y, atomCount);
-  record_debug_macro_len(atomForce.z, atomCount);
-  record_debug_macro_len(molForce.x, molCount);
-  record_debug_macro_len(molForce.y, molCount);
-  record_debug_macro_len(molForce.z, molCount);
+  record_debug_macro_len(coords.x, 2);
+  record_debug_macro_len(coords.y, 2);
+  record_debug_macro_len(coords.z, 2);
+  record_debug_macro_len(atomForce.x, 2);
+  record_debug_macro_len(atomForce.y, 2);
+  record_debug_macro_len(atomForce.z, 2);
+  record_debug_macro_len(molForce.x, 2);
+  record_debug_macro_len(molForce.y, 2);
+  record_debug_macro_len(molForce.z, 2);
   record_debug_macro_len(boxAxes.axis.x, boxAxes.axis.Count());
   record_debug_macro_len(boxAxes.axis.y, boxAxes.axis.Count());
   record_debug_macro_len(boxAxes.axis.z, boxAxes.axis.Count());
@@ -431,12 +431,12 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 #ifdef RECORD_DEBUG
   record_debug_macro(tempLJEn);
   record_debug_macro(tempREn);
-  record_debug_macro_len(aForcex, atomCount);
-  record_debug_macro_len(aForcey, atomCount);
-  record_debug_macro_len(aForcez, atomCount);
-  record_debug_macro_len(mForcex, molCount);
-  record_debug_macro_len(mForcey, molCount);
-  record_debug_macro_len(mForcez, molCount);
+  record_debug_macro_len(aForcex, 2);
+  record_debug_macro_len(aForcey, 2);
+  record_debug_macro_len(aForcez, 2);
+  record_debug_macro_len(mForcex, 2);
+  record_debug_macro_len(mForcey, 2);
+  record_debug_macro_len(mForcez, 2);
 #endif
 
   // setting energy and virial of LJ interaction
