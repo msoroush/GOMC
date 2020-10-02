@@ -135,7 +135,6 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                XYZArray &t_k,
                                XYZArray &molForceRecRef)
 {
-  return;
   int *gpu_isMoleculeInvolved;
   int threadsPerBlock = 256;
   int blocksPerGrid = (int)(atomCount / threadsPerBlock) + 1;
@@ -231,7 +230,6 @@ void CallRotateParticlesGPU(VariablesCUDA *vars,
                             double lambdaBETA,
                             XYZArray &r_k)
 {
-  return;
   int *gpu_isMoleculeInvolved;
   int threadsPerBlock = 256;
   int blocksPerGrid = (int)(atomCount / threadsPerBlock) + 1;
@@ -357,23 +355,23 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
   }
 
   // perform the shift on the coordinates
-  gpu_x[atomNumber] += shiftx;
-  gpu_y[atomNumber] += shifty;
-  gpu_z[atomNumber] += shiftz;
+  //gpu_x[atomNumber] += shiftx;
+  //gpu_y[atomNumber] += shifty;
+  //gpu_z[atomNumber] += shiftz;
 
   // rewrapping
-  WrapPBC(gpu_x[atomNumber], xAxes);
-  WrapPBC(gpu_y[atomNumber], yAxes);
-  WrapPBC(gpu_z[atomNumber], zAxes);
+  //WrapPBC(gpu_x[atomNumber], xAxes);
+  //WrapPBC(gpu_y[atomNumber], yAxes);
+  //WrapPBC(gpu_z[atomNumber], zAxes);
 
   if(updateMol) {
-    gpu_comx[molIndex] += shiftx;
-    gpu_comy[molIndex] += shifty;
-    gpu_comz[molIndex] += shiftz;
+    //gpu_comx[molIndex] += shiftx;
+    //gpu_comy[molIndex] += shifty;
+    //gpu_comz[molIndex] += shiftz;
 
-    WrapPBC(gpu_comx[molIndex], xAxes);
-    WrapPBC(gpu_comy[molIndex], yAxes);
-    WrapPBC(gpu_comz[molIndex], zAxes);
+    //WrapPBC(gpu_comx[molIndex], xAxes);
+    //WrapPBC(gpu_comy[molIndex], yAxes);
+    //WrapPBC(gpu_comz[molIndex], zAxes);
 
     gpu_t_k_x[molIndex] = shiftx;
     gpu_t_k_y[molIndex] = shifty;
@@ -449,9 +447,9 @@ __global__ void RotateParticlesKernel(unsigned int numberOfMolecules,
   }
 
   // perform the rot on the coordinates
-  ApplyRotation(gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber],
-                gpu_comx[molIndex], gpu_comy[molIndex], gpu_comz[molIndex],
-                rotx, roty, rotz, xAxes, yAxes, zAxes);
+  //ApplyRotation(gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber],
+  //              gpu_comx[molIndex], gpu_comy[molIndex], gpu_comz[molIndex],
+  //              rotx, roty, rotz, xAxes, yAxes, zAxes);
 }
 
 #endif
