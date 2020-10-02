@@ -333,21 +333,21 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
 
   double shiftx, shifty, shiftz;
 
-  if(abs(lbmaxx) > MIN_FORCE && abs(lbmaxx) < MAX_FORCE) {
+  if(false) {//abs(lbmaxx) > MIN_FORCE && abs(lbmaxx) < MAX_FORCE) {
     shiftx = log(exp(-1.0 * lbmaxx) + 2 * randomGPU(molIndex * 3, step, seed) * sinh(lbmaxx)) / lbfx;
   } else {
     double rr = randomGPU(molIndex * 3, step, seed) * 2.0 - 1.0;
     shiftx = t_max * rr;
   }
 
-  if(abs(lbmaxy) > MIN_FORCE && abs(lbmaxy) < MAX_FORCE) {
+  if(false) {//abs(lbmaxy) > MIN_FORCE && abs(lbmaxy) < MAX_FORCE) {
     shifty = log(exp(-1.0 * lbmaxy) + 2 * randomGPU(molIndex * 3 + 1, step, seed) * sinh(lbmaxy)) / lbfy;
   } else {
     double rr = randomGPU(molIndex * 3 + 1, step, seed) * 2.0 - 1.0;
     shifty = t_max * rr;
   }
 
-  if(abs(lbmaxz) > MIN_FORCE && abs(lbmaxz) < MAX_FORCE) {
+  if(false) {//abs(lbmaxz) > MIN_FORCE && abs(lbmaxz) < MAX_FORCE) {
     shiftz = log(exp(-1.0 * lbmaxz) + 2 * randomGPU(molIndex * 3 + 2, step, seed) * sinh(lbmaxz)) / lbfz;
   } else {
     double rr = randomGPU(molIndex * 3 + 2, step, seed) * 2.0 - 1.0;
@@ -355,23 +355,23 @@ __global__ void TranslateParticlesKernel(unsigned int numberOfMolecules,
   }
 
   // perform the shift on the coordinates
-  //gpu_x[atomNumber] += shiftx;
-  //gpu_y[atomNumber] += shifty;
-  //gpu_z[atomNumber] += shiftz;
+  gpu_x[atomNumber] += shiftx;
+  gpu_y[atomNumber] += shifty;
+  gpu_z[atomNumber] += shiftz;
 
   // rewrapping
-  //WrapPBC(gpu_x[atomNumber], xAxes);
-  //WrapPBC(gpu_y[atomNumber], yAxes);
-  //WrapPBC(gpu_z[atomNumber], zAxes);
+  WrapPBC(gpu_x[atomNumber], xAxes);
+  WrapPBC(gpu_y[atomNumber], yAxes);
+  WrapPBC(gpu_z[atomNumber], zAxes);
 
   if(updateMol) {
-    //gpu_comx[molIndex] += shiftx;
-    //gpu_comy[molIndex] += shifty;
-    //gpu_comz[molIndex] += shiftz;
+    gpu_comx[molIndex] += shiftx;
+    gpu_comy[molIndex] += shifty;
+    gpu_comz[molIndex] += shiftz;
 
-    //WrapPBC(gpu_comx[molIndex], xAxes);
-    //WrapPBC(gpu_comy[molIndex], yAxes);
-    //WrapPBC(gpu_comz[molIndex], zAxes);
+    WrapPBC(gpu_comx[molIndex], xAxes);
+    WrapPBC(gpu_comy[molIndex], yAxes);
+    WrapPBC(gpu_comz[molIndex], zAxes);
 
     gpu_t_k_x[molIndex] = shiftx;
     gpu_t_k_y[molIndex] = shifty;
@@ -419,21 +419,21 @@ __global__ void RotateParticlesKernel(unsigned int numberOfMolecules,
 
   double rotx, roty, rotz;
 
-  if(abs(lbmaxx) > MIN_FORCE && abs(lbmaxx) < MAX_FORCE) {
+  if(false) {//abs(lbmaxx) > MIN_FORCE && abs(lbmaxx) < MAX_FORCE) {
     rotx = log(exp(-1.0 * lbmaxx) + 2 * randomGPU(molIndex * 3, step, seed) * sinh(lbmaxx)) / lbtx;
   } else {
     double rr = randomGPU(molIndex * 3, step, seed) * 2.0 - 1.0;
     rotx = r_max * rr;
   }
 
-  if(abs(lbmaxy) > MIN_FORCE && abs(lbmaxy) < MAX_FORCE) {
+  if(false) {//abs(lbmaxy) > MIN_FORCE && abs(lbmaxy) < MAX_FORCE) {
     roty = log(exp(-1.0 * lbmaxy) + 2 * randomGPU(molIndex * 3 + 1, step, seed) * sinh(lbmaxy)) / lbty;
   } else {
     double rr = randomGPU(molIndex * 3 + 1, step, seed) * 2.0 - 1.0;
     roty = r_max * rr;
   }
 
-  if(abs(lbmaxz) > MIN_FORCE && abs(lbmaxz) < MAX_FORCE) {
+  if(false) {//abs(lbmaxz) > MIN_FORCE && abs(lbmaxz) < MAX_FORCE) {
     rotz = log(exp(-1.0 * lbmaxz) + 2 * randomGPU(molIndex * 3 + 2, step, seed) * sinh(lbmaxz)) / lbtz;
   } else {
     double rr = randomGPU(molIndex * 3 + 2, step, seed) * 2.0 - 1.0;
