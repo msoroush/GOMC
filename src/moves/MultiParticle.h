@@ -267,6 +267,12 @@ inline uint MultiParticle::Transform()
     }
   }
 #endif
+
+#ifdef RECORD_DEBUG
+  record_debug_macro_len(newMolsPos.x, 2);
+  record_debug_macro_len(newMolsPos.y, 2);
+  record_debug_macro_len(newMolsPos.z, 2);
+#endif
   return state;
 }
 
