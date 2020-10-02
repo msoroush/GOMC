@@ -18,8 +18,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "VariablesCUDA.cuh"
 #endif
 
-#define MIN_FORCE 1E-12
-#define MAX_FORCE 30
+#define MIN_FORCE 1E-4
+#define MAX_FORCE 4
 
 class MultiParticle : public MoveBase
 {
@@ -403,21 +403,21 @@ inline XYZ MultiParticle::CalcRandomTransform(XYZ const &lb, double const max, u
 {
   XYZ lbmax = lb * max;
   XYZ num;
-  if(false) {//std::abs(lbmax.x) > MIN_FORCE && std::abs(lbmax.x) < MAX_FORCE) {
+  if(std::abs(lbmax.x) > MIN_FORCE && std::abs(lbmax.x) < MAX_FORCE) {
     num.x = log(exp(-1.0 * lbmax.x) + 2 * r123wrapper(molIndex*3+0) * sinh(lbmax.x)) / lb.x;
   } else {
     double rr = r123wrapper(molIndex*3+0) * 2.0 - 1.0;
     num.x = max * rr;
   }
 
-  if(false) {//std::abs(lbmax.y) > MIN_FORCE && std::abs(lbmax.y) < MAX_FORCE) {
+  if(std::abs(lbmax.y) > MIN_FORCE && std::abs(lbmax.y) < MAX_FORCE) {
     num.y = log(exp(-1.0 * lbmax.y) + 2 * r123wrapper(molIndex*3+1) * sinh(lbmax.y)) / lb.y;
   } else {
     double rr = r123wrapper(molIndex*3+1) * 2.0 - 1.0;
     num.y = max * rr;
   }
 
-  if(false) {//std::abs(lbmax.z) > MIN_FORCE && std::abs(lbmax.z) < MAX_FORCE) {
+  if(std::abs(lbmax.z) > MIN_FORCE && std::abs(lbmax.z) < MAX_FORCE) {
     num.z = log(exp(-1.0 * lbmax.z) + 2 * r123wrapper(molIndex*3+2) * sinh(lbmax.z)) / lb.z;
   } else {
     double rr = r123wrapper(molIndex*3+2) * 2.0 - 1.0;
