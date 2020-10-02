@@ -18,8 +18,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "VariablesCUDA.cuh"
 #endif
 
-#define MIN_FORCE 1
-#define MAX_FORCE 30
+#define MIN_FORCE 1e-12
+#define MAX_FORCE 1
 
 class MultiParticle : public MoveBase
 {
