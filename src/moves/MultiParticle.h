@@ -462,7 +462,6 @@ inline void MultiParticle::CalculateTrialDistRot()
 
 inline void MultiParticle::RotateForceBiased(uint molIndex)
 {
-  return;
   XYZ rot = r_k.Get(molIndex);
   double rotLen = rot.Length();
   RotationMatrix matrix;

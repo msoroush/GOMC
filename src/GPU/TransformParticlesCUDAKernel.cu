@@ -447,9 +447,9 @@ __global__ void RotateParticlesKernel(unsigned int numberOfMolecules,
   }
 
   // perform the rot on the coordinates
-  //ApplyRotation(gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber],
-  //              gpu_comx[molIndex], gpu_comy[molIndex], gpu_comz[molIndex],
-  //              rotx, roty, rotz, xAxes, yAxes, zAxes);
+  ApplyRotation(gpu_x[atomNumber], gpu_y[atomNumber], gpu_z[atomNumber],
+                gpu_comx[molIndex], gpu_comy[molIndex], gpu_comz[molIndex],
+                rotx, roty, rotz, xAxes, yAxes, zAxes);
 }
 
 #endif
