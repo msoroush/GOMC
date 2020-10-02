@@ -135,6 +135,7 @@ void CallTranslateParticlesGPU(VariablesCUDA *vars,
                                XYZArray &t_k,
                                XYZArray &molForceRecRef)
 {
+  return;
   int *gpu_isMoleculeInvolved;
   int threadsPerBlock = 256;
   int blocksPerGrid = (int)(atomCount / threadsPerBlock) + 1;
@@ -230,6 +231,7 @@ void CallRotateParticlesGPU(VariablesCUDA *vars,
                             double lambdaBETA,
                             XYZArray &r_k)
 {
+  return;
   int *gpu_isMoleculeInvolved;
   int threadsPerBlock = 256;
   int blocksPerGrid = (int)(atomCount / threadsPerBlock) + 1;
