@@ -1051,8 +1051,6 @@ __device__ double CalcEnForceGPU(double distSq, int kind1, int kind2,
     return 0.0;
   }
 
-  return 1.0;
-
   int index = FlatIndexGPU(kind1, kind2, gpu_count);
   if(gpu_VDW_Kind == GPU_VDW_STD_KIND) {
     return CalcVirParticleGPU(distSq, index, gpu_sigmaSq[index], gpu_n,
