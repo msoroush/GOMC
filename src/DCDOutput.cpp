@@ -185,7 +185,7 @@ void DCDOutput::DoOutput(const ulong step)
     SetMolBoxVec(molInBox);
     for (uint b = 0; b < BOX_TOTAL; ++b) {
       //  Copy the coordinates for output
-      SetCoordinates(x, y, z, molInBox, b);
+      SetCoordinates(molInBox, b);
       //  Write out the values for this step
       printf("Writing DCD coordinate to file %s at step %ld \n",
         outDCDStateFile[b], step+1);
@@ -292,10 +292,9 @@ void DCDOutput::Write_binary_file(char *fname, int n, XYZ *vec)
 
 }
 
-void DCDOutput::SetCoordinates(float *x, float *y, float *d, 
-    std::vector<int> &molInBox, const int box)
+void DCDOutput::SetCoordinates(std::vector<int> &molInBox, const int box)
 {
-  uint p, m, pStart = 0, pEnd = 0;
+  int p, m, pStart = 0, pEnd = 0;
   int numMolecules = molRef.count;
   XYZ ref, coor;
   #if ENSEMBLE == NVT || ENSEMBLE == NPT
@@ -333,7 +332,6 @@ void DCDOutput::SetCoordinates(float *x, float *y, float *d,
       }
     }
   #endif
-
 }
 
 void DCDOutput::Copy_lattice_to_unitcell(double *unitcell, int box) {

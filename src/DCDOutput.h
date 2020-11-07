@@ -74,8 +74,7 @@ private:
   // Copy cell length and angles to unitcell[6]
   void Copy_lattice_to_unitcell(double *unitcell, int box);
   // Unwrap and save coordinates of molecule in box, into *x, *y, *z
-  void SetCoordinates(float *x, float *y, float *d,
-      std::vector<int> &molInBox, const int box);
+  void SetCoordinates(std::vector<int> &molInBox, const int box);
   // Unwrap and save coordinates of molecule in box, into *restartCoor
   void SetMolInBox(const int box);
   // Return a vector that defines the box id for each molecule
